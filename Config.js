@@ -37,7 +37,7 @@ const DEFAULT_CONFIG = {
     }
   },
   monitor: {
-    clients: true
+    clients: false
   }
 };
 
