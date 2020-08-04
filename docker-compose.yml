@@ -10,5 +10,6 @@ services:
     - NET_ADMIN
     environment:
     - DEBUG=${DEBUG-}
+    shm_size: 512M
 volumes:
   db:
