@@ -1,0 +1,47 @@
+{
+  name: `MinkeNet`,
+  description: `Manage and monitor cheap network equipment just like it was the expensive stuff.`,
+  uuid: `6BD1A75A-8DC2-4F11-AFDC-6E537E83E32B`,
+  image: `registry.minkebox.net/minkebox/minkenet`,
+  tags: [
+    `Networking`
+  ],
+  actions: [
+  ],
+  properties: [
+    {
+      type: `Feature`,
+      name: `+NET_ADMIN`
+    },
+    {
+      type: `Feature`,
+      name: `shm`,
+      value: `512`
+    },
+    {
+      type: `Environment`,
+      name: `DEBUG`,
+      value: ``
+    },
+    {
+      type: `Network`,
+      name: `primary`,
+      value: `home`
+    },
+    {
+      type: `Directory`,
+      name: `/app/db`,
+      backup: true
+    },
+    {
+      type: `Port`,
+      name: `8080/tcp`,
+      port: 8080,
+      protocol: `TCP`,
+      web: {
+        path: `/`,
+        tab: `newtab`
+      }
+    }
+  ]
+}
