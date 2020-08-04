@@ -1,0 +1,16 @@
+<div class="row">
+  <div class="col-sm-6">
+    <select style="width:100%" class="device-property-rwselect small" onchange="send('monitor.port.key',{i:'{{id}}',k:this.value})">
+      {{#each options}}
+      <option {{#if (eq ../key (lookup this 1))}}selected{{/if}} value="{{lookup this 1}}">{{lookup this 0}}</option>
+      {{/each}}
+    </select>
+  </div>
+  <div class="col-sm-6">
+    <select class="device-property-rwselect small" onchange="send('monitor.port.value',{i:'{{id}}',v:this.value})">
+      <option value="none">None</option>
+      <option {{#if (eq type 'current')}}selected{{/if}} value="current">Now</option>
+      <option {{#if (eq type 'history')}}selected{{/if}} value="history">One Hour</option>
+    </select>
+  </div>
+</div>

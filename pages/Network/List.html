@@ -1,0 +1,21 @@
+{{#unless topologyValid}}
+{{> NetworkTopologyNotice}}
+{{/unless}}
+<div class="networks-container container-fluid">
+  <div class="row title">
+    <div class="col"><div>Name</div></div>
+    <div class="col"><div>VLAN</div></div>
+  </div>
+  {{#each networks}}
+  {{> NetworkSummary selected=@root.vid managementid=@root.managementid}}
+  {{/each}}
+  <script>
+    window.selectnet = function(evt,id) {
+      $('.networks-container .row').removeClass('active');
+      send('select.vlan', id);
+      $(evt.target).parents('.networks-container .row').addClass('active');
+    }
+  </script>
+</div>
+<button type="button" class="networks-new btn btn-secondary btn-sm" onclick="$('#vlan-new-modal').modal()">Create Network</button>
+{{> NetworkNewVLAN}}

@@ -1,0 +1,103 @@
+{{#with selectedDevice.properties}}
+<div id="device-details" class="accordion">
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-details-overview" class="card-header">
+      <div>System
+        <span id="device-update-spinner" class="device-update-spinner">
+          {{#if @root.updating}}
+          {{> DeviceSpinner}}
+          {{/if}}
+        </span>
+      </div>
+    </div>
+    <div id="device-details-overview" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{>RO name="Mac Address" value=(lookup system.macAddress 0)}}
+            {{>RW name="Name" value=system.name default="System name" kv="system.name"}}
+            {{>RO name="Manufacturer" value=system.hardware.manufacturer}}
+            {{>RO name="Model" value=system.hardware.model}}
+            {{>RO name="Version" value=system.hardware.version}}
+            {{>RO name="Firmware" value=system.firmware.version}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-details-address" class="card-header">
+      <div>Address</div>
+    </div>
+    <div id="device-details-address" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{>RWSelect name="Mode" value=system.ipv4.mode kv="system.ipv4.mode" options=(array "static" "dhcp") update="#device-details-address .card-body"}}
+            {{#if (eq system.ipv4.mode 'static')}}
+            {{>RW name="IP Address" value=system.ipv4.address kv="system.ipv4.address" default="0.0.0.0"}}
+            {{>RW name="Subnet Mask" value=system.ipv4.netmask kv="system.ipv4.netmask"}}
+            {{>RW name="Default Gateway" value=system.ipv4.gateway kv="system.ipv4.gateway"}}
+            {{>RW name="DNS" value=system.ipv4.dns kv="system.ipv4.dns"}}
+            {{else}}
+            {{>RO name="IP Address" value=system.ipv4.address default="0.0.0.0"}}
+            {{>RO name="Subnet Mask" value=system.ipv4.netmask}}
+            {{>RO name="Default Gateway" value=system.ipv4.gateway}}
+            {{>RO name="DNS" value=system.ipv4.dns}}
+            {{/if}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-details-hardware" class="card-header">
+      <div>Hardware</div>
+    </div>
+    <div id="device-details-hardware" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{>RO name="Total ports" value=network.physical.ports.nr.total}}
+            {{>RO name="100M ports" value=network.physical.ports.nr.100M}}
+            {{>RO name="1G ports" value=network.physical.ports.nr.1G}}
+            {{>RO name="2.5G ports" value=network.physical.ports.nr.2_5G}}
+            {{>RO name="10G ports" value=network.physical.ports.nr.10G}}
+            {{>RO name="SFP ports" value=network.physical.ports.nr.sfp}}
+            {{>RO name="SFP+ ports" value=network.physical.ports.nr.sfpp}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-details-network" class="card-header">
+      <div>Network</div>
+    </div>
+    <div id="device-details-network" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{#if network.igmp}}
+            {{>RWCheckbox name="IGMP Snooping" kv='network.igmp.snoop' value=network.igmp.snoop}}
+            {{/if}}
+            {{#if (isdefined network.vlans.ivl)}}
+            {{>RWCheckbox name="Independent VLAN lookup" kv='network.vlans.ivl' value=network.vlans.ivl}}
+            {{/if}}
+          </form>
+        </div>
+        <button type="button" class="device-forget-button btn btn-sm btn-outline-secondary" onclick="$('#forget-device').modal()">Forget</button>
+        {{> Modal1
+          id='forget-device'
+          title='Forget this device'
+          body='Forget this device so we\'re no longer managing it'
+          primary='Forget'
+          secondary='Close'
+          event='device.forget'
+          primary_event='forget'
+        }}
+      </div>
+    </div>
+  </div>
+</div>
+{{/with}}

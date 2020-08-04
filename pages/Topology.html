@@ -1,0 +1,19 @@
+{{> Modal1
+  id='topology-analyze'
+  title='Analyze Network'
+  body='
+    <p>Analyze the connections between the various switchs, routers an access points in your Network
+    and determine how they are interconnected. This information is used to visualize your
+    network as well as help build vlans and other network structures which span devices.
+    </p>
+    <p>
+      This process injects traffic into your network and is more successful on a quieter network.
+    </p>'
+  update_id='topology-update'
+  primary='Begin'
+  primary_active='Running...'
+  secondary='Cancel'
+  event='topology.analyze'
+  primary_event='start'
+  secondary_event='stop'
+}}

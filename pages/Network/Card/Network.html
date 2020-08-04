@@ -1,0 +1,9 @@
+<div class="card-body">
+  <div class="list-group">
+    <form>
+      {{>RW name="Name" value=selected.name cmd="network.vlan.update" key="name" default="Network name"}}
+      {{>RO name="VLAN ID" value=selected.id cmd="network.vlan.update" key="id" default="VLAN ID"}}
+      {{>RO name="Type" value="802.1q"}}
+    </form>
+  </div>
+</div>

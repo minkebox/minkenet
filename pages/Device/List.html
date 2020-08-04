@@ -1,0 +1,9 @@
+<div class="devices-container container-sm">
+  <div class="card-deck">
+    {{#each devices}}
+    <div id="device-card-{{_id}}">
+      {{> DeviceCard device=this selectedDevice=../selectedDevice}}
+    </div>
+    {{/each}}
+  </div>
+</div>

@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="stylesheet" href="/css/bootstrap.css" type="text/css">
+    <link rel="stylesheet" href="/css/main.css" type="text/css">
+    <script src="/js/jquery.js"></script>
+    <script src="/js/bootstrap.js"></script>
+    <script src="/js/plotly.js"></script>
+    <script src="/js/sortable.js"></script>
+    <script src="/js/script.js"></script>
+    <title>MinkeNet</title>
+  </head>
+  <body>
+    <div style="height: 100%">
+      <div class="row" style="height: 100%">
+        <div class="menu-container col d-flex flex-column">
+          <ul id="main-nav" class="nav flex-column">
+            <span class="brand">MINKE<span style="color:red">NET</span></span>
+            <div id="commit-revert-buttons" class="commit-revert-buttons btn-group-sm btn-group-vertical">
+              {{> CRButtons}}
+            </div>
+            <li class="nav-item">
+              <div class="nav-link">Overview</div>
+              <ul class="nav sub-nav flex-column">
+                <lu class="nav-item active">
+                  <a class="nav-link" href="#overview.viz" data-toggle="tab">General</a>
+                </lu>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <div class="nav-link">Devices</div>
+              <ul class="nav sub-nav flex-column">
+                <lu class="nav-item">
+                  <a class="nav-link" href="#devices.details" data-toggle="tab">Details</a>
+                </lu>
+                <lu class="nav-item">
+                  <a class="nav-link" href="#devices.ports" data-toggle="tab">Ports</a>
+                </lu>
+                <li class="nav-item">
+                  <a class="nav-link" href="#devices.details" onclick="$('#scan-network').modal()">Discovery</a>
+                </li>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <div class="nav-link">Networks</div>
+              <ul class="nav sub-nav flex-column">
+                <lu class="nav-item">
+                  <a class="nav-link" href="#networks.links">Links</a>
+                </lu>
+                <lu class="nav-item">
+                  <a class="nav-link" href="#networks.vlans">VLANs</a>
+                </lu>
+                <lu class="nav-item">
+                  <a class="nav-link disabled" href="#networks.wifi">WiFi</a>
+                </lu>
+                <lu class="nav-item">
+                  <a class="nav-link topology" href="#networks.links" onclick="$('#topology-analyze').modal()">Analyze</a>
+                </lu>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <div class="nav-link">Clients</div>
+              <ul class="nav sub-nav flex-column">
+                <lu class="nav-item">
+                  <a class="nav-link" href="#clients.all" data-toggle="tab">All</a>
+                </lu>
+              </ul>
+            </li>
+            <li class="nav-item">
+              <div class="nav-link" href="#">Configuration</div>
+              <ul class="nav sub-nav flex-column">
+                <lu class="nav-item">
+                  <a class="nav-link" href="#config.defaults">Defaults</a>
+                </lu>
+                <lu class="nav-item">
+                  <a class="nav-link" href="#config.monitor">Monitor</a>
+                </lu>
+              </ul>
+            </li>
+          </ul>
+        </div>
+        <script>
+        $('#main-nav .nav-link').on('click', function (e) {
+          const tab = e.target.href.split('#')[1];
+          send("tab.select", tab);
+          $('#main-nav .active').removeClass('active');
+          $(e.target.parentElement).addClass('active');
+        });
+        </script>
+        <div id="main-container" class="col main-container tab-content">
+        {{> DeviceTab}}
+      </div>
+    </div>
+    <div id="scan-network-container">{{> Scan}}</div>
+    <div id="topology-analyze-container">{{> Topology}}</div>
+    <div id="commit-changes-container">{{> CModal}}</div>
+    <div id="revert-changes-container">{{> RModal}}</div>
+  </body>
+</html>

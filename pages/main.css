@@ -1,0 +1,526 @@
+
+:root {
+  --main-background-color: #1e1e1e;
+  --main-text-color: #f0f0f0;
+  --highlight-text-color: #ffffff;
+  --edge-background-color: #2e2e2e;
+  --info-background-color: #2e2e2e;
+  --highlight-background-color: #3e3e3e;
+  --modal-background-color: #2e2e2e;
+  --alt-list-background-color: #2e2e2e;
+  --button-disabled-color: #808080;
+  --button-disabled-background: #3e3e3e;
+  --spinner-color: #5e5e5e;
+  --property-border-color: #808080;
+  --minor-text-color: #c0c0c0;
+  --minor-background-color: #505050;
+  --disabled-text-color: #808080;
+
+  --port-device-background: #505050;
+  --port-border: grey;
+  --port-up: #265b36;
+  --port-down: black;
+  --port-selected: #c0c0c0;
+  --error-border-color: #c03d25;
+  --tmp-blue: #347794;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+}
+body {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  background-color: var(--edge-background-color);
+  color: var(--main-text-color);
+}
+
+a {
+  color: var(--minor-text-color);
+}
+
+.sub-nav .nav-item.active {
+  background-color: var(--highlight-background-color);
+  color: var(--main-text-color);
+}
+
+.device-update-spinner {
+  position: relative;
+  top: 2px;
+  color: var(--spinner-color) !important;
+}
+.modal-content {
+  background-color: var(--modal-background-color);
+}
+
+.device-property-rw,
+.device-property-rwselect,
+.config input,
+.config select {
+  background-color: inherit;
+  color: inherit;
+  border: var(--property-border-color) solid 1px;
+  overflow: hidden;
+  max-width: 100%;
+}
+
+.sub-nav {
+  font-size: 0.75rem;
+}
+.sub-nav .nav-link {
+  padding: 0.25rem 1rem 0.25rem 1.5rem;
+}
+.sub-nav .nav-link:hover {
+  color: var(--highlight-text-color);
+}
+
+.modal-footer .btn:empty {
+  display: none;
+}
+
+.menu-container {
+  background-color: var(--edge-background-color);
+  max-width: 160px;
+  height: 100%;
+}
+
+.brand {
+  font-size: 1.25rem;
+  font-family: Futura,Trebuchet MS,Arial,sans-serif;
+  margin: 10px 0px 0px 18px;
+}
+
+.commit-revert-buttons {
+  margin: 15px 5px 10px 12px;
+}
+.commit-revert-buttons .btn {
+  font-size: 0.8rem;
+  margin-top: 0 !important;
+}
+.commit-revert-buttons .btn:disabled {
+  color: var(--button-disabled-color);
+  background-color: var(--button-disabled-background);
+  border-color: var(--button-disabled-background);
+}
+
+.main-container {
+  display: flex;
+  background-color: var(--main-background-color);
+  margin-top: 35px;
+  height: calc(100% - 35px);
+  width: 100%;
+  padding-left: 5px;
+  padding-top: 5px;
+  border-top-left-radius: 15px;
+}
+
+.device-forget-button {
+  margin: 20px 0;
+  float: right;
+}
+
+.devices-column {
+  flex: 1;
+  overflow-y: scroll;
+}
+
+.card {
+  background-color: var(--info-background-color);
+}
+
+.device-card {
+  position: relative;
+  background-color: var(--info-background-color);
+  width: 200px;
+  margin: 5px;
+  border-radius: 10px;
+}
+.device-card.active {
+  background-color: var(--highlight-background-color);
+}
+.device-card .card-img-top {
+  object-fit: contain;
+  width: 200px;
+  height: 150px;
+  padding: 0 20px;
+}
+.device-card .card-body {
+  padding: 0px 20px 20px 20px;
+}
+.device-card .card-title {
+  margin-bottom: 0;
+  overflow-x: hidden;
+  white-space: nowrap;
+  font-size: 1.1rem;
+}
+.device-card .buttons {
+  position: absolute;
+  top: 10px;
+  left: 20px;
+  justify-content: flex-end;
+}
+
+.device-details-column,
+.networks-details-column,
+.bonds-details-column,
+.monitor-details-column,
+.clients-details-column {
+  width: 500px;
+  height: 100%;
+  padding: 5px 10px;
+  overflow-y: scroll;
+}
+
+.device-details-container,
+.ports-container,
+.network-details-container,
+.monitor-details-container,
+.bond-details-contaiiner {
+  height: 100%;
+  overflow-y: scroll;
+}
+.device-details-container .card-header,
+.ports-container .card-header,
+.network-details-container .card-header,
+.bond-details-container .card-header,
+.monitor-details-container .card-header,
+.clients-details-container .card-header {
+  background-color: var(--highlight-background-color);
+  font-size: 0.85rem;
+  font-weight: bold;
+  padding: 8px 10px 8px 20px;
+}
+
+.device-details-container .col-form-label-sm,
+.bond-details-container .col-form-label-sm,
+.ports-container .col-form-label-sm,
+.monitor-details-container .col-form-label-sm,
+.clients-selected .col-form-label-sm {
+  line-height: 1;
+}
+
+#details-device,
+#details-network,
+#details-bond {
+  border-top-left-radius: 10px;
+  overflow: hidden;
+}
+
+.device-property-ro {
+  display: inline-block;
+  width: 100%;
+  padding: 1px 2px;
+  border: transparent solid 1px;
+}
+
+.device-ports-layout {
+  padding-bottom: 16px;
+}
+
+.port-layout {
+  display: table;
+  border: solid var(--port-border) 1px;
+  background-color: var(--port-device-background);
+  padding: 8px 3px;
+  margin: 0 auto;
+  border-radius: 3px;
+}
+.port-row {
+  position: relative;
+  font-size: 0;
+  margin-top: -1px;
+}
+.port {
+  position: relative;
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  border: solid var(--port-border) 1px;
+  background-color: var(--port-down);
+  margin-left: -1px;
+}
+.inner-port {
+  height: 100%;
+}
+.port-space {
+  border-color: transparent;
+  background-color: transparent;
+}
+.port-space-lg {
+  width: 32px;
+  border-color: transparent;
+  background-color: transparent;
+}
+.port-space-sm {
+  width: 8px;
+  border-color: transparent;
+  background-color: transparent;
+}
+.port.up {
+  background-color: var(--port-up);
+}
+.port.selected-T,
+.port.selected-U,
+.port.selected-T .inner-port,
+.port.selected-U .inner-port {
+  border: solid 1px var(--port-selected);
+  z-index: 1;
+}
+
+.networks-column,
+.bonds-column,
+.monitor-column,
+.clients-column {
+  flex: 1;
+  overflow-y: scroll;
+  padding: 5px;
+  font-size: 0.9rem;
+  margin: 0 5px;
+  border-radius: 4px;
+}
+.topology-notice {
+  background-color: var(--minor-background-color);
+  color: var(--minor-text-color);
+  border-width: 0;
+  padding-right: 20px;
+}
+.topology-notice button {
+  position: relative;
+  top: -5px;
+  float: right;
+  color: var(--minor-text-color);
+  border-color: var(--minor-text-color);
+}
+
+.networks-container .row:nth-child(2n),
+.bonds-container .bonds .row:nth-child(2n),
+.monitor-container .row:nth-child(2n),
+.clients-container .row:nth-child(2n) {
+  background-color: var(--alt-list-background-color);
+}
+.networks-container .row.active,
+.bonds-container .row.active,
+.monitor-container .row.active,
+.clients-container .row.active {
+  background-color: var(--highlight-background-color) !important;
+}
+.networks-container .row:hover,
+.bonds-container .row:hover,
+.monitor-container .row:hover,
+.clients-container .row:hover {
+  color: var(--highlight-text-color);
+  text-decoration: none;
+}
+.networks-container .col,
+.bonds-container :not(.title) .col,
+.monitor-container .col,
+.clients-container .col {
+  border-right: 1px solid var(--property-border-color);
+  overflow: hidden;
+}
+.networks-container .col:last-child ,
+.bonds-container .col:last-child,
+.monitor-container .col:last-child,
+.clients-container .col:last-child {
+  border-right: none;
+}
+.networks-container a,
+.monitor-container a,
+.bonds-container a {
+  text-decoration: none;
+}
+.networks-container .row .col div,
+.monitor-container .row .col div,
+.bonds-container .row .col div {
+  padding: 3px 0;
+}
+
+.networks-container .row.title .col div,
+.bonds-container .row.title .col {
+  font-weight: bold;
+  padding: 5px 0 10px 0;
+}
+.bonds-container .row.subtitle .col {
+  font-weight: bold;
+  padding: 0 0 10px 15px;
+}
+.monitor-container .row.title .col {
+  font-weight: bold;
+  padding: 5px 0 5px 15px;
+}
+
+.networks-container .row .col .default,
+.bonds-container .row .col .default {
+  position: relative;
+  display: inline-block;
+  top: -2px;
+  left: 2px;
+  font-size: 8px;
+  border-radius: 5px;
+  padding: 1px 3px;
+  color: var(--main-background-color);
+  background-color: var(--main-text-color);
+}
+
+.bonds-selected,
+.bond-details-container,
+.bond-details-container .accordion,
+.network-selected,
+.network-details-container,
+.network-details-container .accordion {
+  height: 100%;
+}
+.bond-details-container .accordion .card:first-child {
+  max-height: calc(100% - 180px);
+}
+.network-details-container .accordion .card:first-child {
+  max-height: calc(100% - 400px);
+}
+#bond-devices,
+#network-devices {
+  overflow-y: scroll;
+}
+
+.networks-new,
+.bonds-new {
+  margin-top: 20px;
+}
+.network-devices-stack .entry {
+  display: flex;
+  padding: 4px 0 2px 0;
+}
+.network-devices-stack .entry .info {
+  flex: 1;
+  font-size: 0.8rem;
+}
+.network-devices-stack .port-layout {
+  display: inline-block;
+}
+.network-devices-stack .port.selected-T .inner-port,
+.network-devices-stack .port.selected-U .inner-port {
+  height: 100%;
+}
+
+#scanner-update, #topology-update {
+  padding-top: 16px;
+  height: 40px;
+}
+
+.config {
+  width: 100%;
+  padding: 20px;
+}
+.config .section {
+  margin-top: 20px;
+}
+.config .section {
+  color: var(--main-text-color);
+  font-size: 0.9rem;
+}
+.config .section label {
+  width: 400px;
+}
+.config .section .block.false:not(.inv) .subblock,
+.config .section .block.false:not(.inv) .block label,
+.config .section .block.false:not(.inv) .block input,
+.config .section .block.false:not(.inv) .block select,
+.config .section .block.inv:not(.false) .subblock,
+.config .section .block.inv:not(.false) .block label,
+.config .section .block.inv:not(.false) .block input,
+.config .section .block.inv:not(.false) .block select,
+.monitor-details-column .no-monitor {
+  color: var(--disabled-text-color);
+  pointer-events: none;
+}
+.config .section .block.false:not(.inv) .block input[type=checkbox],
+.config .section .block.inv:not(.false) .block input[type=checkbox] {
+  opacity: 0.25;
+}
+.config hr,
+.monitor-column hr {
+  margin: 2px 0 12px 0;
+  border-color: var(--main-text-color);
+}
+
+.clients-column .col-mac {
+  min-width: 160px;
+}
+.clients-column .col-name {
+  min-width: 160px;
+}
+.clients-container .row.title .col {
+  padding: 10px 15px 10px 15px;
+  font-weight: bold;
+}
+
+#device-ports-hardware .port.selected-A,
+#device-ports-hardware .port.selected-A .inner-port,
+.clients-details-column .port.selected-A,
+.clients-details-column .port.selected-A .inner-port,
+#monitor-hardware .port.selected-A,
+#monitor-hardware .port.selected-A .inner-port,
+#bond-devices .port.selected-A,
+#bond-devices .port.selected-A .inner-port {
+  border: solid 1px var(--port-selected);
+  z-index: 1;
+}
+
+#bond-devices .active-,
+#monitor-hardware .active- {
+  opacity: 0.5;
+}
+#bond-devices .active-B {
+  border-color: var(--error-border-color);
+}
+
+.bond-link {
+  padding-top: 2px;
+  font-size: 0.8rem;
+}
+.bond-link div {
+  display: inline-block;
+  padding-left: 15px;
+}
+.bond-link label {
+  margin-bottom: 0;
+}
+
+.clients-column {
+  flex: 1;
+}
+
+.monitor-graph {
+  position: relative;
+  display: block;
+  min-width: 300px;
+  width: auto;
+  height: 200px;
+  z-index: 0;
+}
+.monitor-graph .inner {
+  position: relative;
+  display: inline-block;
+  width: 300px;
+  height: 200px;
+  z-index: 1;
+}
+.monitor-graph .inner:not(:last-of-type) {
+  width: 310px;
+}
+
+.viz {
+  overflow-y: scroll;
+}
+.viz .device-card .handle {
+  position: absolute;
+  width: 24px;
+  height: 24px;
+  background-color: var(--highlight-background-color);
+  z-index: 2;
+  border-radius: 0 10px 0 10px;
+  top: 0;
+  right: 0;
+  cursor: move;
+}

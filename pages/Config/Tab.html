@@ -1,0 +1,46 @@
+
+<div class="config" style='width:100%'>
+  <div class="section">Address
+    <hr>
+    <div class="block {{system.ipv4.allocate}}">
+      <div><label>Allocate a static IP to each device from the range below</label>{{> ConfigCheckbox key='system.ipv4.allocate' checked=system.ipv4.allocate }}</div>
+      <div class="subblock">
+        <div><label>&nbsp;&nbsp;Start IP</label>{{> ConfigInput key="system.ipv4.pool.start" value=system.ipv4.pool.start }}</div>
+        <div><label>&nbsp;&nbsp;End IP</label>{{> ConfigInput key="system.ipv4.pool.end" value=system.ipv4.pool.end }}</div>
+        <div><label>&nbsp;&nbsp;Netmask</label>{{> ConfigInput key="system.ipv4.netmask" value=system.ipv4.netmask }}</div>
+        <div><label>&nbsp;&nbsp;Gateway IP</label>{{> ConfigInput key="system.ipv4.gateway" value=system.ipv4.gateway }}</div>
+        <div><label>&nbsp;&nbsp;DNS</label>{{> ConfigInput key="system.ipv4.dns" value=system.ipv4.dns }}</div>
+      </div>
+    </div>
+  </div>
+  <div class="section">Authentication
+    <hr>
+    <div class="block {{system.keychain.defaultpw}}">
+      <div><label>Set default password</label>{{> ConfigCheckbox key='system.keychain.defaultpw' checked=system.keychain.defaultpw }}</div>
+      <div class="subblock">
+        <div><label>&nbsp;&nbsp;Password</label>{{> ConfigInput key="system.keychain.password" value=system.keychain.password }}</div>
+      </div>
+  </div>
+  <div class="section">Network
+    <hr>
+    <div class="block">
+      <div><label>Enable IGMP snooping</label>{{> ConfigTribox key='network.igmp.snoop' value=network.igmp.snoop }}</div>
+      <div><label>Enable Jumbo frames</label>{{> ConfigTribox key='network.physical.jumbo' value=network.physical.jumbo }}</div>
+  </div>
+  <div class="section">VLAN
+    <hr>
+    <div class="block {{network.vlan.8021q}}">
+      <div><label>Set mode to 802.1q</label>{{> ConfigCheckbox key='network.vlan.8021q' checked=network.vlan.8021q }}</div>
+      <div class="block {{network.vlan.autoroute}}">
+        <div><label>Enable IVL mode</label>{{> ConfigTribox key='network.vlan.ivl' value=network.vlan.ivl }}</div>
+        <div><label>Generate connections between switches which share VLANs</label>{{> ConfigCheckbox key='network.vlan.autoroute' checked=network.vlan.autoroute }}</div>
+        <div class="block {{network.vlan.management}}">
+          <div><label>Generate a management VLAN between all devices</label>{{> ConfigCheckbox key='network.vlan.management' checked=network.vlan.management }}</div>
+          <div class="subblock">
+            <div><label>&nbsp;&nbsp;VLAN ID</label>{{> ConfigInput key="network.vlan.managementid" value=network.vlan.managementid }}</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,13 @@
+{{#if (eq op 'running')}}
+Scaning starting
+{{else if (eq op 'scanning')}}
+Scanning {{address.ip}}
+{{else if (eq op 'found')}}
+Found {{address.ip}}
+{{else if (eq op 'stopping')}}
+Scanning stopping
+{{else if (eq op 'cancelling')}}
+Cancelling
+{{else if (eq op 'stopped')}}
+Scanning complete
+{{/if}}

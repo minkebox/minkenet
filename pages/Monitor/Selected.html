@@ -1,0 +1,71 @@
+<div class="monitor-details-container tap-pane fade show {{#unless selected.monitor}}no-monitor{{/unless}}">
+  <div class="accordion">
+    <div class="card">
+      <div data-toggle="collapse" data-target="#monitor-hardware" class="card-header">
+        <div>Overview</div>
+      </div>
+      <div id="monitor-hardware" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <div class="device-ports-layout">
+              {{#with selected}}
+              {{> DevicePortLayout properties=properties selected=@root.porthighlights}}
+              {{/with}}
+            </div>
+            <form>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#monitor-info" class="card-header">
+        <div>Port</div>
+      </div>
+      <div id="monitor-info" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RO name="Device" value=selected.name}}
+              {{>RO name="Port id" value=selectedPort.id}}
+              {{>RO name="Port Name" value=selectedPort.name}}
+              {{>RO name="Peer" value=peer}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#monitor-monitor" class="card-header">
+        <div>Monitor</div>
+      </div>
+      <div id="monitor-monitor" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{#if (isdefined selectedPort.statistics.rx.bytes)}}
+              {{#each monitors}}
+              {{>MonitorOption id=id key=key type=type options=(array
+                (array "None" "none")
+                (array "TX Bandwidth" "statistics.tx.bytes")
+                (array "RX Bandwidth" "statistics.rx.bytes")
+                (array "TX/RX Bandwidth" "statistics.tx.bytes,statistics.rx.bytes")
+              )}}
+              {{/each}}
+              {{else}}
+              {{#each monitors}}
+              {{>MonitorOption id=id key=key type=type options=(array
+                (array "None" "none")
+                (array "TX Bandwidth" "statistics.tx.packets")
+                (array "RX Bandwidth" "statistics.rx.packets")
+                (array "TX/RX Bandwidth" "statistics.tx.packets,statistics.rx.packets")
+              )}}
+              {{/each}}
+              {{/if}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

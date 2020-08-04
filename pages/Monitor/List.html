@@ -1,0 +1,21 @@
+<div class="monitor-container container-fluid">
+  <div class="row title">
+    <div class="col">Device Name</div>
+    <div class="col">Monitor</div>
+  </div>
+  {{#each devices}}
+  <a class="row {{#if (eq ../selected this)}}active{{/if}}" href="#" onclick="selectmonitor(event,'{{_id}}')">
+    <div class="col">{{name}}</div>
+    <div class="col">
+      <input type="checkbox" {{#if monitor}}checked{{/if}} onclick="send('monitor.change',{id:'{{_id}}',checked:this.checked})">
+    </div>
+  </a>
+  {{/each}}
+  <script>
+    window.selectmonitor = function(evt,id) {
+      $('.monitor-container .row').removeClass('active');
+      send('monitor.select', id);
+      $(evt.target).parents('.monitor-container .row').addClass('active');
+    }
+  </script>
+</div>

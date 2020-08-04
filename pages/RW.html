@@ -1,0 +1,38 @@
+{{#if (isdefined value)}}
+<div class="row">
+  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
+  <div class="col-sm-6 d-flex align-items-center">
+    {{#if ro}}
+    <div class="device-property-ro small">{{value}}</div>
+    {{else}}
+    <input id="fid-{{#if kv}}{{kv}}{{else if cmd}}{{cmd}}{{/if}}"
+      class="device-property-rw small"
+      value="{{value}}"
+      spellcheck="off"
+      autocapitalize="off"
+      autocomplete="off"
+      {{#if default}}placeholder="{{default}}"{{/if}}
+      {{#if kv}}oninput="send('kv.update',{k:'{{kv}}',v:this.value},0.5)"{{/if}}
+      {{#if cmd}}oninput="send('{{cmd}}',{k:'{{key}}',v:this.value},0.5)"{{/if}}
+    >
+    {{/if}}
+  </div>
+</div>
+{{else if (isdefined default)}}
+<div class="row">
+  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
+  <div class="col-sm-6 d-flex align-items-center">
+    {{#if ro}}
+    <div class="device-property-ro small">{{default}}</div>
+    {{else}}
+    <input id="fid-{{kv}}"
+      class="device-property-rw small"
+      spellcheck="false"
+      autocapitalize="off"
+      autocomplete="off"
+      placeholder="{{default}}"
+      oninput="send('kv.update',{ k:'{{kv}}',v:this.value},0.5)">
+    {{/if}}
+  </div>
+</div>
+{{/if}}

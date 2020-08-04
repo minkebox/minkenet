@@ -1,0 +1,19 @@
+<div class="monitor-column">
+  <div class="section">Device Monitors
+    <hr>
+    {{> MonitorList}}
+  </div>
+  <br/>
+  <div class="section">Other Monitors
+    <hr>
+    {{#with config}}
+    <div class="row">
+      <div class="col"><label>Active client count</label></div>
+      <div class="col">{{> ConfigCheckbox key='monitor.clients' checked=monitor.clients }}</div>
+    </div>
+    {{/with}}
+  </div>
+</div>
+<div id="monitor-details-column" class="monitor-details-column">
+  {{> MonitorSelected}}
+</div>

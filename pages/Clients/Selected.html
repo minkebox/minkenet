@@ -1,0 +1,62 @@
+<div class="clients-details-container tap-pane fade show active">
+  {{#if selected}}
+  <div class="accordion">
+    {{#if selected.connected}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+        <div>Overview</div>
+      </div>
+      <div id="clients-hardware" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <div class="device-ports-layout">
+              {{#with selected.connected.device}}
+              {{> DevicePortLayout properties=properties selected=@root.porthighlights}}
+              {{/with}}
+            </div>
+            <form>
+              {{>RO name="Device Name" value=selected.connected.device.name}}
+              {{>RO name="Port id" value=portid}}
+              {{>RW name="Port name" value=portname kv=portnamekv}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/if}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+        <div>Client</div>
+      </div>
+      <div id="clients-info" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RO name="Mac Address" value=selected.mac}}
+              {{>RW name="Name" cmd="client.name" key=selected.mac value=selected.name}}
+              {{>RO name="IP Address" value=selected.ip}}
+              {{>RO name="Hostname" value=selected.hostname}}
+              {{>RO name="Manufacturer" value=selected.oui}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+        <div>History</div>
+      </div>
+      <div id="clients-history" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RO name="First seen" value=(date selected.firstSeen)}}
+              {{>RO name="Last seen" value=(date selected.lastSeen)}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
+</div>

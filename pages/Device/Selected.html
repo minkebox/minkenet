@@ -1,0 +1,19 @@
+<div class="device-selected tab-content">
+  {{#if (eq tab 'details')}}
+  <div id="details-device" class="device-details-container tab-pane fade show active">
+    {{#if selectedDevice}}
+    {{> DeviceDetails}}
+    {{else}}
+    <div></div>
+    {{/if}}
+  </div>
+  {{else if (eq tab 'ports')}}
+  <div id="details-ports" class="ports-container tab-pane fade show active">
+    {{#if selectedDevice}}
+    {{> DevicePortInfo}}
+    {{else}}
+    <div></div>
+    {{/if}}
+  </div>
+  {{/if}}
+</div>

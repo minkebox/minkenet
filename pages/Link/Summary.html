@@ -1,0 +1,30 @@
+<a class="row {{#if (eq selected id)}}active{{/if}}" href="#" onclick="selectbond(event,'{{id}}')">
+  {{#with (lookup this 0)}}
+  <div class="col">
+    {{device.name}}
+  </div>
+  <div class="col">
+    {{#if lag}}
+    {{#each lag.ports}}
+      <span>{{add 1 this}}</span>
+    {{/each}}
+    {{else}}
+      <span>{{add 1 port}}</span>
+    {{/if}}
+  </div>
+  {{/with}}
+  {{#with (lookup this 1)}}
+  <div class="col">
+    {{device.name}}
+  </div>
+  <div class="col">
+    {{#if lag}}
+    {{#each lag.ports}}
+      <span>{{add 1 this}}</span>
+    {{/each}}
+    {{else}}
+      <span>{{add 1 port}}</span>
+    {{/if}}
+  </div>
+  {{/with}}
+</a>

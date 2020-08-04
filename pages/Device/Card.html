@@ -1,0 +1,21 @@
+{{#with device}}
+<div class="device-card d-inline-block {{#if (eq this ../selectedDevice)}}active{{/if}}" {{#if _authenticated}}onclick="send('device.select','{{_id}}')"{{/if}}>
+  <img src="{{description.image}}" class="card-img-top">
+  <div class="card-body">
+    {{#if properties.system.name}}
+    <h5 class="card-title">{{properties.system.name}}</h5>
+    {{else}}
+    <h5 class="card-title">{{description.name}}</h5>
+    {{/if}}
+    <a class="card-text" href="http://{{properties.system.ipv4.address}}" target="_blank">{{properties.system.ipv4.address}}</a>
+    {{#unless _authenticated}}
+    <div class="d-flex buttons" style="justify-content: flex-end">
+      <button type="button" class="btn btn-outline-primary btn-sm" onclick="$('#login-modal-{{_id}}').modal()">Authenticate</button>
+    </div>
+    {{/unless}}
+  </div>
+  {{#unless _authenticated}}
+  {{> DeviceAuthModal}}
+  {{/unless}}
+</div>
+{{/with}}

@@ -1,0 +1,24 @@
+{{#unless topologyValid}}
+{{> NetworkTopologyNotice}}
+{{/unless}}
+<div class="clients-container container-fluid">
+  <div class="row title">
+    <div class="col col-mac">Mac Address</div>
+    <div class="col col-name">Name</div>
+    <div class="col col-ip">IP Address</div>
+    <div class="col col-location">Location</div>
+    <div class="col col-oui">Manufacturer</div>
+  </div>
+  {{#each clients}}
+  <a id="mac-{{id}}" class="row {{#if (eq selected.mac mac)}}active{{/if}}" href="#" onclick="selectclient(event,'{{mac}}')">
+    {{> ClientsSummary selected=../selected}}
+  </a>
+  {{/each}}
+  <script>
+    window.selectclient = function(evt,id) {
+      $('.clients-container .row').removeClass('active');
+      send('select.client', id);
+      $(evt.target).parents('.clients-container .row').addClass('active');
+    }
+  </script>
+</div>

@@ -1,0 +1,62 @@
+<div id="{{id}}" class="device-card d-inline-block monitor-graph">
+  <div class="handle"></div>
+  <div id="{{id}}-0" class="inner"></div>
+  <script>
+  let traces = [];
+  {{#each trace}}
+  traces.push({
+    type: "scatter",
+    mode: "markers+text",
+    x: [ {{@index}} ],
+    y: [ {{mod @index 2}} ],
+    text: [ '{{title}}' ],
+    {{#if (eq @index 0)}}
+    {{/if}}
+    textfont: {
+      family: 'Arial',
+      color: '#e0e0e0',
+      size: 16
+    },
+    marker: {
+      size: {{value}},
+      color: GraphConfig.colors[{{@index}}],
+      opacity: 0.7
+    }
+  });
+  {{/each}}
+  const layout = {
+    title: {
+      text: "{{title}}",
+      font: {
+        color: '#c0c0c0'
+      },
+      x: 0.05,
+      y: 0.92
+    },
+    xaxis: {
+      showticklabels: false,
+      showgrid: false,
+      fixedrange: true,
+      zeroline: false,
+      range: [ -0.75, 2.5 ]
+    },
+    yaxis: {
+      showticklabels: false,
+      showgrid: false,
+      fixedrange: true,
+      zeroline: false
+    },
+    margin: {
+      t: 0,
+      r: 0,
+      b: 0,
+      l: 0,
+      pad: 0
+    },
+    showlegend: false,
+    plot_bgcolor: 'transparent',
+    paper_bgcolor: 'transparent'
+  };
+  Plotly.newPlot("{{id}}-0", traces, layout, { displayModeBar: false });
+  </script>
+</div>

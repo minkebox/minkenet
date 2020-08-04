@@ -1,0 +1,7 @@
+<a class="row {{#if (eq selected id)}}active{{/if}}" href="#" onclick="selectnet(event,'{{id}}')">
+  <div class="col"><div>{{name}}
+    {{#if (eq id 1)}} <div class="default">default</div>{{/if}}
+    {{#if (eq id managementid)}} <div class="default">management</div>{{/if}}
+  </div></div>
+  <div class="col">{{id}}</div>
+</a>

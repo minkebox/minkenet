@@ -1,0 +1,117 @@
+<div id="device-ports" class="accordion">
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+      <div>Overview
+        <span id="device-update-spinner" class="device-update-spinner">
+          {{#if updating}}
+          {{> DeviceSpinner}}
+          {{/if}}
+        </span>
+      </div>
+    </div>
+    <div id="device-ports-hardware" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <div class="device-ports-layout">
+            {{#with selectedDevice}}
+            {{> DevicePortLayout properties=properties selected=../porthighlights}}
+            {{/with}}
+          </div>
+          <form>
+            {{#with selectedPort}}
+            {{#with port}}
+            {{>RO name="Port id" value=id}}
+            {{>RW name="Name" kv=(concat 'network.physical.port.' ../portnr '.name') value=name}}
+            {{#if (eq status 'up')}}
+            {{>RO name="Type" value=type}}
+            {{else}}
+            {{>RO name="Type" value='-'}}
+            {{/if}}
+            {{>RO name="Status" value=status}}
+            {{/with}}
+            {{#if peer}}
+            {{>RO name="Peer" value=peer}}
+            {{else if clients}}
+            {{#if (eq clients.total 1)}}
+            {{>RO name="Client" value=(lookup (lookup clients.macs 0) 'name')}}
+            {{else if (ne clients.total 0)}}
+            {{>RO name="Purpose" value="Switch/Router/AP"}}
+            {{/if}}
+            {{/if}}
+            {{/with}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-ports-settings" class="card-header">
+      <div>Settings</div>
+    </div>
+    <div id="device-ports-settings" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{#with selectedPort}}
+            {{#with port}}
+            {{>RWCheckbox name="Enable" kv=(concat 'network.physical.port.' ../portnr '.enable') value=enable}}
+            {{>RWCheckbox name="Flow Control" kv=(concat 'network.physical.port.' ../portnr '.flowcontrol') value=flowcontrol}}
+            {{>RWCheckbox name="Jumbo Frames" kv=(concat 'network.physical.port.' ../portnr '.jumbo') value=jumbo}}
+            {{>RO name="Speed" value=speed}}
+            {{/with}}
+            {{/with}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{#with XselectedPort.port.statistics}}
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-ports-statistics" class="card-header">
+      <div>Statistics</div>
+    </div>
+    <div id="device-ports-statistics" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{#if (isdefined rx.bytes)}}
+            {{>RO name="RX (MB)" value=(fixed (div rx.bytes 1048576) 2)}}
+            {{else if (isdefined rx.packets)}}
+            {{>RO name="RX (MPkts)"value=(fixed (div rx.packets 1048576) 2)}}
+            {{/if}}
+            {{#if (isdefined tx.bytes)}}
+            {{>RO name="TX (MB)" value=(fixed (div tx.bytes 1048576) 2)}}
+            {{else if (isdefined tx.packets)}}
+            {{>RO name="TX (MPkts)" value=(fixed (div tx.packets 1048576) 2)}}
+            {{/if}}
+            {{#if (isdefined rx.errors)}}
+            {{>RO name="RX errors" value=(fixed rx.errors)}}
+            {{/if}}
+            {{#if (isdefined tx.errors)}}
+            {{>RO name="TX errors" value=(fixed tx.errors)}}
+            {{/if}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/with}}
+  {{#if (gt selectedPort.clients.total 0)}}
+  {{#with selectedPort.clients}}
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-ports-clients" class="card-header">
+      <div>Clients</div>
+    </div>
+    <div id="device-ports-clients" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{>RO name="Total" value=total}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/with}}
+  {{/if}}
+</div>

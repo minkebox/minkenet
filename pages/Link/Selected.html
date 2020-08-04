@@ -1,0 +1,59 @@
+<div id="details-bond" class="bond-details-container tab-pane fade show active">
+  <div class="accordion">
+    <div class="card">
+      <div data-toggle="collapse" data-target="#bond-devices" class="card-header">
+        <div>Devices</div>
+      </div>
+      <div id="bond-devices" class="collapse show">
+        {{> NetworkCardDevices}}
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#bond-overview" class="card-header">
+        <div>Link</div>
+      </div>
+      <div id="bond-overview" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              <div class="row">
+                <label class="col-sm-6 col-form-label col-form-label-sm">Link Aggregation</label>
+                <div class="col-sm-6">
+                <select class="device-property-rwselect small"
+                  onchange="send('lag.select',this.value)">
+                    {{#each @root.options}}
+                    <option {{#if (eq @root.lag name)}}selected{{/if}} {{#unless enabled}}disabled{{/unless}} value="{{name}}">{{name}}</option>
+                    {{/each}}
+                  </select>
+                </div>
+              </div>
+              <div class="row">
+                <label class="col-sm-6 col-form-label col-form-label-sm">Device Ports</label>
+              </div>
+              {{#with (lookup selected 0)}}
+              <div class="row bond-link">
+                <label class="col-sm-6">&nbsp;&nbsp;{{device.name}}</label>
+                <div>
+                  {{#each lag.ports}}
+                  <span>{{add 1 this}}</span>
+                  {{/each}}
+                </div>
+              </div>
+              {{/with}}
+              {{#with (lookup selected 1)}}
+              <div class="row bond-link">
+                <label class="col-sm-6">&nbsp;&nbsp;{{device.name}}</label>
+                <div>
+                  {{#each lag.ports}}
+                  <span>{{add 1 this}}</span>
+                  {{/each}}
+                </div>
+              </div>
+              {{/with}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

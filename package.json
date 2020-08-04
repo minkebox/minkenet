@@ -1,0 +1,31 @@
+{
+  "name": "minkenet",
+  "description": "MinkeNet",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://gitlab.com/minkebox/minkenet.git"
+  },
+  "dependencies": {
+    "bootstrap": "^4.5.0",
+    "debug": "^4.1.1",
+    "dns-packet": "^5.2.1",
+    "fast-glob": "^3.2.4",
+    "handlebars": "^4.7.6",
+    "jquery": "^3.5.1",
+    "jsonpath-plus": "^4.0.0",
+    "koa": "^2.13.0",
+    "koa-cache-control": "^2.0.0",
+    "koa-router": "^9.1.0",
+    "koa-websocket": "^6.0.0",
+    "local-devices": "^3.0.0",
+    "nanotimer": "^0.3.15",
+    "nedb": "^1.8.0",
+    "node-mndp": "git+https://github.com/patagonaa/node-mndp.git",
+    "oui": "^11.0.28",
+    "plotly.js-dist": "^1.54.7",
+    "popper.js": "^1.16.1",
+    "puppeteer": "^4.0.1",
+    "sortablejs": "^1.10.2"
+  }
+}

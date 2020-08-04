@@ -1,0 +1,11 @@
+<div class="row">
+  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
+  <div class="col-sm-6">
+  <select class="device-property-rwselect small"
+    onchange="{{#if kv}}send('kv.update',{ k:'{{kv}}',v:event.target.value}){{/if}}{{#if cmd}}send('{{cmd}}',{k:'{{key}}',v:this.value}){{/if}}{{#if update}};send('device.details.summary.updaterequest','{{update}}'){{/if}}">
+      {{#each options}}
+      <option {{#if (eq ../value this)}}selected{{/if}} value="{{this}}">{{this}}</option>
+      {{/each}}
+    </select>
+  </div>
+</div>

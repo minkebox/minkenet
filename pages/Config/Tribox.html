@@ -1,0 +1,5 @@
+<select onchange="send('config.change',{key:'{{key}}',value:JSON.parse(this.value)})">
+  <option {{#if (eq value true)}}selected{{/if}} value="true">Enable</option>
+  <option {{#if (eq value false)}}selected{{/if}} value="false">Disable</option>
+  <option {{#if (eq value null)}}selected{{/if}} value="null">No change</option>
+</select>

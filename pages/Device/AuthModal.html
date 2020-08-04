@@ -1,0 +1,28 @@
+<div class="modal fade" id="login-modal-{{_id}}" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Authenticate</h5>
+      </div>
+      <div class="modal-body">
+        <form>
+          {{#if (or description.basicAuth description.login.username)}}
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="username" class="form-control device-username" value="{{properties.system.keychain.username}}">
+          </div>
+          {{/if}}
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="text" class="form-control device-password" value="{{properties.system.keychain.password}}">
+          </div>
+        </form>
+        <div id="login-modal-status-{{_id}}">&nbsp;</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" onclick="deviceLogin('{{_id}}')">Login</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="send('device.authenticate.cancel','{{_id}}')">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>

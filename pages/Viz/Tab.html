@@ -1,0 +1,20 @@
+<div class="viz">
+  {{#each monitor}}
+  {{#if (eq type '1Hour')}}
+  {{> VizMon1Hour }}
+  {{else if (eq type 'Gauge')}}
+  {{> VizMonGauge }}
+  {{else if (eq type 'Bubbles')}}
+  {{> VizMonBubbles }}
+  {{/if}}
+  {{/each}}
+</div>
+<script>
+  new Sortable(document.querySelector('.viz'), {
+    handle: '.handle',
+    fallbackTolerance: 5,
+    delay: 500,
+    delayOnTouchOnly: true,
+    onEnd: evt => send('mon.move', { id: evt.item.id.match(/mon-(.*)/)[1], from: evt.oldDraggableIndex, to: evt.newDraggableIndex })
+ });
+</script>

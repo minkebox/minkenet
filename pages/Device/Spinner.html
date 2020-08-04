@@ -1,0 +1,11 @@
+<div id="device-spinner" class="spinner-border spinner-border-sm float-right" role="status" style="display:none"></div>
+<script>
+  (() =>{
+    setTimeout(() => {
+      const spin = document.getElementById('device-spinner');
+      if (spin) {
+        spin.style.display = '';
+      }
+    }, {{#if (isdefined delay)}}{{delay}}{{else}}0{{/if}});
+  })();
+</script>

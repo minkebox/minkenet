@@ -1,0 +1,14 @@
+version: '3.5'
+services:
+  minkenet:
+    container_name: minkenet
+    image: minkenet
+    volumes:
+    - ${DB-db}:/app/db
+    network_mode: "host"
+    cap_add:
+    - NET_ADMIN
+    environment:
+    - DEBUG=${DEBUG-}
+volumes:
+  db:

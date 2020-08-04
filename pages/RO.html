@@ -1,0 +1,15 @@
+{{#if (isdefined value)}}
+<div class="row">
+  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
+  <div class="col-sm-6 d-flex align-items-center">
+    <div class="device-property-ro small">{{value}}</div>
+  </div>
+</div>
+{{else if default}}
+<div class="row">
+  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
+  <div class="col-sm-6 d-flex align-items-center">
+    <div class="device-property-ro small">{{default}}</div>
+  </div>
+</div>
+{{/if}}

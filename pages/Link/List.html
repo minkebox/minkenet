@@ -1,0 +1,25 @@
+{{#unless topologyValid}}
+{{> NetworkTopologyNotice}}
+{{/unless}}
+<div class="bonds-container container-fluid">
+  <div class="row title">
+    <div class="col"><div>First Peer</div></div>
+    <div class="col"><div>Second Peer</div></div>
+  </div>
+  <div class="row subtitle">
+    <div class="col">Device</div><div class="col">Ports</div>
+    <div class="col">Device</div><div class="col">Ports</div>
+  </div>
+  <div class="bonds">
+  {{#each links}}
+  {{> LinkSummary id=@index selected=../selectedIndex}}
+  {{/each}}
+  </div>
+  <script>
+    window.selectbond = function(evt,id) {
+      $('.bonds-container .row').removeClass('active');
+      send('link.select', id);
+      $(evt.target).parents('.bonds-container .row').addClass('active');
+    }
+  </script>
+</div>
