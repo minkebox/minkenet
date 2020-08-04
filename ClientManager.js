@@ -164,9 +164,10 @@ class ClientManager extends EventEmitter {
         entry.hostname = info.hostname;
       }
       entry.lastSeen = now;
+    }
+    if (change) {
       DB.updateMac(this.toDB(addr));
     }
-
     return change;
   }
 
