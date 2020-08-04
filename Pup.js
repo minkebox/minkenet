@@ -21,6 +21,7 @@ class Pup {
           '--no-proxy-server',
           '--disable-gpu',
           '--in-process-gpu',
+          '--disable-dev-shm-usage',
           //'--proxy-server="direct://"',
           //'--proxy-bypass-list=*'
         ],
