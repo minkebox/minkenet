@@ -18,8 +18,8 @@ module.exports = {
       },
       network: {
         physical: {
-          port: [
-            {
+          port: {
+            '0': {
               id: '$[0].id',
               status: {
                 $: 'jsonp',
@@ -40,7 +40,7 @@ module.exports = {
                 }
               }
             }
-          ]
+          }
         }
       }
     }

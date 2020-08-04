@@ -8,8 +8,8 @@ module.exports = {
   values: {
     network: {
       physical: {
-        port: [
-          {
+        port: {
+          '0': {
             statistics: {
               rx: {
                 bytes: '$[0].rx_bytes',
@@ -21,7 +21,7 @@ module.exports = {
               }
             }
           }
-        ]
+        }
       }
     }
   }
