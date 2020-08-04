@@ -65,8 +65,8 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   addDevice(device) {
-    if (!this.devices[device.id]) {
-      this.devices[device.id] = device;
+    if (!this.devices[device._id]) {
+      this.devices[device._id] = device;
       device.on('update', this.onDeviceUpdate);
       this.emit('add');
       this.emit('update');
@@ -74,8 +74,8 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   removeDevice(device) {
-    if (this.devices[device.id]) {
-      delete this.devices[device.id];
+    if (this.devices[device._id]) {
+      delete this.devices[device._id];
       device.off('update', this.onDeviceUpdate);
       this.emit('remove');
       this.emit('update');
@@ -83,7 +83,7 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   async authenticated(device) {
-    if (!this.devices[device.id]) {
+    if (!this.devices[device._id]) {
       throw new Error('Cannot authenticate unknown device');
     }
     if (!device._authenticated) {
@@ -91,7 +91,7 @@ class DeviceInstanceManager extends EventEmitter {
     }
     device.on('update', this.onDeviceUpdate);
     await DB.updateDevice(device.toDB());
-    await DB.updateDeviceState(device.id, device.state.toDB());
+    await DB.updateDeviceState(device._id, device.state.toDB());
   }
 
   needCommit() {
