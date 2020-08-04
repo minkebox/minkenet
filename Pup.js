@@ -20,6 +20,7 @@ class Pup {
           '--no-zygote',
           '--no-proxy-server',
           '--disable-gpu',
+          '--in-process-gpu',
           //'--proxy-server="direct://"',
           //'--proxy-bypass-list=*'
         ],
