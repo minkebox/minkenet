@@ -18,8 +18,8 @@ class Pup {
           '--disable-extensions',
           '--start-maximixed',
           '--no-zygote',
-          //'--single-process',
           '--no-proxy-server',
+          '--disable-gpu',
           //'--proxy-server="direct://"',
           //'--proxy-bypass-list=*'
         ],
