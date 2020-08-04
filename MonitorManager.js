@@ -19,8 +19,9 @@ class MonitorManager extends EventEmitter {
       this.enabled = JSON.parse(data.enabled);
       this.monitors = JSON.parse(data.monitors);
       for (let i = 0; i < this.monitors.length; i++) {
-        if (!('order' in this.monitors[i])) this.monitors[i].order = 0;
-        await DB.createMonitor(this.monitors[i].name);
+        if (this.monitors[i].name) {
+          await DB.createMonitor(this.monitors[i].name);
+        }
       }
       const DeviceInstanceManager = require('./DeviceInstanceManager');
       this.enabled.forEach(id => {
