@@ -365,8 +365,8 @@ class TopologyManager extends EventEmitter {
     // Only keep the rx and tx with the greatest traffic.
     for (let i = 2; i < timings.length; i++) {
       for (let d = 0; d < timings[i].length; d++) {
-        let maxrx = { rx: counts[i] / 2, p: -1 };
-        let maxtx = { tx: counts[i] / 2, p: -1 };
+        let maxrx = { rx: 0, p: -1 };
+        let maxtx = { tx: 0, p: -1 };
         for (let p = 0; p < timings[i][d].length; p++) {
           // '>>>0' forces the answer to be unsigned 32-bits, so we handle wrapping counters
           // Deduct the baseline after the 32-bit wrap. It can go negative now but that's okay.
