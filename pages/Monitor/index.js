@@ -30,37 +30,38 @@ class Monitor extends Page {
 
   updateState() {
     this.state.devices = DeviceInstanceManager.getAuthenticatedDevices();
-    this.state.selected = this.state.devices[this.state.selectedIndex];
-    this.state.porthighlights = [];
-    if (this.state.selected.monitor) {
-      this.state.porthighlights.active = 'A';
-    }
-    const portRoot = `network.physical.port.${this.state.selectedPortNr}`;
-    this.state.selectedPort = this.state.selected.readKV(portRoot);
-    this.state.porthighlights[this.state.selectedPortNr] = 'A';
-    const macs = ClientManager.getClientsForDeviceAndPort(this.state.selected, this.state.selectedPortNr);
-    if (macs.length === 1) {
-      this.state.peer = macs[0].name;
-    }
-    else {
-      const peer = TopologyManager.findLink(this.state.selected, this.state.selectedPortNr);
-      if (peer) {
-        this.state.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
+    if (this.state.devices.length) {
+      this.state.selected = this.state.devices[this.state.selectedIndex];
+      this.state.porthighlights = [];
+      if (this.state.selected.monitor) {
+        this.state.porthighlights.active = 'A';
+      }
+      const portRoot = `network.physical.port.${this.state.selectedPortNr}`;
+      this.state.selectedPort = this.state.selected.readKV(portRoot);
+      this.state.porthighlights[this.state.selectedPortNr] = 'A';
+      const macs = ClientManager.getClientsForDeviceAndPort(this.state.selected, this.state.selectedPortNr);
+      if (macs.length === 1) {
+        this.state.peer = macs[0].name;
       }
       else {
-        this.state.peer = null;
+        const peer = TopologyManager.findLink(this.state.selected, this.state.selectedPortNr);
+        if (peer) {
+          this.state.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
+        }
+        else {
+          this.state.peer = null;
+        }
       }
-    }
-    this.state.monitors = [];
-    const monitors = MonitorManager.getDeviceMonitors(this.state.selected);
-    for (let i = 0; i < monitors.length; i++) {
-      const mon = monitors[i];
-      if (mon.keys[0].key.indexOf(portRoot) === 0) {
-        this.state.monitors.push({ id: mon.id, key: mon.keys.map(k => k.key.substring(portRoot.length + 1)).join(','), type: mon.type });
+      this.state.monitors = [];
+      const monitors = MonitorManager.getDeviceMonitors(this.state.selected);
+      for (let i = 0; i < monitors.length; i++) {
+        const mon = monitors[i];
+        if (mon.keys[0].key.indexOf(portRoot) === 0) {
+          this.state.monitors.push({ id: mon.id, key: mon.keys.map(k => k.key.substring(portRoot.length + 1)).join(','), type: mon.type });
+        }
       }
+      this.state.monitors.push({ id: MonitorManager.newMonitorId(), key: 'none', type: 'none' });
     }
-    this.state.monitors.push({ id: MonitorManager.newMonitorId(), key: 'none', type: 'none' });
-
     this.state.config = ConfigDB.readAll();
   }
 
