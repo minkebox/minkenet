@@ -73,8 +73,13 @@ div[data-placeholder]:empty:before {
   max-width: 100%;
 }
 
+.nav-link {
+  padding-top: 6px;
+  padding-bottom: 4px;
+}
 .sub-nav {
   font-size: 0.75rem;
+  line-height: 0.75rem;
 }
 .sub-nav .nav-link {
   padding: 0.25rem 1rem 0.25rem 1.5rem;
