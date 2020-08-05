@@ -41,6 +41,11 @@ a {
   color: var(--minor-text-color);
 }
 
+div[data-placeholder]:empty:before {
+  content: attr(data-placeholder);
+  color: var(--disabled-text-color);
+}
+
 .sub-nav .nav-item.active {
   background-color: var(--highlight-background-color);
   color: var(--main-text-color);
