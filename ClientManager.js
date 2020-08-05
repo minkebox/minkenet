@@ -8,6 +8,8 @@ const ARP = require('./discovery/arp');
 const Debounce = require('./utils/Debounce');
 const Log = require('debug')('clients');
 
+const SCRUB_TIMER = 10 * 60 * 1000; // 10 minutes
+
 class ClientManager extends EventEmitter {
 
   constructor() {
@@ -42,10 +44,16 @@ class ClientManager extends EventEmitter {
 
     this.arp.start();
     this.updateDeviceClients();
+
+    this.scrubEntries = this.scrubEntries.bind(this);
+    this._scrubTimer = setInterval(this.scrubEntries, SCRUB_TIMER);
+    this.scrubEntries();
   }
 
   stop() {
     this.arp.stop();
+    clearInterval(this._scrubTimer);
+    this._scrubTimer = null;
   }
 
   async updateDeviceClients() {
@@ -211,6 +219,29 @@ class ClientManager extends EventEmitter {
       }
     }
     return null;
+  }
+
+  scrubEntries() {
+    let change = false;
+    const before = new Date(Date.now() - 60 * 60 * 1000).getTime();
+    for (let addr in this.mac) {
+      const entry = this.mac[addr];
+      if (entry.lastSeen < before) {
+        // Old entry. Clear transient info.
+        if (entry.ip) {
+          entry.ip = null;
+          change = true;
+        }
+        if (entry.connected) {
+          entry.connected = null;
+          change = true;
+        }
+      }
+    }
+    if (change) {
+      DB.updateMac(this.toDB(addr));
+      this.emit('update');
+    }
   }
 
   getClientsForDeviceAndPort(device, portnr) {
