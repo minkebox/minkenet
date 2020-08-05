@@ -209,7 +209,7 @@ class Viz extends Page {
     let active = 0;
     let recent = 0;
     for (let key in clients) {
-      if (clients[key].ip) {
+      if (clients[key].lastSeen > inlast24hours) {
         active++;
       }
       if (clients[key].firstSeen > inlast24hours) {
