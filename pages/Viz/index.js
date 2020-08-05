@@ -169,10 +169,6 @@ class Viz extends Page {
     };
 
     const data = await DB.readMonitor(mon.name);
-    const max = {
-      value: 0,
-      time: 0
-    };
     mon.keys.forEach(k => {
       const trace = {
         title: k.title,
@@ -188,19 +184,14 @@ class Viz extends Page {
           const item = data[d];
           if (item.key === k.key) {
             trace.value = k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time);
-            if (previous.value !== -1 && trace.value > max.value) {
-              max.value = trace.value;
-              max.time = item.expiresAt;
+            if (previous.value !== -1 && trace.value > graph.max) {
+              graph.max = trace.value;
             }
             previous.value = item.value;
             previous.time = item.expiresAt;
           }
         }
       }
-      const ROUND = 5 * 1024 * 1024;
-      const tdiff = 1 - Math.min(1, (1 * 60 * 1000) / (max.time - Date.now()));
-      const vdiff = (max.value - trace.value) * tdiff;
-      graph.max = Math.ceil((max.value - vdiff) / ROUND) * ROUND;
       graph.trace.push(trace);
     });
     return graph;

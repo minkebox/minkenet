@@ -1,8 +1,11 @@
 const EventEmitter = require('events');
 const DB = require('./Database');
 
-const MONITOR_EXPIRES_1HOUR = 60 * 60 * 1000;
-const MONITOR_EXPIRES_1DAY = 24 * 60 * 60 * 1000;
+const MONITOR_EXPIRES = {
+  FIVEMINUTES: 5 * 60 * 1000,
+  ONEHOUR: 60 * 60 * 1000,
+  ONEDAY: 24 * 60 * 60 * 100
+};
 
 
 class MonitorManager extends EventEmitter {
@@ -23,8 +26,6 @@ class MonitorManager extends EventEmitter {
         if (this.monitors[i].name) {
           await DB.createMonitor(this.monitors[i].name);
         }
-        // XXX
-        if (this.monitors[i].type === 'history') this.monitors[i].type = '1hour';
       }
       const DeviceInstanceManager = require('./DeviceInstanceManager');
       this.enabled.forEach(id => {
@@ -121,13 +122,15 @@ class MonitorManager extends EventEmitter {
         prop.monitors.forEach(mon => {
           let expires = 0;
           switch (mon.type) {
+            case 'now':
+              expires = MONITOR_EXPIRES.FIVEMINUTES;
+              break;
             case '1day':
-              expires = MONITOR_EXPIRES_1DAY;
+              expires = MONITOR_EXPIRES.ONEDAY;
               break;
             case '1hour':
-            case 'now':
             default:
-              expires = MONITOR_EXPIRES_1HOUR;
+              expires = MONITOR_EXPIRES.ONEHOUR;
               break;
           }
           DB.updateMonitor(mon.name, { key: key, value: value, expiresAt: new Date(Date.now() + expires) });
