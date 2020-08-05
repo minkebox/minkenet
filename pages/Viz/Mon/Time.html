@@ -34,7 +34,7 @@
     },
     xaxis: {
       title: {
-        text: 'One Day',
+        text: "{{xtitle}}",
         standoff: 8
       },
       automargin: true,
@@ -51,7 +51,8 @@
         family: 'Arial',
         size: 10
       },
-      fixedrange: true
+      fixedrange: true,
+      rangemode: 'tozero'
     },
     showlegend: true,
     legend: {
