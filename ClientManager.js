@@ -269,8 +269,8 @@ class ClientManager extends EventEmitter {
     return null;
   }
 
-  getAllClients() {
-    const dmacs = this._getDeviceMacs();
+  getAllClients(filter) {
+    const dmacs = filter === 'clients' ? this._getDeviceMacs() : {};
     const macs = {}
     for (let m in this.mac) {
       if (!dmacs[m]) {
