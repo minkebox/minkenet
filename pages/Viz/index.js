@@ -48,7 +48,8 @@ class Viz extends Page {
       const mon = monitors[i];
       let graph = null;
       switch (mon.type) {
-        case 'history':
+        case '1hour':
+        case '1day':
           graph = await this._makeGraph(mon);
           break;
         case 'current':
@@ -65,10 +66,7 @@ class Viz extends Page {
       }
     }
 
-    // Sort and renumber
-    this.state.monitor.sort((a, b) => a.mon.order - b.mon.order);
-    this.state.monitor.forEach((m, idx) => m.mon.order = idx);
-    await MonitorManager.updateMonitors();
+    await this._sortAndSaveMonitors();
   }
 
   async 'mon.move' (msg) {
@@ -91,8 +89,14 @@ class Viz extends Page {
         });
       }
       move.mon.order = Math.min(to, this.state.monitor.length);
-      await MonitorManager.updateMonitors();
+      await this._sortAndSaveMonitors();
     }
+  }
+
+  async _sortAndSaveMonitors() {
+    this.state.monitor.sort((a, b) => a.mon.order - b.mon.order);
+    this.state.monitor.forEach((m, idx) => m.mon.order = idx);
+    await MonitorManager.updateMonitors();
   }
 
   async _makeGraph(mon) {
@@ -104,7 +108,7 @@ class Viz extends Page {
     }
 
     const graph = {
-      type: '1Hour',
+      type: mon.type === '1day' ? '1Day' : '1Hour',
       id: `mon-${mon.id}`,
       title: mon.title,
       trace: [],
@@ -220,8 +224,8 @@ class Viz extends Page {
     const SIZE = (v) => Math.max(60, 120 * v / all);
     return {
       type: 'Bubbles',
-      id: `mon-clients`,
-      title: 'Clients',
+      id: `mon-${mon.id}`,
+      title: mon.title,
       trace: [
         { title: `Total ${all}`, value: SIZE(all) },
         { title: `Active ${active}`, value: SIZE(active) },

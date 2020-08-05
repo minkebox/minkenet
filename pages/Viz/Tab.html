@@ -2,6 +2,8 @@
   {{#each monitor}}
   {{#if (eq type '1Hour')}}
   {{> VizMon1Hour }}
+  {{else if (eq type '1Day')}}
+  {{> VizMon1Day }}
   {{else if (eq type 'Gauge')}}
   {{> VizMonGauge }}
   {{else if (eq type 'Bubbles')}}

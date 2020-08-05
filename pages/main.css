@@ -15,6 +15,7 @@
   --minor-text-color: #c0c0c0;
   --minor-background-color: #505050;
   --disabled-text-color: #808080;
+  --placeholder-text-color: #606060;
 
   --port-device-background: #505050;
   --port-border: grey;
@@ -43,7 +44,7 @@ a {
 
 div[data-placeholder]:empty:before {
   content: attr(data-placeholder);
-  color: var(--disabled-text-color);
+  color: var(--placeholder-text-color);
 }
 
 .sub-nav .nav-item.active {

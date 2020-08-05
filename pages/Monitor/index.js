@@ -116,7 +116,7 @@ class Monitor extends Page {
     ConfigDB.write(msg.value.key, msg.value.value);
     switch (msg.value.key) {
       case 'monitor.clients':
-        await MonitorManager.monitorCustom('clients', msg.value.value, 'clients');
+        await MonitorManager.monitorCustom('clients', msg.value.value, 'Clients', 'clients');
         break;
       default:
         break;
