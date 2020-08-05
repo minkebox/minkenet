@@ -25,7 +25,7 @@
               <div class="nav-link">Overview</div>
               <ul class="nav sub-nav flex-column">
                 <lu class="nav-item active">
-                  <a class="nav-link" href="#overview.viz" data-toggle="tab">General</a>
+                  <a class="nav-link" href="#overview.viz">General</a>
                 </lu>
               </ul>
             </li>
@@ -33,10 +33,10 @@
               <div class="nav-link">Devices</div>
               <ul class="nav sub-nav flex-column">
                 <lu class="nav-item">
-                  <a class="nav-link" href="#devices.details" data-toggle="tab">Details</a>
+                  <a class="nav-link" href="#devices.details">Details</a>
                 </lu>
                 <lu class="nav-item">
-                  <a class="nav-link" href="#devices.ports" data-toggle="tab">Ports</a>
+                  <a class="nav-link" href="#devices.ports">Ports</a>
                 </lu>
                 <li class="nav-item">
                   <a class="nav-link" href="#devices.details" onclick="$('#scan-network').modal()">Discovery</a>
@@ -64,7 +64,7 @@
               <div class="nav-link">Clients</div>
               <ul class="nav sub-nav flex-column">
                 <lu class="nav-item">
-                  <a class="nav-link" href="#clients.all" data-toggle="tab">All</a>
+                  <a class="nav-link" href="#clients.all">All</a>
                 </lu>
               </ul>
             </li>
@@ -81,14 +81,6 @@
             </li>
           </ul>
         </div>
-        <script>
-        $('#main-nav .nav-link').on('click', function (e) {
-          const tab = e.target.href.split('#')[1];
-          send("tab.select", tab);
-          $('#main-nav .active').removeClass('active');
-          $(e.target.parentElement).addClass('active');
-        });
-        </script>
         <div id="main-container" class="col main-container tab-content">
         {{> DeviceTab}}
       </div>

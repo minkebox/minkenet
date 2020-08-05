@@ -125,3 +125,10 @@ const GraphConfig = {
 };
 
 window.addEventListener('pageshow', runMessageManager);
+window.addEventListener('hashchange', evt => {
+  const tab = location.hash.split('#')[1];
+  send("tab.select", tab);
+  document.querySelectorAll('#main-nav .active').forEach(e => e.classList.remove('active'));
+  document.querySelector('#main-nav .nav-link[href="' + location.hash + '"]').parentElement.classList.add('active');
+});
+location.hash = '#overview.viz';

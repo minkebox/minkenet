@@ -217,6 +217,7 @@ class Viz extends Page {
       type: 'Bubbles',
       id: `mon-${mon.id}`,
       title: mon.title,
+      link: `#clients.all`,
       trace: [
         { title: `Total ${all}`, value: SIZE(all) },
         { title: `Active ${active}`, value: SIZE(active) },

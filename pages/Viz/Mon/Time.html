@@ -1,4 +1,4 @@
-<div id="{{id}}" class="monitor-graph device-card d-inline-block">
+<a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="monitor-graph device-card d-inline-block">
   <div class="handle"></div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
@@ -70,4 +70,4 @@
   };
   Plotly.newPlot("{{id}}-0", traces, layout, { displayModeBar: false });
   </script>
-</div>
+</a>
