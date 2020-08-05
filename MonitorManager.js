@@ -34,7 +34,7 @@ class MonitorManager extends EventEmitter {
         }
       });
       this._buildMap();
-    }5
+    }
   }
 
   stop() {
@@ -61,7 +61,7 @@ class MonitorManager extends EventEmitter {
       this._buildMap();
       await DB.removeMonitor(old[0].name);
     }
-    if (keys[0] !== 'none' && monitorType !== 'none') {
+    if (keys[0].key !== 'none' && monitorType !== 'none') {
       const mon = {
         id: id,
         deviceid: device._id,

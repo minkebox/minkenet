@@ -94,9 +94,6 @@ class Monitor extends Page {
     const mon = this.state.monitors.find(mon => mon.id == msg.value.i);
     if (mon) {
       mon.key = msg.value.k;
-      if (mon.key === 'none') {
-        mon.type = 'none';
-      }
       await this.updateMonitor(mon);
     }
   }
@@ -105,9 +102,6 @@ class Monitor extends Page {
     const mon = this.state.monitors.find(mon => mon.id == msg.value.i);
     if (mon) {
       mon.type = msg.value.v;
-      if (mon.type === 'none') {
-        mon.key = 'none';
-      }
       await this.updateMonitor(mon);
     }
   }
@@ -133,33 +127,39 @@ class Monitor extends Page {
       mon.id,
       title,
       mon.key.split(',').map(k => {
-        let name = k;
-        let scale = 1;
         switch (k) {
           case 'statistics.rx.bytes':
-            name = 'RX (byte)';
-            scale = 8;
-            break;
+            return {
+              key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
+              title: 'RX (byte)',
+              scale: 8
+            };
           case 'statistics.tx.bytes':
-            name = 'TX (byte)';
-            scale = 8;
-            break;
+            return {
+              key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
+              title: 'TX (byte)',
+              scale: 8
+            };
           case 'statistics.rx.packets':
-            name = 'RX (packets)';
-            scale = 1;
-            break;
+            return {
+              key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
+              title: 'RX (packets)',
+              scale: 1
+            };
           case 'statistics.tx.packets':
-            name = 'TX (packets)';
-            scale = 1;
-            break;
+            return {
+              key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
+              title: 'TX (packets)',
+              scale: 1
+            };
           default:
+            return {
+              key: 'none',
+              title: 'none',
+              scale: 1
+            };
             break;
         }
-        return {
-          key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
-          title: name,
-          scale: scale
-        };
       }),
       mon.type
     );
