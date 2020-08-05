@@ -2,7 +2,7 @@ module.exports = {
   $: 'fetch',
   arg: {
     $: 'eval',
-    arg: `window.location.pathname.replace(/(tok=.*admin).*/,'$1')+'/network/iface_status2/lan'`
+    arg: `window.location.pathname.replace(/(tok=.*admin).*/,'$1')+'/network/iface_status2/eth1'`
   },
   type: 'jsonp',
   values: {
