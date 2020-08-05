@@ -65,7 +65,7 @@ class DeviceInstance extends EventEmitter {
 
   async commit() {
     this.state.commitKV();
-    await DB.updateDeviceState(this.id, this.state.toDB());
+    await DB.updateDeviceState(this._id, this.state.toDB());
   }
 
   mergeIntoState(src, trim, reason) {
