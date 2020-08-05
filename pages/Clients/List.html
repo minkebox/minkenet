@@ -9,7 +9,8 @@
     <div class="col col-oui">Manufacturer</div>
   </div>
   {{#each clients}}
-  <a id="mac-{{id}}" class="row {{#if (eq selected.mac mac)}}active{{/if}}" href="#" onclick="selectclient(event,'{{mac}}')">
+  {{print ../selected.mac mac}}
+  <a id="mac-{{id}}" class="row {{#if (eq ../selected.mac mac)}}active{{/if}} {{#if (gt firstSeen ../yesterday)}}new{{/if}} {{#if (gt lastSeen ../yesterday)}}seen{{/if}}" href="#" onclick="selectclient(event,'{{mac}}')">
     {{> ClientsSummary selected=../selected}}
   </a>
   {{/each}}

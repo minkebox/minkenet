@@ -222,9 +222,10 @@ class ClientManager extends EventEmitter {
   }
 
   scrubEntries() {
-    let change = false;
-    const before = new Date(Date.now() - 60 * 60 * 1000).getTime();
+    let anychange = false;
+    const before = Date.now() - 60 * 60 * 1000;
     for (let addr in this.mac) {
+      let change = false;
       const entry = this.mac[addr];
       if (entry.lastSeen < before) {
         // Old entry. Clear transient info.
@@ -237,9 +238,12 @@ class ClientManager extends EventEmitter {
           change = true;
         }
       }
+      if (change) {
+        DB.updateMac(this.toDB(addr));
+        anychange = true;
+      }
     }
-    if (change) {
-      DB.updateMac(this.toDB(addr));
+    if (anychange) {
       this.emit('update');
     }
   }

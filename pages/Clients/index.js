@@ -10,6 +10,7 @@ class Clients extends Page {
     this.state = {
       clients: null,
       selected: null,
+      yesterday: null
     };
 
     this.onUpdateClient = this.onUpdateClient.bind(this);
@@ -22,6 +23,8 @@ class Clients extends Page {
       this.selectMac(mac);
       break;
     }
+    this.state.yesterday =  Date.now() - 24 * 60 * 60 * 1000;
+
     this.state.topologyValid = TopologyManager.valid;
     ClientManager.on('update.client', this.onUpdateClient);
 

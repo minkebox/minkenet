@@ -16,6 +16,7 @@
   --minor-background-color: #505050;
   --disabled-text-color: #808080;
   --placeholder-text-color: #606060;
+  --urgent-text-color: #c03d25;
 
   --port-device-background: #505050;
   --port-border: grey;
@@ -459,6 +460,10 @@ div[data-placeholder]:empty:before {
 .clients-container .row.title .col {
   padding: 10px 15px 10px 15px;
   font-weight: bold;
+}
+.clients-container .row.new,
+.clients-container .row.new div[data-placeholder]:empty:before {
+  color: var(--urgent-text-color);
 }
 
 #device-ports-hardware .port.selected-A,
