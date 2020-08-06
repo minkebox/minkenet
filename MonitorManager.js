@@ -4,7 +4,7 @@ const DB = require('./Database');
 const MONITOR_EXPIRES = {
   FIVEMINUTES: 5 * 60 * 1000,
   ONEHOUR: 60 * 60 * 1000,
-  ONEDAY: 24 * 60 * 60 * 100
+  ONEDAY: 24 * 60 * 60 * 1000
 };
 
 

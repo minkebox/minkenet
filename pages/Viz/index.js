@@ -108,13 +108,25 @@ class Viz extends Page {
     }
 
     const graph = {
-      type: mon.type === '1day' ? '1Day' : '1Hour',
+      type: '',
       id: `mon-${mon.id}`,
       title: mon.title,
       trace: [],
       mon: mon
     };
+    let scale = 1;
 
+    switch (mon.type) {
+      case '1day':
+        graph.type = '1Day';
+        scale = 60 * 60 * 1000;
+        break;
+      case '1hour':
+      default:
+        graph.type = '1Hour';
+        scale = 60 * 1000;
+        break;
+    }
     const data = await DB.readMonitor(mon.name);
     if (data.length) {
       mon.keys.forEach(k => {
@@ -130,7 +142,7 @@ class Viz extends Page {
         for (let d = 0; d < data.length; d++) {
           const item = data[d];
           if (item.key === k.key && item.expiresAt > previous.time) {
-            trace.time.push((item.expiresAt - now) / 1000);
+            trace.time.push((item.expiresAt - now) / scale);
             trace.value.push(k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time));
             previous.value = item.value;
             previous.time = item.expiresAt;
@@ -142,7 +154,7 @@ class Viz extends Page {
         // beginning with zero.
         const ftime = trace.time.shift();
         trace.value.shift();
-        if (ftime > 120) {
+        if (ftime > 2) {
           trace.value.unshift(0, 0);
           trace.time.unshift(0, ftime);
         }
