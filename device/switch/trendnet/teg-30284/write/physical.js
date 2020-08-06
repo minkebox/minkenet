@@ -21,11 +21,46 @@ module.exports = {
                   method: "BatchPost",
                   id: 0,
                   params: [{
-                    phyInfJumboFrameEnable: 1,
+                    phyInfJumboFrameEnable: {
+                      $: 'kv',
+                      arg: `${itr.path}.jumbo`,
+                      map: {
+                        true: 1,
+                        false: 2
+                      }
+                    },
                     phyInfEAPPassThrough: 2,
                     phyInfBPDUPassThrough: 1,
-                    phyInfAdminStatus: 1,
-                    phyInfportSetDescription: { $: 'kv', arg: `${itr.path}.name` },
+                    phyInfSpeed: {
+                      $: 'kv',
+                      arg: `${itr.path}.speed`,
+                      map: {
+                        '10G': 4,
+                        '1G': 3,
+                        '100M': 2,
+                        '10M': 1
+                      }
+                    },
+                    phyInfAdminStatus: {
+                      $: 'kv',
+                      arg: `${itr.path}.enable`,
+                      map: {
+                        true: 1,
+                        false: 2
+                      }
+                    },
+                    phyInfFlowCtrl: {
+                      $: 'kv',
+                      arg: `${itr.path}.flowcontrol`,
+                      map: {
+                        true: 1,
+                        false: 2
+                      }
+                    },
+                    phyInfportSetDescription: {
+                      $: 'kv',
+                      arg: `${itr.path}.name`
+                    },
                     phyInfIndex: itr.index + 1,
                     phyInfMediaType: 1,
                     FuncName: "Port_Set"
