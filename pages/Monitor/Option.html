@@ -9,7 +9,7 @@
   <div class="col-sm-6">
     <select class="device-property-rwselect small" onchange="send('monitor.port.value',{i:'{{id}}',v:this.value})">
       <option value="none">None</option>
-      <option {{#if (eq type 'current')}}selected{{/if}} value="current">Now</option>
+      <option {{#if (eq type 'current')}}selected{{/if}} value="now">Now</option>
       <option {{#if (eq type '1hour')}}selected{{/if}} value="1hour">One Hour</option>
       <option {{#if (eq type '1day')}}selected{{/if}} value="1day">One Day</option>
     </select>
