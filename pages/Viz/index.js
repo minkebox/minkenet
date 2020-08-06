@@ -52,7 +52,7 @@ class Viz extends Page {
         case '1day':
           graph = await this._makeGraph(mon);
           break;
-        case 'current':
+        case 'now':
           graph = await this._makeGauge(mon);
           break;
         case 'clients':
