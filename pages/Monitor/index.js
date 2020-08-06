@@ -131,25 +131,25 @@ class Monitor extends Page {
           case 'statistics.rx.bytes':
             return {
               key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
-              title: 'RX (byte)',
+              title: 'RX (bytes/sec)',
               scale: 8
             };
           case 'statistics.tx.bytes':
             return {
               key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
-              title: 'TX (byte)',
+              title: 'TX (bytes/sec)',
               scale: 8
             };
           case 'statistics.rx.packets':
             return {
               key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
-              title: 'RX (packets)',
+              title: 'RX (packets/sec)',
               scale: 1
             };
           case 'statistics.tx.packets':
             return {
               key: `network.physical.port.${this.state.selectedPortNr}.${k}`,
-              title: 'TX (packets)',
+              title: 'TX (packets/sec)',
               scale: 1
             };
           default:
