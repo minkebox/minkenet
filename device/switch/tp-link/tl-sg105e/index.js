@@ -74,7 +74,8 @@ const Device = {
     $4: require('../tl-sg108e/write/vlan'),
     $5: require('../tl-sg108e/write/lag'),
     $6: require('../tl-sg108e/write/ip')
-  }
+  },
+  commit: require('../tl-sg108e/write/commit')
 
 };
 

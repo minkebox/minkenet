@@ -75,7 +75,8 @@ const Device = {
     $5: require('./write/lag'),
     $6: require('./write/physical'),
     $7: require('./write/ip')
-  }
+  },
+  commit: require('./write/commit')
 
 };
 
