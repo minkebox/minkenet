@@ -317,11 +317,18 @@ class Eval {
         }
         const timeout = value.timeout || TIMEOUT.frameNavigation;
 
-        LogNav('goto:', url);
-        const response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
-        LogNav('goneto:', url, response.ok());
+        let response;
+        try {
+          LogNav('goto:', url);
+          response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
+          LogNav('goneto:', url, response.ok());
+        }
+        catch (e) {
+          Log(e);
+          throw new Error(`navigation failed: ${url} - ${e}`);
+        }
         if (!response.ok()) {
-          throw new Error(`navigation failed: ${response.statusText()}`);
+          throw new Error(`navigation failed: ${url} - ${response.statusText()}`);
         }
         if (value.values) {
           return await this.eval(value.type || 'selector', value.values, frame, path, device);
