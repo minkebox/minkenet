@@ -283,9 +283,13 @@ class Eval {
           key = await this.eval('literal', value, context, path, device);
         }
         if (typeof key === 'string') {
-          const kv = device.readKV(key, { info: true, value: false });
-          if (kv.modified) {
-            valid = true;
+          key = key.split(',');
+          for (let k = 0; k < key.length; k++) {
+            const kv = device.readKV(key[k], { info: true, value: false });
+            if (kv.modified) {
+              valid = true;
+              break;
+            }
           }
         }
         else if (typeof key === 'boolean') {
