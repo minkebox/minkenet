@@ -71,8 +71,9 @@ const Device = {
     $statistics: require('./read/statistics')
   },
   write: {
-    $1: require('./write/name'),
-    $2: require('./write/keychain')
+    $1: require('./write/physical'),
+    $2: require('./write/keychain'),
+    $3: require('./write/name+ip')
   }
 
 };
