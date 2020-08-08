@@ -265,30 +265,53 @@ class TopologyManager extends EventEmitter {
     });
     const timings = Array(probes.length + 2);
     const counts = Array(probes.length + 2);
+    let snapDevices;
 
+    // Setup connetions to all devices
     try {
       Log('connecting');
       this.emit('status', { op: 'connecting' });
-      await Promise.all(measureDevices.map(dev => dev.connect()));
+      const connections = await Promise.all(measureDevices.map(dev => dev.connect()));
       if (!this.running) {
         this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
         return;
       }
+      if (!connections.reduce((a, b) => a && b)) {
+        Log('connecting failed', connections);
+        this.emit('status', { op: 'complete', success: false, reason: 'connecting' });
+        return false;
+      }
+    }
+    catch (e) {
+      Log('connecting failed', e);
+      this.emit('status', { op: 'complete', success: false, reason: 'connecting' });
+      return false;
+    }
+
+    // Build a baseline of the network traffic
+    try {
       Log('starting baseline timing')
       this.emit('status', { op: 'baseline' });
       // First get a baseline of network activity by taking a snapshot before and after we pause of the probe
       // time. This is best done on a quiet(ish) network as we rely on finding the large traffic flow to identify
       // the connections between the switches in the network.
-      const snapDevices = this._snapDevices(measureDevices);
+      snapDevices = this._snapDevices(measureDevices);
       timings[0] = await this._snap(snapDevices);
       await new Promise(resolve => setTimeout(resolve, PROBE_TIME));
       timings[1] = await this._snap(snapDevices);
-
       if (!this.running) {
         this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
         return;
       }
+    }
+    catch (e) {
+      Log('baseline failed', e);
+      this.emit('status', { op: 'complete', success: false, reason: 'baseline' });
+      return false;
+    }
 
+    // Inject traffic and measure things
+    try {
       Log('starting probe timings');
       // Then probe each devices and snap the traffic
       for (let i = 0; i < probes.length && this.running; i++) {
@@ -309,6 +332,7 @@ class TopologyManager extends EventEmitter {
       return false;
     }
 
+    // Analyze the results
     this.emit('status', { op: 'analyzing' });
 
     // Unify traffic onto a single port if that port is part of a LAG.

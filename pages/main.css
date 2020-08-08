@@ -417,7 +417,7 @@ div[data-placeholder]:empty:before {
 
 #scanner-update, #topology-update {
   padding-top: 16px;
-  height: 40px;
+  min-height: 40px;
 }
 
 .config {

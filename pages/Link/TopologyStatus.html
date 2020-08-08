@@ -1,0 +1,31 @@
+{{#if (eq op 'connecting')}}
+Connecting to devices
+{{else if (eq op 'baseline')}}
+Establishing network baseline
+{{else if (eq op 'probe')}}
+Analyzing {{device.properties.system.ipv4.address}}
+{{else if (eq op 'probes-complete')}}
+{{else if (eq op 'analyzing')}}
+Analyzing network
+{{else if (eq op 'complete')}}
+{{#if success}}
+Success
+{{else}}
+<span style="color:red">
+{{#if (eq reason 'cancelled')}}
+{{else if (eq reason 'connecting')}}
+Failed to connect to one or more devices
+{{else if (eq reason 'baseline')}}
+Failed to collect baseline network data from devices. Make sure nothing else is accessing your devices during this test.
+{{else if (eq reason 'probes')}}
+Failed probing for one or more devices. This an happen randoming when some device will suddenly stops responding for a few seconds.
+{{else if (eq reason 'busy')}}
+Network is too busy to successfully analyze
+{{else if (eq reason 'topology')}}
+Successfully probed network but failed to determine network topology.
+{{else}}
+Unknown failure
+{{/if}}
+</span>
+{{/if}}
+{{/if}}

@@ -160,7 +160,7 @@ class Links extends Page {
   //
 
   topologyStatus(evt) {
-    this.html('topology-update', Template.TopologyStatus(evt));
+    this.html('topology-update', Template.LinkTopologyStatus(evt));
     if (evt.op === 'complete') {
       this.html('topology-analyze-primary', '');
       this.html('topology-analyze-secondary', 'Done');
@@ -185,7 +185,7 @@ class Links extends Page {
         this.state.topologyValid = TopologyManager.valid;
         this.html('bond-devices', Template.NetworkCardDevices(this.state));
         setTimeout(() => {
-          this.html('topology-analyze-container', Template.Topology());
+          this.html('topology-analyze-container', Template.LinkTopology());
         }, 1000);
         break;
       default:
