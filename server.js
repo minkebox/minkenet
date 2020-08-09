@@ -57,6 +57,15 @@ App.ws.use(async (ctx, next) => {
     port: PORT
   });
 
+  process.on('uncaughtException', e => {
+    console.error('uncaughtException:');
+    console.error(e)
+  });
+  process.on('unhandledRejection', e => {
+    console.error('unhandledRejection:');
+    console.error(e)
+  });
+
   process.on('SIGTERM', async () => {
     MonitorManager.stop();
     Discovery.stop();
