@@ -11,4 +11,4 @@ RUN apk add nodejs npm git chromium ;\
 EXPOSE 8080/tcp
 VOLUME /app/db
 
-CMD [ "npm", "start", "--prefix", "/app" ]
+CMD [ "/bin/sh", "-c", "(cd /app ; node server.js)" ]
