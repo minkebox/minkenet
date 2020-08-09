@@ -18,9 +18,12 @@ const DB_MONITOR_COMPACT_SEC = DB_FAST_COMPACT_SEC;
 
 function _wrap(fn) {
   return async function(db, ...args) {
+    const here = new Error();
     return new Promise((resolve, reject) => {
       args.push((err, val) => {
         if (err) {
+          console.error(err);
+          console.error(here);
           reject(err);
         }
         else {

@@ -6,7 +6,7 @@ COPY . /app
 
 RUN apk add nodejs npm git chromium ;\
     cd /app ; npm install --production ;\
-    apk del git
+    apk del git npm
 
 EXPOSE 8080/tcp
 VOLUME /app/db
