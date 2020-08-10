@@ -74,6 +74,16 @@ class Clients extends Page {
     this.html(`mac-${msg.value.k.replace(/:/g, '-')}`, Template.ClientsSummary(this.state.selected));
   }
 
+  async 'client.forget' (msg) {
+    await ClientManager.forgetClient(msg.value);
+    this.state.clients = ClientManager.getAllClients();
+    for (const mac in this.state.clients) {
+      this.selectMac(mac);
+      break;
+    }
+    this.html('clients-list', Template.ClientsList(this.state));
+  }
+
 }
 
 module.exports = Clients;

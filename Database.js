@@ -115,6 +115,10 @@ class Database {
     await this._update(this._macs, { _id: info._id }, info, { upsert: true });
   }
 
+  async removeMac(info) {
+    await this._remove(this._macs, { _id: info._id });
+  }
+
   async getMonitorList() {
     return await this._findOne(this._monitorlist, { _id: 'monitors' });
   }

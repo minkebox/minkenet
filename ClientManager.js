@@ -56,6 +56,22 @@ class ClientManager extends EventEmitter {
     this._scrubTimer = null;
   }
 
+  async forgetClient(mac) {
+    if (!this.mac[mac]) {
+      return false;
+    }
+    await DB.removeMac(this.toDB(mac));
+    delete this.mac[mac];
+    for (let devid in this.dev2mac) {
+      const dev2mac = this.dev2mac[devid];
+      if (dev2mac[mac]) {
+        delete dev2mac[mac];
+      }
+    }
+    this.emit('update');
+    return true;
+  }
+
   async updateDeviceClients() {
     Log('update clients:');
     const devices = DeviceInstanceManager.getAuthenticatedDevices();
