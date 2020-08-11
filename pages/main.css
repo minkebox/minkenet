@@ -423,6 +423,7 @@ div[data-placeholder]:empty:before {
 .config {
   width: 100%;
   padding: 20px;
+  overflow-y: scroll;
 }
 .config .section {
   margin-top: 20px;

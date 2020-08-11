@@ -13,6 +13,7 @@ class Monitor extends Page {
     super(send);
     this.state = {
       devices: null,
+      deviceportsmonitored: null,
       selectedIndex: 0,
       selected: null,
       selectedPortNr: 0,
@@ -30,7 +31,18 @@ class Monitor extends Page {
 
   updateState() {
     this.state.devices = DeviceInstanceManager.getAuthenticatedDevices();
+    this.state.deviceportsmonitored = [];
     if (this.state.devices.length) {
+      this.state.devices.forEach(device => {
+        const ports = {};
+        MonitorManager.getDeviceMonitors(device).forEach(mon => {
+          const port = mon.keys[0].key.replace(/^network\.physical\.port\.(.*)\.statistics.*$/,'$1');
+          if (port) {
+            ports[parseInt(port) + 1] = true;
+          }
+        })
+        this.state.deviceportsmonitored.push(Object.keys(ports));
+      });
       this.state.selected = this.state.devices[this.state.selectedIndex];
       this.state.porthighlights = [];
       if (this.state.selected.monitor) {
@@ -111,6 +123,9 @@ class Monitor extends Page {
     switch (msg.value.key) {
       case 'monitor.clients':
         await MonitorManager.monitorCustom('clients', msg.value.value, 'Clients', 'clients');
+        break;
+      case 'monitor.wan.speedtest':
+        await MonitorManager.monitorCustom('wanspeedtest', msg.value.value, 'WAN Speed', 'wanspeedtest');
         break;
       default:
         break;

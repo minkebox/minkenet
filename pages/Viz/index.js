@@ -4,6 +4,7 @@ const MonitorManager = require('../../MonitorManager');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const DB = require('../../Database');
 const ClientManager = require('../../ClientManager');
+const SpeedTest = require('../../SpeedTest');
 
 const REFRESH_TIMER = 60 * 1000; // 1 minute
 
@@ -57,6 +58,9 @@ class Viz extends Page {
           break;
         case 'clients':
           graph = this._makeClientGraph(mon);
+          break;
+        case 'wanspeedtest':
+          graph = this._makeSpeedtestGraph(mon);
           break;
         default:
           break;
@@ -237,6 +241,26 @@ class Viz extends Page {
       ],
       mon: mon
     };
+  }
+
+  _makeSpeedtestGraph(mon) {
+    const graph = {
+      type: 'SpeedGraph',
+      id: `mon-${mon.id}`,
+      title: mon.title,
+      trace: [
+      ],
+      max: 0,
+      mon: mon
+    };
+
+    const speed = SpeedTest.getWanSpeed();
+    console.log(speed);
+    graph.trace.push({ title: 'Download', value: speed.download * 8 });
+    graph.trace.push({ title: 'Upload', value: speed.upload * 8 });
+    graph.max = Math.max(speed.upload, speed.download) * 8;
+
+    return graph;
   }
 
 }

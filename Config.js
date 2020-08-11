@@ -37,7 +37,10 @@ const DEFAULT_CONFIG = {
     }
   },
   monitor: {
-    clients: false
+    clients: false,
+    wan: {
+      speedtest: false
+    }
   }
 };
 

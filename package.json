@@ -7,6 +7,7 @@
     "url": "https://gitlab.com/minkebox/minkenet.git"
   },
   "dependencies": {
+    "@lh2020/speedtest-net": "^2.1.1",
     "bootstrap": "^4.5.0",
     "debug": "^4.1.1",
     "dns-packet": "^5.2.1",

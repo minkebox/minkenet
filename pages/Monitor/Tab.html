@@ -11,6 +11,10 @@
       <div class="col"><label>Active client count</label></div>
       <div class="col">{{> ConfigCheckbox key='monitor.clients' checked=monitor.clients }}</div>
     </div>
+    <div class="row">
+      <div class="col"><label>WAN speed test</label></div>
+      <div class="col">{{> ConfigCheckbox key='monitor.wan.speedtest' checked=monitor.wan.speedtest }}</div>
+    </div>
     {{/with}}
   </div>
 </div>
