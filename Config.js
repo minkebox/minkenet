@@ -86,7 +86,7 @@ class Config extends EventEmitter {
     if (ptr[0].value !== value) {
       ptr[0].parent[ptr[0].parentProperty] = value;
       DB.updateConfig(this.toDB());
-      this.emit('update', { key: key });
+      this.emit('update', { key: key, value: value });
     }
   }
 

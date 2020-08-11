@@ -244,23 +244,18 @@ class Viz extends Page {
   }
 
   _makeSpeedtestGraph(mon) {
-    const graph = {
-      type: 'SpeedGraph',
+    const speed = SpeedTest.getWanSpeed();
+    return {
+      type: 'Gauge',
       id: `mon-${mon.id}`,
       title: mon.title,
+      max: Math.max(speed.upload, speed.download) * 8 / (1024 * 1024),
       trace: [
+        { title: 'Download (Mbps)', value: speed.download * 8 / (1024 * 1024) },
+        { title: 'Upload (Mbps)', value: speed.upload * 8 / (1024 * 1024) }
       ],
-      max: 0,
       mon: mon
     };
-
-    const speed = SpeedTest.getWanSpeed();
-    console.log(speed);
-    graph.trace.push({ title: 'Download', value: speed.download * 8 });
-    graph.trace.push({ title: 'Upload', value: speed.upload * 8 });
-    graph.max = Math.max(speed.upload, speed.download) * 8;
-
-    return graph;
   }
 
 }

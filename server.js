@@ -12,6 +12,7 @@ const VLANManager = require('./VLANManager');
 const ClientManager = require('./ClientManager');
 const Discovery = require('./discovery');
 const MonitorManager = require('./MonitorManager');
+const SpeedTest = require('./SpeedTest');
 
 // Extend path so we can find 'ping' and 'arp'
 process.env.PATH = `${process.env.PATH}:/usr/sbin:/sbin`;
@@ -52,6 +53,7 @@ App.ws.use(async (ctx, next) => {
   await ClientManager.start();
   Discovery.start();
   await MonitorManager.start();
+  SpeedTest.start();
 
   App.listen({
     port: PORT
