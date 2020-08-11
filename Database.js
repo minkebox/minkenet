@@ -127,6 +127,10 @@ class Database {
     await this.asyncUpdate(this._monitorlist, { _id: monitors._id }, monitors, { upsert: true });
   }
 
+  newMonitorId() {
+    return this._monitorlist.createNewId();
+  }
+
   async createMonitor(name) {
     if (!this._monitors[name]) {
       const db = new DB({ filename: `${DB_MONITOR_PATH}/${name}.db`, autoload: true });
@@ -174,10 +178,6 @@ class Database {
     delete this._monitors[name];
     db.db.persistence.stopAutocompaction();
     FS.unlinkSync(`${DB_MONITOR_PATH}/${name}.db`);
-  }
-
-  newMonitorId() {
-    return this._topology.createNewId();
   }
 }
 
