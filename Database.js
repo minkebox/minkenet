@@ -63,23 +63,23 @@ class Database {
   }
 
   async getConfig() {
-    return await this._findOne(this._config, { _id: 'config' });
+    return await this.asyncFindOne(this._config, { _id: 'config' });
   }
 
   async updateConfig(config) {
-    await this._update(this._config, { _id: config._id }, config, { upsert: true });
+    await this.asyncUpdate(this._config, { _id: config._id }, config, { upsert: true });
   }
 
   async getDevices() {
-    return await this._find(this._devices, {});
+    return await this.asyncFind(this._devices, {});
   }
 
   async updateDevice(device) {
-    await this._update(this._devices, { _id: device._id }, device, { upsert: true });
+    await this.asyncUpdate(this._devices, { _id: device._id }, device, { upsert: true });
   }
 
   async removeDevice(id) {
-    await this._remove(this._devices, { _id: id });
+    await this.asyncRemove(this._devices, { _id: id });
   }
 
   newDeviceId() {
@@ -88,43 +88,43 @@ class Database {
 
   async updateDeviceState(id, state) {
     state._id = id;
-    await this._update(this._devicestate, { _id: state._id }, state, { upsert: true });
+    await this.asyncUpdate(this._devicestate, { _id: state._id }, state, { upsert: true });
   }
 
   async getDeviceState(id) {
-    return await this._findOne(this._devicestate, { _id: id });
+    return await this.asyncFindOne(this._devicestate, { _id: id });
   }
 
   async getTopology() {
-    return await this._findOne(this._topology, { _id: 'topology' });
+    return await this.asyncFindOne(this._topology, { _id: 'topology' });
   }
 
   async updateTopology(topology) {
-    await this._update(this._topology, { _id: topology._id }, topology, { upsert: true });
+    await this.asyncUpdate(this._topology, { _id: topology._id }, topology, { upsert: true });
   }
 
   async getMac(mac) {
-    return await this._findOne(this._macs, { _id: mac });
+    return await this.asyncFindOne(this._macs, { _id: mac });
   }
 
   async getAllMacs() {
-    return await this._find(this._macs, {});
+    return await this.asyncFind(this._macs, {});
   }
 
   async updateMac(info) {
-    await this._update(this._macs, { _id: info._id }, info, { upsert: true });
+    await this.asyncUpdate(this._macs, { _id: info._id }, info, { upsert: true });
   }
 
   async removeMac(info) {
-    await this._remove(this._macs, { _id: info._id });
+    await this.asyncRemove(this._macs, { _id: info._id });
   }
 
   async getMonitorList() {
-    return await this._findOne(this._monitorlist, { _id: 'monitors' });
+    return await this.asyncFindOne(this._monitorlist, { _id: 'monitors' });
   }
 
   async updateMonitorList(monitors) {
-    await this._update(this._monitorlist, { _id: monitors._id }, monitors, { upsert: true });
+    await this.asyncUpdate(this._monitorlist, { _id: monitors._id }, monitors, { upsert: true });
   }
 
   async createMonitor(name) {
@@ -132,11 +132,11 @@ class Database {
       const db = new DB({ filename: `${DB_MONITOR_PATH}/${name}.db`, autoload: true });
       this._monitors[name] = { db: db, timer: null };
       db.persistence.setAutocompactionInterval(DB_MONITOR_COMPACT_SEC * 1000);
-      await this._ensureIndex(db, { fieldName: 'expiresAt', expireAfterSeconds: 0 });
+      await this.asyncEnsureIndex(db, { fieldName: 'expiresAt', expireAfterSeconds: 0 });
       // Expired records are only marked as such when we attempt to read them, so we periodically do
       // a read to make sure this happens. Otherwise the database will just keep getting bigger.
       this._monitors[name].timer = setInterval(() => {
-        this._find(db, {});
+        this.asyncFind(db, {});
       }, DB_MONITOR_COMPACT_SEC * 1000);
     }
   }
@@ -146,7 +146,7 @@ class Database {
     if (!db) {
       throw new Error(`unknown monitor: ${name}`);
     }
-    await this._insert(db.db, record);
+    await this.asyncInsert(db.db, record);
   }
 
   async readMonitor(name) {
@@ -154,7 +154,7 @@ class Database {
     if (!db) {
       throw new Error(`unknown monitor: ${name}`);
     }
-    //return this._find(db.db, {});
+    //return this.asyncFind(db.db, {});
     return new Promise((resolve, reject) => {
       db.db.find({}).sort({ expiresAt: 1 }).exec((err, docs) => {
         if (err) {
@@ -181,11 +181,11 @@ class Database {
   }
 }
 
-Database.prototype._find = _wrap(DB.prototype.find);
-Database.prototype._findOne = _wrap(DB.prototype.findOne);
-Database.prototype._update = _wrap(DB.prototype.update);
-Database.prototype._remove = _wrap(DB.prototype.remove);
-Database.prototype._insert = _wrap(DB.prototype.insert);
-Database.prototype._ensureIndex = _wrap(DB.prototype.ensureIndex);
+Database.prototype.asyncFind = _wrap(DB.prototype.find);
+Database.prototype.asyncFindOne = _wrap(DB.prototype.findOne);
+Database.prototype.asyncUpdate = _wrap(DB.prototype.update);
+Database.prototype.asyncRemove = _wrap(DB.prototype.remove);
+Database.prototype.asyncInsert = _wrap(DB.prototype.insert);
+Database.prototype.asyncEnsureIndex = _wrap(DB.prototype.ensureIndex);
 
 module.exports = new Database();
