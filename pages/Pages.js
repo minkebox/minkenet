@@ -13,24 +13,31 @@ const JSPages = {
   '/js/jquery.js':      `${__dirname}/../node_modules/jquery/dist/jquery.js`,
   '/js/bootstrap.js':   `${__dirname}/../node_modules/bootstrap/dist/js/bootstrap.bundle.js`,
   '/js/plotly.js':      `${__dirname}/../node_modules/plotly.js-dist/plotly.js`,
-  '/js/sortable.js':    `${__dirname}/../node_modules/sortablejs/Sortable.min.js`
+  '/js/sortable.js':    `${__dirname}/../node_modules/sortablejs/Sortable.min.js`,
+  '/js/dx.all.js':      `${__dirname}/../node_modules/devextreme/dist/js/dx.all.js`
 };
 
 const CSSPages = {
-  '/css/main.css': `${__dirname}/main.css`,
-  '/css/bootstrap.css': `${__dirname}/../node_modules/bootstrap/dist/css/bootstrap.css`
+  '/css/main.css':      `${__dirname}/main.css`,
+  '/css/bootstrap.css': `${__dirname}/../node_modules/bootstrap/dist/css/bootstrap.css`,
+  '/css/dx.common.css': `${__dirname}/../node_modules/devextreme/dist/css/dx.common.css`,
+  '/css/dx.dark.css':   `${__dirname}/../node_modules/devextreme/dist/css/dx.dark.css`
 };
 
-const IMGPages = {
-};
 
 function Register(root, wsroot) {
 
   for (let key in JSPages) {
-    //const body = FS.readFileSync(JSPages[key], { encoding: 'utf8' });
-    root.get(key, async (ctx) => {
-      const body = FS.readFileSync(JSPages[key], { encoding: 'utf8' });
-      ctx.body = body;
+    const file = JSPages[key];
+    if (DEBUG) {
+      JSPages[key] = () => FS.readFileSync(file, { encoding: 'utf8' });
+    }
+    else {
+      const contents = FS.readFileSync(file, { encoding: 'utf8' });
+      JSPages[key] = () => contents;
+    }
+    root.get(key, async ctx => {
+      ctx.body = JSPages[key]();
       ctx.type = 'text/javascript';
       if (!DEBUG) {
         ctx.cacheControl = { maxAge: CACHE_MAXAGE };
@@ -39,23 +46,17 @@ function Register(root, wsroot) {
   }
 
   for (let key in CSSPages) {
-    //const body = FS.readFileSync(CSSPages[key], { encoding: 'utf8' });
+    const file = CSSPages[key];
+    if (DEBUG) {
+      CSSPages[key] = () => FS.readFileSync(file, { encoding: 'utf8' });
+    }
+    else {
+      const contents = FS.readFileSync(file, { encoding: 'utf8' });
+      CSSPages[key] = () => contents;
+    }
     root.get(key, async (ctx) => {
-      const body = FS.readFileSync(CSSPages[key], { encoding: 'utf8' });
-      ctx.body = body;
+      ctx.body = CSSPages[key]();
       ctx.type = 'text/css';
-      if (!DEBUG) {
-        ctx.cacheControl = { maxAge: CACHE_MAXAGE };
-      }
-    });
-  }
-
-  for (let key in IMGPages) {
-    //const body = FS.readFileSync(IMGPages[key], { encoding: 'utf8' });
-    root.get(key, async (ctx) => {
-      const body = FS.readFileSync(IMGPages[key], { encoding: 'utf8' });
-      ctx.body = body;
-      ctx.type = 'image/png';
       if (!DEBUG) {
         ctx.cacheControl = { maxAge: CACHE_MAXAGE };
       }

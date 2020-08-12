@@ -10,6 +10,7 @@
     "@lh2020/speedtest-net": "^2.1.1",
     "bootstrap": "^4.5.0",
     "debug": "^4.1.1",
+    "devextreme": "^20.1.6",
     "dns-packet": "^5.2.1",
     "fast-glob": "^3.2.4",
     "handlebars": "^4.7.6",

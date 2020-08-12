@@ -187,7 +187,7 @@ class Viz extends Page {
     const data = await DB.readMonitor(mon.name);
     mon.keys.forEach(k => {
       const trace = {
-        title: k.title,
+        unit: k.title,
         value: 0
       };
       let pos = data.length;
@@ -249,10 +249,10 @@ class Viz extends Page {
       type: 'Gauge',
       id: `mon-${mon.id}`,
       title: mon.title,
-      max: Math.max(speed.upload, speed.download) * 8 / (1024 * 1024),
+      max: Math.max(speed.upload, speed.download) * 8 / (1024 * 1024) * 1.2,
       trace: [
-        { title: 'Download (Mbps)', value: speed.download * 8 / (1024 * 1024) },
-        { title: 'Upload (Mbps)', value: speed.upload * 8 / (1024 * 1024) }
+        { unit: 'Download (Mbps)', value: speed.download * 8 / (1024 * 1024) },
+        { unit: 'Upload (Mbps)', value: speed.upload * 8 / (1024 * 1024) }
       ],
       mon: mon
     };
