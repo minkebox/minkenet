@@ -121,7 +121,7 @@ onMessage['device.details.summary.update'] = msg => {
 }
 
 const GraphConfig = {
-  colors: [ '#488a29', '#c0b125', '#c03d25' ]
+  colors: [ '#488a29', '#c0b125', '#347794' ]
 };
 
 window.addEventListener('pageshow', runMessageManager);

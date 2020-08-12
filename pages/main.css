@@ -511,7 +511,7 @@ div[data-placeholder]:empty:before {
 .monitor-graph {
   position: relative;
   display: block;
-  min-width: 300px;
+  min-width: 350px;
   width: auto;
   height: 200px;
   z-index: 0;
@@ -519,7 +519,7 @@ div[data-placeholder]:empty:before {
 .monitor-graph .inner {
   position: relative;
   display: inline-block;
-  width: 300px;
+  width: 350px;
   height: 200px;
   z-index: 1;
 }
@@ -527,17 +527,20 @@ div[data-placeholder]:empty:before {
   width: 310px;
 }
 
-.viz {
-  overflow-y: scroll;
-}
-.viz .device-card .handle {
+.monitor-graph .handle {
   position: absolute;
-  width: 24px;
-  height: 24px;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px 8px;
+  color: var(--minor-text-color);
   background-color: var(--highlight-background-color);
   z-index: 2;
   border-radius: 0 10px 0 10px;
   top: 0;
   right: 0;
   cursor: move;
+}
+
+.viz {
+  overflow-y: scroll;
 }

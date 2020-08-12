@@ -1,5 +1,5 @@
 <a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="monitor-graph device-card d-inline-block">
-  <div class="handle"></div>
+  <div class="handle">{{title}}</div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
   const traces = [];
@@ -18,13 +18,6 @@
   });
   {{/each}}
   const layout = {
-    title: {
-      text: "{{title}}",
-      font: {
-        color: '#c0c0c0'
-      },
-      x: 0.05
-    },
     margin: {
       t: 50,
       r: 20,
@@ -57,8 +50,8 @@
     },
     showlegend: true,
     legend: {
-      x: 1,
-      xanchor: 'right',
+      x: 0,
+      xanchor: 'left',
       y: 1.2,
       font: {
         family: 'Arial',

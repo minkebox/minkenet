@@ -1,5 +1,5 @@
 <a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="device-card d-inline-block monitor-graph">
-  <div class="handle"></div>
+  <div class="handle">{{title}}</div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
   let traces = [];
@@ -26,14 +26,6 @@
   });
   {{/each}}
   const layout = {
-    title: {
-      text: "{{title}}",
-      font: {
-        color: '#c0c0c0'
-      },
-      x: 0.05,
-      y: 0.92
-    },
     xaxis: {
       showticklabels: false,
       showgrid: false,

@@ -1,21 +1,13 @@
 <a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="device-card d-inline-block monitor-graph">
-  <div class="handle"></div>
+  <div class="handle">{{title}}</div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
     $('#{{id}}-0').dxBarGauge({
-      title: {
-        text: '{{title}}',
-        font: {
-          size: 18,
-          color: '#f0f0f0'
-        },
-        verticalAlignment: 'top',
-        horizontalAlignment: 'left'
-      },
       geometry: {
         startAngle: 270,
         endAngle: 0
       },
+      backgroundColor: '#505050',
       startValue: 0,
       endValue: {{max}},
       values: [
@@ -32,19 +24,30 @@
           size: 12
         },
         indent: 5,
-        customizeText: arg => `${arg.valueText} Mbps`
-      },
-      resolveLabelOverlapping: 'none',
-      tooltip: {
-        enabled: true,
-        customizeTooltip: arg => {
+        customizeText: arg => {
           const units = [
           {{#each trace}}
           '{{unit}}',
           {{/each}}
           ];
+          return `${arg.valueText} ${units[arg.index]}`;
+        }
+      },
+      resolveLabelOverlapping: 'none',
+      tooltip: {
+        enabled: true,
+        format: {
+          type: 'fixedPoint',
+          precision: 2
+        },
+        customizeTooltip: arg => {
+          const units = [
+          {{#each trace}}
+          '{{tipunit}}',
+          {{/each}}
+          ];
           return {
-            text: `${arg.value.toFixed(2)} ${units[arg.index]}`
+            text: `${arg.valueText} ${units[arg.index]}`
           };
         }
       },
