@@ -229,16 +229,15 @@ class Viz extends Page {
       }
     }
 
-    const SIZE = (v) => Math.max(60, 120 * v / all);
     return {
       type: 'Bubbles',
       id: `mon-${mon.id}`,
       title: mon.title,
       link: `#clients.all`,
       trace: [
-        { title: `Total ${all}`, value: SIZE(all) },
-        { title: `Active ${active}`, value: SIZE(active) },
-        { title: `New ${recent}`, value: SIZE(recent) }
+        { title: `Total ${all}`, value: all },
+        { title: `Active ${active}`, value: active },
+        { title: `New ${recent}`, value: recent }
       ],
       mon: mon
     };
