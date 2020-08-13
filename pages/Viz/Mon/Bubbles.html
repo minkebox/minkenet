@@ -29,21 +29,25 @@
         {
           argumentField: 'x{{@index}}',
           valueField: 'y{{@index}}',
-          tagField: 'value{{@index}}',
-          sizeField: 'value{{@index}}',
+          tagField: 'v{{@index}}',
+          sizeField: 'v{{@index}}',
           name: '{{title}}'
         },
       {{/each}}
       ],
       dataSource: [{
         {{#each series}}
-        x{{@index}}: {{add 1 @index}}, y{{@index}}: {{add 2 (mod @index 2)}}, value{{@index}}: {{value}},
+        x{{@index}}: {{@index}}, y{{@index}}: {{add 2 (mod @index 2)}}, v{{@index}}: {{value}},
         {{/each}}
         dummy: 0
       }],
       minBubbleSize: 60,
-      maxBubbleSize: 0.7,
-      palette: GraphConfig.colors
+      maxBubbleSize: 0.75,
+      palette: GraphConfig.colors,
+      margin: {
+        left: 4,
+        bottom: 4
+      }
     });
   </script>
 </a>

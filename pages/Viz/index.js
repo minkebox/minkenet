@@ -116,7 +116,7 @@ class Viz extends Page {
       id: `mon-${mon.id}`,
       title: mon.title,
       series: [],
-      data: [],
+      data: '[]',
       mon: mon
     };
     let scale = 1;
@@ -147,12 +147,16 @@ class Viz extends Page {
         for (let d = 0; d < data.length; d++) {
           const item = data[d];
           if (item.key === k.key && item.expiresAt > previous.time) {
+            const t = (item.expiresAt - now) / scale;
             if (first) {
               first = false;
+              if (t > 2) {
+                tracedata.push({ t: 0, [`v${ki}`]: 0 }, { t: t, [`v${ki}`]: 0 });
+              }
             }
             else {
               tracedata.push({
-                t: (item.expiresAt - now) / scale,
+                t: t,
                 [`v${ki}`]: k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time)
               });
             }
