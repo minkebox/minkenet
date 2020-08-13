@@ -1,9 +1,9 @@
 <div class="viz">
   {{#each monitor}}
   {{#if (eq type '1Hour')}}
-  {{> VizMonTime xtitle='60 Minutes' id=id title=title trace=trace}}
+  {{> VizMonTime xtitle='Last Hour' id=id title=title series=series data=data unit='Mbps'}}
   {{else if (eq type '1Day')}}
-  {{> VizMonTime xtitle='24 Hours' id=id title=title trace=trace}}
+  {{> VizMonTime xtitle='Last Day' id=id title=title series=series data=data unit='Mbps'}}
   {{else if (eq type 'Gauge')}}
   {{> VizMonGauge }}
   {{else if (eq type 'Bubbles')}}

@@ -11,7 +11,7 @@
       startValue: 0,
       endValue: {{max}},
       values: [
-      {{#each trace}}
+      {{#each series}}
       {{value}},
       {{/each}}
       ],
@@ -26,7 +26,7 @@
         indent: 5,
         customizeText: arg => {
           const units = [
-          {{#each trace}}
+          {{#each series}}
           '{{unit}}',
           {{/each}}
           ];
@@ -36,13 +36,22 @@
       resolveLabelOverlapping: 'none',
       tooltip: {
         enabled: true,
+        color: '#3e3e3e',
+        font: {
+          color: '#c0c0c0'
+        },
+        border: {
+          visible: false
+        },
+        paddingLeftRight: 4,
+        paddingTopBottom: 4,
         format: {
           type: 'fixedPoint',
           precision: 2
         },
         customizeTooltip: arg => {
           const units = [
-          {{#each trace}}
+          {{#each series}}
           '{{tipunit}}',
           {{/each}}
           ];

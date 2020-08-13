@@ -1,50 +1,69 @@
 <a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="monitor-graph device-card d-inline-block">
-  <div class="handle">{{title}}</div>
+  <div class="handle">{{title}}<div class="subtitle">{{xtitle}}</div></div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
     $('#{{id}}-0').dxChart({
+      animation: {
+        enabled: false
+      },
       commonSeriesSettings: {
-        argumentField: 'index',
-        type: 'line'
+        argumentField: 't',
+        type: 'spline',
+        aggregation: {
+          enabled: false
+        }
       },
       commonAxisSettings: {
         visible: false,
         grid: { visible: false },
         tick: { visible: false }
       },
+      argumentAxis: {
+        label: {
+          visible: false
+        }
+      },
       legend: {
         visible: true,
         horizontalAlignment: 'left',
         position: 'inside',
-        backgroundColor: '#3e3e3e',
+        backgroundColor: 'rgba(62,62,62,0.8)',
         border: {
           visible: true,
           color: 'transparent',
           cornerRadius: 10
-        }
+        },
+        paddingLeftRight: 10,
+        paddingTopBottom: 10,
+      },
+      tooltip: {
+        enabled: true,
+        format: arg => `${arg.toFixed(2)} {{unit}}`,
+        color: '#3e3e3e',
+        font: {
+          color: '#c0c0c0'
+        },
+        border: {
+          visible: false
+        },
+        paddingLeftRight: 4,
+        paddingTopBottom: 4,
       },
       series: [
-      {{#each trace}}
+      {{#each series}}
       {
         name: '{{title}}',
-        valueField: 'value{{@index}}'
+        valueField: 'v{{@index}}'
       },
       {{/each}}
       ],
-      dataSource: (function(a){
-        const v = [];
-        for (let i = 0; i < a[0].length; i++) {
-          const val = { index: i };
-          for (let j = 0; j < a.length; j++) {
-            val[`value${j}`] = a[j][i];
-          }
-          v.push(val);
-        }
-        return v;
-      })([
-      {{#each trace}}[{{value}}],{{/each}}
-      ]),
-      palette: GraphConfig.colors
+      dataSource: {{{data}}},
+      palette: GraphConfig.colors,
+      margin: {
+        top: 8,
+        left: 8,
+        bottom: 8
+      }
     });
   </script>
 </a>

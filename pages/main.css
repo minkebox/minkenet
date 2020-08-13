@@ -539,6 +539,11 @@ div[data-placeholder]:empty:before {
   top: 0;
   right: 0;
   cursor: move;
+  text-align: center;
+}
+
+.monitor-graph .handle .subtitle {
+  font-size: 10px;
 }
 
 .viz {

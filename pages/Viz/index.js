@@ -115,7 +115,8 @@ class Viz extends Page {
       type: '',
       id: `mon-${mon.id}`,
       title: mon.title,
-      trace: [],
+      series: [],
+      data: [],
       mon: mon
     };
     let scale = 1;
@@ -133,37 +134,34 @@ class Viz extends Page {
     }
     const data = await DB.readMonitor(mon.name);
     if (data.length) {
-      mon.keys.forEach(k => {
-        const trace = {
+      const tracedata = [];
+      mon.keys.forEach((k, ki) => {
+        graph.series.push({
           title: k.title,
-          time: [],
-          value: []
-        };
+        });
         const previous = {
           value: 0,
           time: now
         };
+        let first = true;
         for (let d = 0; d < data.length; d++) {
           const item = data[d];
           if (item.key === k.key && item.expiresAt > previous.time) {
-            trace.time.push((item.expiresAt - now) / scale);
-            trace.value.push(k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time));
+            if (first) {
+              first = false;
+            }
+            else {
+              tracedata.push({
+                t: (item.expiresAt - now) / scale,
+                [`v${ki}`]: k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time)
+              });
+            }
             previous.value = item.value;
             previous.time = item.expiresAt;
           }
         }
-        // Fix up the beginning of the graph.
-        // The first value is unreliable because we can't calculate the difference with tne [-1] value.
-        // If the first time is too far in the future, we don't have a full set of data yet, so pad the
-        // beginning with zero.
-        const ftime = trace.time.shift();
-        trace.value.shift();
-        if (ftime > 2) {
-          trace.value.unshift(0, 0);
-          trace.time.unshift(0, ftime);
-        }
-        graph.trace.push(trace);
       });
+      graph.data = JSON.stringify(tracedata);
     }
 
     return graph;
@@ -180,7 +178,7 @@ class Viz extends Page {
       id: `mon-${mon.id}`,
       title: mon.title,
       max: 0,
-      trace: [],
+      series: [],
       mon: mon
     };
 
@@ -209,7 +207,7 @@ class Viz extends Page {
           }
         }
       }
-      graph.trace.push(trace);
+      graph.series.push(trace);
     });
     return graph;
   }
@@ -234,7 +232,7 @@ class Viz extends Page {
       id: `mon-${mon.id}`,
       title: mon.title,
       link: `#clients.all`,
-      trace: [
+      series: [
         { title: `Total ${all}`, value: all },
         { title: `Active ${active}`, value: active },
         { title: `New ${recent}`, value: recent }
@@ -250,7 +248,7 @@ class Viz extends Page {
       id: `mon-${mon.id}`,
       title: mon.title,
       max: Math.max(speed.upload, speed.download) * 8 / (1024 * 1024) * 1.1,
-      trace: [
+      series: [
         { unit: 'Mbps', tipunit: 'Download (Mbps)', value: speed.download * 8 / (1024 * 1024) },
         { unit: 'Mbps', tipunit: 'Upload (Mbps)', value: speed.upload * 8 / (1024 * 1024) },
         { unit: 'ms', tipunit: 'Latency (ms)', value: speed.latency }
