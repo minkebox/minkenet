@@ -1,13 +1,13 @@
 <div class="viz">
   {{#each monitor}}
   {{#if (eq type '1Hour')}}
-  {{> VizMonTime2 xtitle='60 Minutes' id=id title=title trace=trace}}
+  {{> VizMonTime xtitle='60 Minutes' id=id title=title trace=trace}}
   {{else if (eq type '1Day')}}
-  {{> VizMonTime2 xtitle='24 Hours' id=id title=title trace=trace}}
+  {{> VizMonTime xtitle='24 Hours' id=id title=title trace=trace}}
   {{else if (eq type 'Gauge')}}
-  {{> VizMonGauge2 }}
+  {{> VizMonGauge }}
   {{else if (eq type 'Bubbles')}}
-  {{> VizMonBubbles2 }}
+  {{> VizMonBubbles }}
   {{/if}}
   {{/each}}
 </div>

@@ -2,66 +2,49 @@
   <div class="handle">{{title}}</div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
-  const traces = [];
-  {{#each trace}}
-  traces.push({
-    type: "scatter",
-    mode: "lines",
-    name: "{{title}}",
-    line: {
-      color: GraphConfig.colors[{{@index}}],
-      shape: "hvh"
-    },
-    opacity: 0.8,
-    x: [{{time}}],
-    y: [{{value}}]
-  });
-  {{/each}}
-  const layout = {
-    margin: {
-      t: 50,
-      r: 20,
-      b: 20,
-      l: 40,
-      pad: 0
-    },
-    xaxis: {
-      title: {
-        text: "{{xtitle}}",
-        standoff: 8
+    $('#{{id}}-0').dxChart({
+      commonSeriesSettings: {
+        argumentField: 'index',
+        type: 'line'
       },
-      automargin: true,
-      color: '#c0c0c0',
-      showgrid: false,
-      showticklabels: false,
-      fixedrange: true,
-      hoverformat: ',f'
-    },
-    yaxis: {
-      color: '#c0c0c0',
-      rangemode: 'nonnegative',
-      showgrid: false,
-      tickfont: {
-        family: 'Arial',
-        size: 10
+      commonAxisSettings: {
+        visible: false,
+        grid: { visible: false },
+        tick: { visible: false }
       },
-      fixedrange: true,
-      rangemode: 'tozero'
-    },
-    showlegend: true,
-    legend: {
-      x: 0,
-      xanchor: 'left',
-      y: 1.2,
-      font: {
-        family: 'Arial',
-        size: 12,
-        color: '#808080'
-      }
-    },
-    plot_bgcolor: 'transparent',
-    paper_bgcolor: 'transparent'
-  };
-  Plotly.newPlot("{{id}}-0", traces, layout, { displayModeBar: false });
+      legend: {
+        visible: true,
+        horizontalAlignment: 'left',
+        position: 'inside',
+        backgroundColor: '#3e3e3e',
+        border: {
+          visible: true,
+          color: 'transparent',
+          cornerRadius: 10
+        }
+      },
+      series: [
+      {{#each trace}}
+      {
+        name: '{{title}}',
+        valueField: 'value{{@index}}'
+      },
+      {{/each}}
+      ],
+      dataSource: (function(a){
+        const v = [];
+        for (let i = 0; i < a[0].length; i++) {
+          const val = { index: i };
+          for (let j = 0; j < a.length; j++) {
+            val[`value${j}`] = a[j][i];
+          }
+          v.push(val);
+        }
+        return v;
+      })([
+      {{#each trace}}[{{value}}],{{/each}}
+      ]),
+      palette: GraphConfig.colors
+    });
   </script>
 </a>

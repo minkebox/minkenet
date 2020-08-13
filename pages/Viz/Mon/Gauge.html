@@ -1,66 +1,57 @@
 <a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="device-card d-inline-block monitor-graph">
-  <div class="handle"></div>
-  {{#each trace}}
-  <div id="{{../id}}-{{@index}}" class="inner"></div>
-  {{/each}}
+  <div class="handle">{{title}}</div>
+  <div id="{{id}}-0" class="inner"></div>
   <script>
-  let traces;
-  let layout;
-  {{#each trace}}
-  traces = [{
-    type: "indicator",
-    mode: "gauge+number",
-    title: {
-      text: "{{title}}",
-      font: {
-        family: 'Arial',
-        color: '#808080',
-        size: 14
-      }
-    },
-    number: {
-      font: {
-        family: 'Arial',
-        color: '#c0c0c0',
-        size: 36
-      }
-    },
-    gauge: {
-      bordercolor: '#808080',
-      bar: {
-        color: GraphConfig.colors[{{@index}}],
+    $('#{{id}}-0').dxBarGauge({
+      geometry: {
+        startAngle: 270,
+        endAngle: 0
       },
-      axis: {
-        range: [ 0, {{../max}} ],
-        tickcolor: '#808080',
-        tickfont: {
-          color: '#808080'
+      backgroundColor: '#505050',
+      startValue: 0,
+      endValue: {{max}},
+      values: [
+      {{#each trace}}
+      {{value}},
+      {{/each}}
+      ],
+      label: {
+        format: {
+          type: 'fixedPoint',
+          precision: 2
+        },
+        font: {
+          size: 12
+        },
+        indent: 5,
+        customizeText: arg => {
+          const units = [
+          {{#each trace}}
+          '{{unit}}',
+          {{/each}}
+          ];
+          return `${arg.valueText} ${units[arg.index]}`;
         }
-      }
-    },
-    value: {{value}}
-  }];
-  layout = {
-    title: {
-      {{#if (eq @index 0)}}
-      text: "{{../title}}",
-      {{/if}}
-      font: {
-        color: '#c0c0c0'
       },
-      x: 0.05
-    },
-    margin: {
-      t: 50,
-      r: 40,
-      b: 20,
-      l: 40,
-      pad: 0
-    },
-    plot_bgcolor: 'transparent',
-    paper_bgcolor: 'transparent'
-  };
-  Plotly.newPlot("{{../id}}-{{@index}}", traces, layout, { displayModeBar: false });
-  {{/each}}
+      resolveLabelOverlapping: 'none',
+      tooltip: {
+        enabled: true,
+        format: {
+          type: 'fixedPoint',
+          precision: 2
+        },
+        customizeTooltip: arg => {
+          const units = [
+          {{#each trace}}
+          '{{tipunit}}',
+          {{/each}}
+          ];
+          return {
+            text: `${arg.valueText} ${units[arg.index]}`
+          };
+        }
+      },
+      palette: GraphConfig.colors
+    });
   </script>
 </a>

@@ -2,54 +2,45 @@
   <div class="handle">{{title}}</div>
   <div id="{{id}}-0" class="inner"></div>
   <script>
-  let traces = [];
-  {{#each trace}}
-  traces.push({
-    type: "scatter",
-    mode: "markers+text",
-    x: [ {{@index}} ],
-    y: [ {{mod @index 2}} ],
-    text: [ '{{title}}' ],
-    {{#if (eq @index 0)}}
-    {{/if}}
-    textfont: {
-      family: 'Arial',
-      color: '#e0e0e0',
-      size: 16
-    },
-    marker: {
-      size: {{value}},
-      color: GraphConfig.colors[{{@index}}],
-      opacity: 0.7
-    },
-    hoverinfo: 'none'
-  });
-  {{/each}}
-  const layout = {
-    xaxis: {
-      showticklabels: false,
-      showgrid: false,
-      fixedrange: true,
-      zeroline: false,
-      range: [ -0.75, 2.5 ]
-    },
-    yaxis: {
-      showticklabels: false,
-      showgrid: false,
-      fixedrange: true,
-      zeroline: false
-    },
-    margin: {
-      t: 0,
-      r: 0,
-      b: 0,
-      l: 0,
-      pad: 0
-    },
-    showlegend: false,
-    plot_bgcolor: 'transparent',
-    paper_bgcolor: 'transparent'
-  };
-  Plotly.newPlot("{{id}}-0", traces, layout, { displayModeBar: false });
+    $('#{{id}}-0').dxChart({
+      commonAxisSettings: {
+        visible: false,
+        grid: { visible: false },
+        tick: { visible: false },
+        label: { visible: false }
+      },
+      legend: { visible: false },
+      series: [
+      {{#each trace}}
+        {
+          type: 'bubble',
+          argumentField: 'x{{@index}}',
+          valueField: 'y{{@index}}',
+          tagField: 'value{{@index}}',
+          sizeField: 'value{{@index}}',
+          name: '{{title}}',
+          label: {
+            visible: true,
+            position: 'inside',
+            backgroundColor: 'transparent',
+            font: {
+              size: 16,
+              color: '#d0d0d0'
+            },
+            customizeText: arg => arg.seriesName
+          }
+        },
+      {{/each}}
+      ],
+      dataSource: [{
+        {{#each trace}}
+        x{{@index}}: {{add 1 @index}}, y{{@index}}: {{add 2 (mod @index 2)}}, value{{@index}}: {{value}},
+        {{/each}}
+        dummy: 0
+      }],
+      minBubbleSize: 60,
+      maxBubbleSize: 0.7,
+      palette: GraphConfig.colors
+    });
   </script>
 </a>
