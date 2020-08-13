@@ -1,0 +1,50 @@
+<a {{#if link}}href="{{link}}"{{/if}} id="{{id}}" class="monitor-graph device-card d-inline-block">
+  <div class="handle">{{title}}</div>
+  <div id="{{id}}-0" class="inner"></div>
+  <script>
+    $('#{{id}}-0').dxChart({
+      commonSeriesSettings: {
+        argumentField: 'index',
+        type: 'line'
+      },
+      commonAxisSettings: {
+        visible: false,
+        grid: { visible: false },
+        tick: { visible: false }
+      },
+      legend: {
+        visible: true,
+        horizontalAlignment: 'left',
+        position: 'inside',
+        backgroundColor: '#3e3e3e',
+        border: {
+          visible: true,
+          color: 'transparent',
+          cornerRadius: 10
+        }
+      },
+      series: [
+      {{#each trace}}
+      {
+        name: '{{title}}',
+        valueField: 'value{{@index}}'
+      },
+      {{/each}}
+      ],
+      dataSource: (function(a){
+        const v = [];
+        for (let i = 0; i < a[0].length; i++) {
+          const val = { index: i };
+          for (let j = 0; j < a.length; j++) {
+            val[`value${j}`] = a[j][i];
+          }
+          v.push(val);
+        }
+        return v;
+      })([
+      {{#each trace}}[{{value}}],{{/each}}
+      ]),
+      palette: GraphConfig.colors
+    });
+  </script>
+</a>
