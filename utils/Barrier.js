@@ -1,4 +1,7 @@
-module.exports = function(fn) {
+module.exports = function(fn, lk) {
+  if (!lk) {
+    lk = fn;
+  }
   return async function() {
     const self = this;
     const args = arguments;
@@ -7,22 +10,22 @@ module.exports = function(fn) {
         return await fn.apply(self, args);
       }
       finally {
-        const next = fn.__barrier.shift();
+        const next = lk.__barrier.shift();
         if (next) {
           setImmediate(next);
         }
         else {
-          fn.__barrier = null;
+          lk.__barrier = null;
         }
       }
     }
-    if (!fn.__barrier) {
-      fn.__barrier = [];
+    if (!lk.__barrier) {
+      lk.__barrier = [];
       return await exec();
     }
     else {
       return new Promise((resolve, reject) => {
-        fn.__barrier.push(async () => {
+        lk.__barrier.push(async () => {
           try {
             resolve(await exec());
           }

@@ -1,6 +1,7 @@
 const FS = require('fs');
 const Path = require('path');
 const DB = require('nedb');
+const Barrier = require('./utils/Barrier');
 const Log = require('debug')('db');
 
 const DB_PATH = `${__dirname}/db`;
@@ -60,6 +61,16 @@ class Database {
         this.createMonitor(Path.basename(name, '.db'));
       }
     });
+
+    // Put our own barrier around access to monitors. For whatever reason, insert is giving
+    // very occasional ENOSPC errors even when there is *lots* of space left. Could be some form
+    // of race condition, so this will hopefully avoid it ... horrible though this is.
+    const lock = {};
+    this.createMonitor = Barrier(this.createMonitor, lock);
+    this.updateMonitor = Barrier(this.updateMonitor, lock);
+    this.readMonitor = Barrier(this.readMonitor, lock);
+    this.removeMonitor = Barrier(this.removeMonitor, lock);
+    this.purgeMonitor = Barrier(this.purgeMonitor, lock);
   }
 
   async getConfig() {
@@ -140,9 +151,13 @@ class Database {
       // Expired records are only marked as such when we attempt to read them, so we periodically do
       // a read to make sure this happens. Otherwise the database will just keep getting bigger.
       this._monitors[name].timer = setInterval(() => {
-        this.asyncFind(db, {});
+        this.purgeMonitor(db);
       }, DB_MONITOR_COMPACT_SEC * 1000);
     }
+  }
+
+  async purgeMonitor(db) {
+    await this.asyncFind(db, {});
   }
 
   async updateMonitor(name, record) {
