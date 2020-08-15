@@ -28,16 +28,6 @@ module.exports = {
                   true: 'up',
                   false: 'down'
                 }
-              },
-              statistics: {
-                rx: {
-                  bytes: '$[0].rx_bytes',
-                  packets: '$[0].rx_packets'
-                },
-                tx: {
-                  bytes: '$[0].tx_bytes',
-                  packets: '$[0].tx_packets'
-                }
               }
             }
           }
