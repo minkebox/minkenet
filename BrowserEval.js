@@ -280,7 +280,7 @@ class Eval {
         let valid = false;
         let key = path;
         if ('key' in value) {
-          key = await this.eval('literal', value, context, path, device);
+          key = await this.eval('literal', value.key, context, path, device);
         }
         if (typeof key === 'string') {
           key = key.split(',');
