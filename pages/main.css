@@ -17,6 +17,7 @@
   --disabled-text-color: #808080;
   --placeholder-text-color: #606060;
   --urgent-text-color: #c03d25;
+  --emphasis-text-color: #347794;
 
   --port-device-background: #505050;
   --port-border: grey;
@@ -24,7 +25,6 @@
   --port-down: black;
   --port-selected: #c0c0c0;
   --error-border-color: #c03d25;
-  --tmp-blue: #347794;
 }
 
 html, body {
@@ -466,7 +466,11 @@ div[data-placeholder]:empty:before {
 }
 .clients-container .row.new,
 .clients-container .row.new div[data-placeholder]:empty:before {
-  color: var(--urgent-text-color);
+  color: var(--emphasis-text-color);
+}
+.clients-container .row:not(.new):not(.seen),
+.clients-container .row:not(.new):not(.seen) div[data-placeholder]:empty:before {
+  color: var(--disabled-text-color);
 }
 
 #device-ports-hardware .port.selected-A,
