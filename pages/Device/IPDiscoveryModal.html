@@ -1,0 +1,26 @@
+<div class="modal fade" id="ipdiscovery-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Locate device by IP</h5>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="text">IP Address</label>
+            <input id="ipdiscovery-model-ip" type="text" class="form-control">
+          </div>
+        </form>
+        <div id="ipdiscovery-modal-status">&nbsp;</div>
+      </div>
+      <div class="modal-footer">
+        <button id="ipdiscovery-modal-primary" type="button" class="btn btn-primary" onclick="send('discover.ip',document.getElementById('ipdiscovery-model-ip').value)">Discover</button>
+        <button id="ipdiscovery-modal-secondary" type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  var _ipdiscovery={{refresh}};
+  $('#ipdiscovery-modal').modal();
+</script>

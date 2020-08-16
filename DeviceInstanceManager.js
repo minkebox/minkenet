@@ -42,6 +42,7 @@ class DeviceInstanceManager extends EventEmitter {
 
   getAllDevices() {
     const devices = Object.values(this.devices);
+    console.log(devices);
     const ip2int = ip => ip.split('.').reduce((ipInt, octet) => (ipInt << 8) + parseInt(octet), 0) >>> 0;
     devices.sort((a, b) => ip2int(a.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)) - ip2int(b.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)));
     return devices;

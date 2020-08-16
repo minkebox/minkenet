@@ -26,11 +26,13 @@ class Devices extends Page {
       tab: null,
       updating: false
     };
+    this.forceRefresh = 1;
 
     this.onDeviceUpdate = Debounce(this.onDeviceUpdate, this);
     this.onDeviceUpdating = Debounce(this.onDeviceUpdating, this);
     this.onListUpdate = Debounce(this.onListUpdate, this);
     this.scanUpdate = this.scanUpdate.bind(this);
+    this.discoverUpdate = this.discoverUpdate.bind(this);
   }
 
   select() {
@@ -329,11 +331,47 @@ class Devices extends Page {
         }, 1000);
         break;
       case 'ipaddress':
-
+        this.html('ipdiscovery-container', Template.DeviceIPDiscoveryModal({ refresh: this.forceRefresh++ }));
+        break;
       default:
         break;
     }
   }
+
+  discoverUpdate(evt) {
+    console.log(evt);
+    this.html('ipdiscovery-modal-status', Template.DeviceScanStatus(evt));
+    switch (evt.op) {
+      case 'done':
+        this.html('ipdiscovery-modal-primary', '');
+        this.html('ipdiscovery-modal-secondary', 'Done');
+        this.scanner.off('status', this.discoverUpdate);
+        this.scanner = null;
+        break;
+      default:
+        break;
+    }
+  }
+
+  async 'discover.ip' (msg) {
+    const address = msg.value.split(':');
+    // Valid IP
+    if (!/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(address[0])) {
+      return;
+    }
+    // Valid port
+    if (address[1] && parseInt(address[1]) != address[1]) {
+      return;
+    }
+    this.html('ipdiscovery-modal-primary', '');
+    this.scanner = new NetworkScanner.createScanner({
+      addresses: [ { type: 'net', ip: address[0], port: parseInt(address[1] || 80) } ],
+      pageTimeout: 5000
+    });
+    this.scanner.on('status', this.discoverUpdate);
+    this.scanner.start();
+  }
+
 }
 
 module.exports = Devices;
