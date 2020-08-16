@@ -7,9 +7,14 @@ module.exports = {
           $: 'guard',
           arg: {
             $: 'fetch',
+            arg: '/iss/specific/port_settings.html',
             method: 'post',
             params: {
-              PORT_NO: `${itr.index} + 1`,
+              Gambit: {
+                $: 'eval',
+                arg: 'top.GAMBIT'
+              },
+              PORT_NO: `${itr.index + 1};`,
               PORT_DESCRIPTION: {
                 $: 'kv',
                 arg: `${itr.path}.name`
