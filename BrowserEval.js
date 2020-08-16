@@ -303,6 +303,9 @@ class Eval {
       case 'navigate':
       {
         const frame = await this.getEvalFrame(context, value);
+        if (!value.arg) {
+          throw new Error('Missing arg in navigate');
+        }
         let url = (new URL(await this.eval('literal', value.arg, frame, path, device), frame.url())).toString();
         if (value.params) {
           const p = {};
@@ -342,6 +345,9 @@ class Eval {
       case 'fetch':
       {
         const frame = await this.getEvalFrame(context, value);
+        if (!value.arg) {
+          throw new Error('Missing arg in fetch');
+        }
         let url = (new URL(await this.eval('literal', value.arg, frame, path, device), frame.url())).toString();
         const method = (value.method || 'GET').toUpperCase();
 
