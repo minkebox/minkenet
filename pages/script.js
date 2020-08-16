@@ -124,11 +124,24 @@ const GraphConfig = {
   colors: [ '#488a29', '#c0b125', '#347794' ]
 };
 
+const dxs = {};
+function collectDx(id, fn) {
+  const old = dxs[id];
+  const q = $(id);
+  dxs[id] = () => fn.apply(q);
+  if (old) {
+    old();
+  }
+}
+
 window.addEventListener('pageshow', runMessageManager);
 window.addEventListener('hashchange', evt => {
   const tab = location.hash.split('#')[1];
   send("tab.select", tab);
   document.querySelectorAll('#main-nav .active').forEach(e => e.classList.remove('active'));
-  document.querySelector('#main-nav .nav-link[href="' + location.hash + '"]').parentElement.classList.add('active');
+  const link = document.querySelector('#main-nav .nav-link[href="' + location.hash + '"]');
+  if (link) {
+    link.parentElement.classList.add('active');
+  }
 });
 location.hash = '#overview.viz';
