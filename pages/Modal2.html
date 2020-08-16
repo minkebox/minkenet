@@ -1,0 +1,18 @@
+<div id="{{id}}" class="modal fade" data-backdrop="static" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">{{title}}</h5>
+      </div>
+      <div class="modal-body">
+        {{{body}}}
+        {{#if update_id}}<div id="{{update_id}}""></div>{{/if}}
+      </div>
+      <div class="modal-footer">
+        <button id="{{id}}-alt" style="position:absolute;left:12px;bottom:12px" type="button" class="btn btn-info" data-dismiss="modal" onclick="send('{{event}}','{{alt_event}}')">{{alt}}</button>
+        <button id="{{id}}-primary" type="button" class="btn btn-primary" {{#unless primary_active}}data-dismiss="modal"{{/unless}} {{#if primary_event}}onclick="send('{{event}}','{{primary_event}}'){{#if primary_active}};event.target.innerText='{{primary_active}}'{{/if}}"{{/if}}>{{primary}}</button>
+        <button id="{{id}}-secondary" type="button" class="btn btn-secondary" data-dismiss="modal" {{#if secondary_event}}onclick="send('{{event}}','{{secondary_event}}')"{{/if}}>{{secondary}}</button>
+      </div>
+    </div>
+  </div>
+</div>

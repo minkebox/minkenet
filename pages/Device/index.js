@@ -291,8 +291,11 @@ class Devices extends Page {
   }
 
   scanUpdate(evt) {
-    this.html('scanner-update', Template.ScanStatus(evt));
+    this.html('scanner-update', Template.DeviceScanStatus(evt));
     switch (evt.op) {
+      case 'running':
+        this.html('scan-network-alt', '');
+        break;
       case 'done':
         this.html('scan-network-primary', '');
         this.html('scan-network-secondary', 'Done');
@@ -322,9 +325,11 @@ class Devices extends Page {
           this.scanner = null;
         }
         setTimeout(() => {
-          this.html('scan-network-container', Template.Scan());
+          this.html('scan-network-container', Template.DeviceScan());
         }, 1000);
         break;
+      case 'ipaddress':
+
       default:
         break;
     }
