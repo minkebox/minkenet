@@ -7,11 +7,13 @@ const Device = {
   generic: true,
 
   properties: {
+    router: true,
+    firewall: true
   },
 
   identify: {
     http: {
-      ipv4: 'dhcp',
+      ipv4: [ 'dhcp' ],
       loggedOut: {
         $: 'eval',
         arg: `!!document.querySelector("a[href='https://pfsense.org']")`
@@ -21,15 +23,25 @@ const Device = {
 
   login: {
     path: '/',
-    username: {
-      select: '#usernamefld'
-    },
-    password: {
-      select: '#passwordfld'
-    },
-    activate: {
-      $: 'click',
-      select: `input[name=login]`
+    username: '#usernamefld',
+    password: '#passwordfld',
+    activate: `input[name=login]`,
+    valid: ''
+  },
+
+  constants: {
+    system: {
+      hardware: {
+        model: 'Generic pfSense'
+      },
+      keychain: {
+        username: 'admin',
+        password: 'pfsense'
+      },
+      ipv4: {
+        address: '',
+        port: 80
+      }
     }
   }
 };
