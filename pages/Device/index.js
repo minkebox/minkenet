@@ -339,7 +339,6 @@ class Devices extends Page {
   }
 
   discoverUpdate(evt) {
-    console.log(evt);
     this.html('ipdiscovery-modal-status', Template.DeviceScanStatus(evt));
     switch (evt.op) {
       case 'done':
