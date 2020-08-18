@@ -23,7 +23,7 @@ class Viz extends Page {
   async select() {
     await super.select();
     await this.updateMonitors();
-    this.html('main-container', Template.VizTab(this.state));
+    this.html('main-container', Template.VizTab(Object.assign({ first: true }, this.state)));
 
     this._refreshClock = setInterval(this.refresh, REFRESH_TIMER);
   }

@@ -3,9 +3,11 @@
   <div id="{{id}}-0" class="inner"></div>
   <script>
     $('#{{id}}-0').dxChart({
+      {{#unless first}}
       animation: {
         enabled: false
       },
+      {{/unless}}
       commonSeriesSettings: {
         argumentField: 't',
         type: 'spline',

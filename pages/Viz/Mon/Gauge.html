@@ -3,6 +3,11 @@
   <div id="{{id}}-0" class="inner"></div>
   <script>
     $('#{{id}}-0').dxBarGauge({
+      {{#unless first}}
+      animation: {
+        enabled: false
+      },
+      {{/unless}}
       geometry: {
         startAngle: 270,
         endAngle: 0
