@@ -3,7 +3,7 @@ module.exports = {
     vlans: {
       $: 'guard',
       arg: {
-        '8021q': {
+        ivl: {
           $: 'guard',
           arg: {
             $: 'fetch',
@@ -32,7 +32,7 @@ module.exports = {
               mem: {
                 $: 'fn',
                 arg: async () => {
-                  const ports = await itr.readKV(`${itr.path}.port`);
+                  const ports = itr.readKV(`${itr.path}.port`);
                   let mem = '';
                   for (let p in ports) {
                     if (ports[p].tagged === true) {
@@ -57,7 +57,7 @@ module.exports = {
           method: 'post',
           params: {
             $: 'fn',
-            arg: async ctx => {
+            arg: ctx => {
               const vlans = ctx.readKV(`${ctx.path}`);
               for (let p in vlans) {
                 if (vlans[p].management === true) {
@@ -91,7 +91,7 @@ module.exports = {
           method: 'post',
           params: {
             $: 'fn',
-            arg: async ctx => {
+            arg: ctx => {
               const ports = ctx.readKV(`${ctx.path}`);
               const pvid = [];
               for (let p in ports) {

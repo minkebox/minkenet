@@ -13,9 +13,9 @@ module.exports = {
             params: {
               SPEED: {
                 $: 'fn',
-                arg: async ctx => {
-                  const speed = await ctx.eval('kv', `${itr.path}.speed`);
-                  const enable = await ctx.eval('kv', `${itr.path}.enable`);
+                arg: ctx => {
+                  const speed = ctx.readKV(`${itr.path}.speed`);
+                  const enable = ctx.readKV(`${itr.path}.enable`);
                   if (!enable) {
                     return 2;
                   }

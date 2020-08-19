@@ -82,9 +82,13 @@ const Device = {
   write: {
     $1: require('./write/name'),
     $2: require('./write/keychain'),
-    $3: require('./write/physical'),
-    $4: require('./write/dns'),
-    $5: require('./write/ip')
+    $3: require('./write/dns'),
+    $4: require('./write/lag'),
+    $5: require('./write/igmp'),
+    $6: require('./write/ivl'),
+    $7: require('./write/vlan'),
+    $8: require('./write/physical'),
+    $9: require('./write/ip')
   },
   commit: require('./write/commit')
 
