@@ -1,4 +1,4 @@
-<div class="monitor-column">
+<div class="monitor-column config">
   <div class="section">Device Monitors
     <hr>
     {{> MonitorList}}
@@ -7,13 +7,20 @@
   <div class="section">Other Monitors
     <hr>
     {{#with config}}
-    <div class="row">
-      <div class="col"><label>Active client count</label></div>
-      <div class="col">{{> ConfigCheckbox key='monitor.clients' checked=monitor.clients }}</div>
+    <div class="block">
+      <div><label>Active client count</label>
+      {{> ConfigCheckbox key='monitor.clients' checked=monitor.clients }}
     </div>
-    <div class="row">
-      <div class="col"><label>WAN speed test</label></div>
-      <div class="col">{{> ConfigCheckbox key='monitor.wan.speedtest' checked=monitor.wan.speedtest }}</div>
+    </div>
+    <div class="block {{monitor.wan.speedtest.enabled}}">
+      <div><label>WAN speed test</label>
+      {{> ConfigCheckbox key='monitor.wan.speedtest.enabled' checked=monitor.wan.speedtest.enabled }}
+      </div>
+      <div class="subblock">
+        <div><label>Speed test server</label>
+        {{> MonitorSpeedTestSelect key='monitor.wan.speedtest.id' value=monitor.wan.speedtest.id }}
+        </div>
+      </div>
     </div>
     {{/with}}
   </div>

@@ -124,7 +124,7 @@ class Monitor extends Page {
       case 'monitor.clients':
         await MonitorManager.monitorCustom('clients', msg.value.value, 'Clients', 'clients');
         break;
-      case 'monitor.wan.speedtest':
+      case 'monitor.wan.speedtest.enabled':
         await MonitorManager.monitorCustom('wanspeedtest', msg.value.value, 'WAN Speed', 'wanspeedtest');
         break;
       default:

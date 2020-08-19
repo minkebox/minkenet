@@ -1,7 +1,6 @@
 const EventEmitter = require('events');
 const SpeedTestNet = require('@lh2020/speedtest-net');
 const ConfigDB = require('./Config');
-const Config = require('./Config');
 
 const SPEEDTEST_TIMER = 60 * 60 * 1000; // 1 hour
 
@@ -14,11 +13,11 @@ class SpeedTest extends EventEmitter {
       upload: { bandwidth: 0 }
     };
     ConfigDB.on('update', evt => {
-      if (evt.key === 'monitor.wan.speedtest') {
+      if (evt.key === 'monitor.wan.speedtest.enabled') {
         this.enable(evt.value);
       }
     });
-    this.enable(ConfigDB.read('monitor.wan.speedtest'));
+    this.enable(ConfigDB.read('monitor.wan.speedtest.enabled'));
   }
 
   enable(yes) {
@@ -47,7 +46,8 @@ class SpeedTest extends EventEmitter {
   _run() {
     SpeedTestNet({
       acceptLicense: true,
-      acceptGdpr: true
+      acceptGdpr: true,
+      serverId: ConfigDB.read('monitor.wan.speedtest.id')
     }).then(result => {
       this.last = result;
       this.emit('update');

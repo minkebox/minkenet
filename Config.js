@@ -39,7 +39,10 @@ const DEFAULT_CONFIG = {
   monitor: {
     clients: false,
     wan: {
-      speedtest: false
+      speedtest: {
+        enabled: false,
+        id: null
+      }
     }
   }
 };
@@ -94,9 +97,11 @@ class Config extends EventEmitter {
     if (data) {
       function merge(to, from) {
         if (typeof to === 'object' && to !== null) {
-          for (let key in to) {
-            if (key in from) {
-              to[key] = merge(to[key], from[key]);
+          if (typeof from === 'object' && from !== null) {
+            for (let key in to) {
+              if (key in from) {
+                to[key] = merge(to[key], from[key]);
+              }
             }
           }
           return to;
