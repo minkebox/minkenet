@@ -39,7 +39,8 @@ module.exports = {
                 for (let mac in net.assoclist) {
                   clients[i] = {
                     mac: mac,
-                    portnr: net.ssid
+                    portnr: net.ssid,
+                    ssid: net.ssid
                   }
                   if (net.isolation != '0') {
                     client[i].vlan = net.vlan_id;

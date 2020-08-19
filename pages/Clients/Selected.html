@@ -42,6 +42,22 @@
         </div>
       </div>
     </div>
+    {{#if selected.ssid}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+        <div>WiFi</div>
+      </div>
+      <div id="clients-info" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RO name="SSID" value=selected.ssid}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/if}}
     <div class="card">
       <div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
         <div>History</div>

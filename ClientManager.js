@@ -89,13 +89,14 @@ class ClientManager extends EventEmitter {
       const odev2mac = this.dev2mac[dev._id] || {};
       this.dev2mac[dev._id] = ndev2mac;
       for (let key in macs) {
-        const mac = macs[key].mac;
-        change |= this.updateEntry(mac, {});
+        const info = macs[key];
+        const mac = info.mac;
+        change |= this.updateEntry(mac, info.ssid ? { ssid: info.ssid } : {});
         if (ndev2mac[mac]) {
           // Ignore mac on multiple ports for now
         }
         else {
-          let portnr = macs[key].portnr;
+          let portnr = info.portnr;
           if (String(portnr).indexOf('lag') === 0) {
             // Some devices report lags as being a port and so macs can appear on these virtual ports.
             // We map these to the base port on the lag itself which is how we track things.
@@ -169,6 +170,7 @@ class ClientManager extends EventEmitter {
         ip: info.ip,
         hostname: info.hostname,
         name: info.name || '',
+        ssid: info.ssid || '',
         firstSeen: info.firstSeen || now,
         lastSeen: info.lastSeen || now,
         instances: [],
@@ -179,13 +181,11 @@ class ClientManager extends EventEmitter {
       change = true;
     }
     else {
-      if ('ip' in info && info.ip !== entry.ip) {
-        change = true;
-        entry.ip = info.ip;
-      }
-      if ('hostname' in info && info.hostname != entry.hostname) {
-        change = true;
-        entry.hostname = info.hostname;
+      for (let key in info) {
+        if (key in entry && info[key] !== entry[key]) {
+          change = true;
+          entry[key] = info[key];
+        }
       }
       entry.lastSeen = now;
     }
