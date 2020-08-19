@@ -11,7 +11,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'statisticsChartEntry' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'statisticsChartEntry'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {

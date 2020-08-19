@@ -9,7 +9,16 @@ module.exports = {
         $: 'eval',
         arg: 'GetInputGambit()'
       },
-      RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'sysSystemInfo' } })
+      RPC: {
+        $: 'tojson',
+        arg: {
+          method: 'CommonGet',
+          id: 0,
+          params: {
+            Template: 'sysSystemInfo'
+          }
+        }
+      }
     },
     type: 'jsonp',
     values: {
@@ -33,7 +42,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'sysSystemCtrl' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'sysSystemCtrl'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: 'result.systemSwitchBaseMacAddress'

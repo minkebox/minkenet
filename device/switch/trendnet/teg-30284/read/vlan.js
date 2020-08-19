@@ -15,7 +15,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'vlanGlobal' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'vlanGlobal'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {
@@ -32,7 +41,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'dot1qVlanStaticEntry' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'dot1qVlanStaticEntry'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {
@@ -75,7 +93,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'dot1qVlanStaticEntry' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'dot1qVlanStaticEntry'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {
@@ -105,7 +132,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'dot1qPortVlanEntry' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'dot1qPortVlanEntry'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {

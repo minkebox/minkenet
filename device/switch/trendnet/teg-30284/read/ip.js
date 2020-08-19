@@ -10,7 +10,16 @@ module.exports = {
           $: 'eval',
           arg: 'GetInputGambit()'
         },
-        RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'sysIPv4SysSettings' } })
+        RPC: {
+          $: 'tojson',
+          arg: {
+            method: 'CommonGet',
+            id: 0,
+            params: {
+              Template: 'sysIPv4SysSettings'
+            }
+          }
+        }
       },
       type: 'jsonp',
       values: {
@@ -40,7 +49,16 @@ module.exports = {
             $: 'eval',
             arg: 'GetInputGambit()'
           },
-          RPC: JSON.stringify({ method: 'CommonGet', id: 0, params: { Template: 'dnsGlobal' } })
+          RPC: {
+            $: 'tojson',
+            arg: {
+              method: 'CommonGet',
+              id: 0,
+              params: {
+                Template: 'dnsGlobal'
+              }
+            }
+          }
         },
         type: 'jsonp',
         values: {
