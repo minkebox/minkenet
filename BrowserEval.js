@@ -86,6 +86,8 @@ class Eval {
     switch (value.$) {
       case 'literal':
         return value.arg;
+      case 'type':
+        return await this.eval(value.type, value.arg, context, path, device);
       case 'eval':
       {
         const frame = await this.getEvalFrame(context, value);
@@ -475,20 +477,44 @@ class Eval {
       case 'oid':
       {
         const oid = await this.eval('literal', value.arg, context, path, device);
-        const varbind = await new Promise((resolve, reject) => {
-          device.getSNMPSession().get([ oid ], (err, varbinds) => {
-            if (err) {
-              return reject(err);
+        const session = device.getSNMPSession();
+        if ('values' in value) {
+          // Subtree
+          const ncontext = await new Promise(resolve => {
+            const v = {};
+            function add(oid, val) {
+              const p = oid.split('.');
+              let t = v;
+              for (let i = 0; i < p.length - 1; i++) {
+                t = t[p[i]] || (t[p[i]] = {});
+              }
+              t[p[p.length - 1]] = val;
             }
-            resolve(varbinds[0]);
+            session.subtree(oid,
+              varbinds => {
+                //Log('varbinds:', varbinds);
+                varbinds.forEach(varbind => add(varbind.oid, this.convertFromVarbind(varbind)));
+              },
+              () => {
+                resolve(v);
+              }
+            );
           });
-        });
-        Log('varbind:', varbind);
-        switch (varbind.type) {
-          case SNMP.ObjectType.OctetString:
-            return varbind.value.toString('utf8');
-          default:
-            return varbind.value;
+          Log('varbinds:', JSON.stringify(ncontext, null, 1));
+          return await this.eval('jsonp', value.values, ncontext, path, device);
+        }
+        else {
+          // Single
+          const varbind = await new Promise((resolve, reject) => {
+            session.get([ oid ], (err, varbinds) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve(varbinds[0]);
+            });
+          });
+          Log('varbind:', varbind);
+          return this.map(value, this.convertFromVarbind(varbind));
         }
       }
       case 'oid+set':
@@ -624,6 +650,19 @@ class Eval {
       return target;
     }
     return source;
+  }
+
+  convertFromVarbind(varbind) {
+    switch (varbind.type) {
+      case SNMP.ObjectType.OctetString:
+        return varbind.value.toString('utf8');
+      case SNMP.ObjectType.Integer:
+      case SNMP.ObjectType.ObjectIdentifier:
+      case SNMP.ObjectType.TimeTicks:
+      case SNMP.ObjectType.Guage:
+      default:
+        return varbind.value;
+    }
   }
 
 }
