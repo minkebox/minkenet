@@ -1,7 +1,9 @@
 const URL = require('url').URL;
 const Path = require('path');
 const JSONPath = require('jsonpath-plus').JSONPath;
+const SNMP = require('net-snmp');
 const TypeConversion = require('./utils/TypeConversion');
+const { type } = require('jquery');
 const Log = require('debug')('browser:eval');
 const LogNav = require('debug')('browser:nav');
 
@@ -469,6 +471,68 @@ class Eval {
             break;
         }
         return await this.eval(type, value.values, ncontext, path, device);
+      }
+      case 'oid':
+      {
+        const oid = await this.eval('literal', value.arg, context, path, device);
+        const varbind = await new Promise((resolve, reject) => {
+          device.getSNMPSession().get([ oid ], (err, varbinds) => {
+            if (err) {
+              return reject(err);
+            }
+            resolve(varbinds[0]);
+          });
+        });
+        Log('varbind:', varbind);
+        switch (varbind.type) {
+          case SNMP.ObjectType.OctetString:
+            return varbind.value.toString('utf8');
+          default:
+            return varbind.value;
+        }
+      }
+      case 'oid+set':
+      {
+        let nvalue = '';
+        if ('value' in value) {
+          nvalue = await this.eval(def$, value.value, frame, path, device);
+        }
+        else {
+          nvalue = await this.eval('kv', path, frame, path, device);
+        }
+        nvalue = await this.map(value, nvalue);
+        let type;
+        if ('type' in value) {
+          type = SNMP.ObjectType[value.type];
+        }
+        else switch (typeof nvalue) {
+          case 'number':
+            type = SNMP.ObjectType.Integer;
+            break;
+          case 'boolean':
+            type = SNMP.ObjectType.Boolean;
+            break;
+          case 'string':
+          default:
+            type = SNMP.ObjectType.OctetString;
+            break;
+        }
+        const varbind = {
+          oid: await this.eval('literal', value.arg, context, path, device),
+          type: type,
+          value: nvalue
+        };
+        return await new Promise((resolve, reject) => {
+          device.getSNMPSession().set([ varbind ], (err, varbinds) => {
+            if (err) {
+              return reject(err);
+            }
+            if (SNMP.isVarbindError(varbinds[0])) {
+              return reject(SNMP.varbindError(varbinds[0]));
+            }
+            resolve(true);
+          });
+        });
       }
       case 'frame':
       {

@@ -1,16 +1,16 @@
 const HTTP = require('http');
 const URL = require('url').URL;
+const SNMP = require('net-snmp');
 const DeviceInstance = require('./DeviceInstance');
 const Pup = require('./Pup');
 const Eval = require('./BrowserEval');
 const DB = require('./Database');
 const TypeConversion = require('./utils/TypeConversion');
 const DeviceState = require('./DeviceState');
-let TopologyManager = null; // on-demand
 const Log = require('debug')('browser');
 const LogContent = Log.extend('content');
 const LogState = Log.extend('state');
-
+const LogSNMP = require('debug')('snmp');
 
 const TIMEOUT = { // in mseconds
   loginNavigation: 60000,
@@ -467,6 +467,42 @@ class BrowserDeviceInstance extends DeviceInstance {
 
   async eval(def$, value, context) {
     return await Eval.eval(def$, value, context, '$', this);
+  }
+
+  getSNMPSession() {
+    if (!this.session) {
+      const snmp = this.description.snmp || {};
+      const ipv4 = this.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS);
+      switch (snmp.version || '1') {
+        case '1':
+        case '2c':
+        default:
+          this.session = SNMP.createSession(ipv4, snmp.community || 'public');
+          break;
+        case '3':
+          const user = {
+            name: snmp.name,
+            level: SNMP.SecurityLevel.noAuthNoPriv
+          };
+          if (snmp.auth) {
+            const pwd = this.readKV(DeviceState.KEY_SYSTEM_KEYCHAIN_PASSWORD);
+            user.level = SNMP.SecurityLevel.authNoPriv;
+            user.authProtocol = SNMP.AuthProtocols[snmp.auth];
+            user.authKey = pwd;
+            if (snmp.priv) {
+              user.level = SNMP.SecurityLevel.authPriv;
+              user.privProtocol = snmp.priv;
+              user.privKey = pwd;
+            }
+          }
+          this.session = SNMP.createV3Session(ipv4, user);
+          break;
+      }
+      this.session.on('error', err => {
+        LogSNMP(err);
+      });
+    }
+    return this.session;
   }
 
   toDB() {
