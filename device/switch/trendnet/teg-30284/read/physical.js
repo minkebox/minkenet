@@ -40,8 +40,8 @@ module.exports = {
               $: 'jsonp',
               arg: `result[${itr.index}].phyInfJumboFrameEnable`,
               map: {
-                1: '10240',
-                2: '1500'
+                1: '9996',
+                2: '1518'
               }
             },
             type: {
