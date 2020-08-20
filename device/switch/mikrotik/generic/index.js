@@ -2,7 +2,6 @@ const Device = {
 
   name: 'MikroTik SwOS',
   id: 'mikrotik/unknown',
-  type: 'browser',
   image: require('./image'),
   generic: true,
 

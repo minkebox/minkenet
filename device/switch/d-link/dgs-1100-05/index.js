@@ -2,7 +2,6 @@ const Device = {
 
   name: 'DGS-1100-05',
   id: 'dlink/dgs-1100-05',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

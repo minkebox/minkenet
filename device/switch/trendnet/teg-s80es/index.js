@@ -2,7 +2,6 @@ const Device = {
 
   name: 'TEG-S80ES',
   id: 'trendnet/teg-s80es',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

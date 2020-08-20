@@ -2,7 +2,6 @@ const Device = {
 
   name: 'pfSense',
   id: 'pfsense/unknown',
-  type: 'browser',
   image: require('./image'),
   generic: true,
 

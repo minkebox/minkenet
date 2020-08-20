@@ -2,7 +2,6 @@ const Device = {
 
   name: 'CRS309-1G-8S+',
   id: 'mikrotik/crs309-1g-8s+',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

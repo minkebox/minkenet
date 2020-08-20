@@ -2,7 +2,6 @@ const Device = {
 
   name: 'CSS106-5G-1S',
   id: 'mikrotik/css106-5g-1s',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

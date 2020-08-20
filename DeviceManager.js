@@ -16,7 +16,7 @@ class DeviceManager {
       }
       else if (entry.name === 'index.js') {
         const description = require(dir);
-        switch (description.type) {
+        switch (description.type || 'browser') {
           case 'browser':
             this.devices.push(new BrowserDevice(description));
             break;

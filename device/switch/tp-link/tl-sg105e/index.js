@@ -2,7 +2,6 @@ const Device = {
 
   name: 'TL-SG105E',
   id: 'tplink/tlsg105e',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

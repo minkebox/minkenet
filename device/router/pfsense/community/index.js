@@ -2,7 +2,6 @@ const Device = {
 
   name: 'pfSense Community',
   id: 'pfsense/community',
-  type: 'browser',
   image: require('./image'),
 
   properties: {

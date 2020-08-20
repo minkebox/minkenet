@@ -2,7 +2,6 @@ const Device = {
 
   name: 'Unidentified TP-Link',
   id: 'tplink/unknown',
-  type: 'browser',
   image: require('./image'),
   generic: true,
 

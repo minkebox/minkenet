@@ -2,7 +2,6 @@ const Device = {
 
   name: 'TEG-30284',
   id: 'trendnet/teg-30284',
-  type: 'browser',
   image: require('./image'),
 
   layout: {
@@ -39,6 +38,11 @@ const Device = {
       arg: '#Gambit',
       frame: 'myframe'
     }
+  },
+
+  snmp: {
+    version: '1',
+    community: 'private'
   },
 
   constants: {

@@ -3,7 +3,6 @@ const Device = {
   name: 'T2600G-28TS',
   id: 'tplink/t2600g28ts',
   productUrl: 'https://www.tp-link.com/us/business-networking/managed-switch/t2600g-28ts/',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

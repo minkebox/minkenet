@@ -2,7 +2,6 @@ const Device = {
 
   name: 'GS305E',
   id: 'netgear/gs305e',
-  type: 'browser',
   image: require('./image'),
 
   layout: {

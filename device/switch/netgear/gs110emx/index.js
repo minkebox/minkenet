@@ -2,7 +2,6 @@ const Device = {
 
   name: 'GS110EMX',
   id: 'netgear/gs110emx',
-  type: 'browser',
   image: require('./image'),
 
   layout: {
