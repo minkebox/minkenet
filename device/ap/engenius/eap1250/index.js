@@ -2,7 +2,6 @@ const Device = {
 
   name: 'EAP1250',
   id: 'engenius/eap1250',
-  type: 'browser',
   image: require('./image'),
 
   layout: {
@@ -80,7 +79,8 @@ const Device = {
     $statistics: require('./read/statistics')
   },
   write: {
-    $1: require('./write/name')
+    $1: require('./write/name'),
+    $2: require('./write/keychain')
   },
   commit: require('./write/commit')
 
