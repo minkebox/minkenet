@@ -102,11 +102,18 @@ class Adopt {
   }
 
   async enableSNMP() {
+    Log('enableSNMP:');
     const snmp = this.device.description.snmp;
     this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP, {}, { create: true });
     this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP_ENABLE, true, { create: true });
     this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP_VERSION, snmp.version, { create: true }); // v1 and v2c only
-    await this.device.commit();
+    try {
+      await this.device.write();
+      await this.device.commit();
+    }
+    catch (e) {
+      Log(e);
+    }
   }
 
 }
