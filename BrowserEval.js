@@ -655,7 +655,7 @@ class Eval {
   convertFromVarbind(varbind) {
     switch (varbind.type) {
       case SNMP.ObjectType.OctetString:
-        return varbind.value.toString('utf8');
+        return varbind.value.toString('ascii');
       case SNMP.ObjectType.Integer:
       case SNMP.ObjectType.ObjectIdentifier:
       case SNMP.ObjectType.TimeTicks:
