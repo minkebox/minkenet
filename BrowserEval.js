@@ -185,7 +185,11 @@ class Eval {
       }
       case 'tojson':
       {
-        return JSON.stringify(await this.eval('literal', value.arg, context, path, device));
+        const obj = await this.eval('literal', value.arg, context, path, device);
+        if (obj === undefined || obj === null) {
+          return obj;
+        }
+        return JSON.stringify(obj);
       }
       case 'iterate':
       {
@@ -290,7 +294,7 @@ class Eval {
           key = key.split(',');
           for (let k = 0; k < key.length; k++) {
             const kv = device.readKV(key[k], { info: true, value: false });
-            if (kv.modified) {
+            if (kv && kv.modified) {
               valid = true;
               break;
             }
