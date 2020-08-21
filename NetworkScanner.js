@@ -31,8 +31,6 @@ class Scanner extends EventEmitter {
           this.emit('status', { op: 'found', address: addresses[i] });
           const state = DeviceState.newInstance();
           state.mergeIntoState(device.description.constants);
-          state.localizeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_USERNAME, true);
-          state.localizeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_PASSWORD, true);
           state.writeKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS, addresses[i].ip, { track: false });
           state.writeKV(DeviceState.KEY_SYSTEM_IPV4_PORT, addresses[i].port, { track: false });
           DeviceInstanceManager.addDevice(device.newInstance({ _id: DB.newDeviceId() }, state));

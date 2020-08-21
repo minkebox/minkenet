@@ -9,17 +9,32 @@ class Adopt {
     this.device = device;
   }
 
-  async configure() {
+  async configure(config) {
     Log('configure:');
     const status = { newaddress: false, newpassword: false };
 
-    status.newaddress = this.setAddress();
+    // If this devices uses SNMP we must enable this first before changing anything else
+    if (this.device.description.snmp) {
+      await this.enableSNMP();
+    }
+
+    // Get some initial device state
+    await this.device.read();
+
+    // Commit the username/password that we entered. These are what's currently on the device so
+    // we don't want these to look like changes. We can never read these from the device.
+    this.device.state.localKV(DeviceState.KEY_SYSTEM_KEYCHAIN_USERNAME, true);
+    this.device.state.localKV(DeviceState.KEY_SYSTEM_KEYCHAIN_PASSWORD, true);
+    this.device.writeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_USERNAME, config.username, { track: false });
+    this.device.writeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_PASSWORD, config.password, { track: false });
+    // Update the password if requested
     status.newpassword = this.setPassword();
+
+    status.newaddress = this.setAddress();
     this.setNetwork();
     this.setVLANMode();
 
     Log('configured:', status);
-    Log(this.device.readKV('$'));
 
     return status;
   }
@@ -84,6 +99,14 @@ class Adopt {
 
   _allocateAddress() {
     return AddressPool.getInstance(Config.read('system.ipv4.pool.start'), Config.read('system.ipv4.pool.end')).allocateAddress();
+  }
+
+  async enableSNMP() {
+    const snmp = this.device.description.snmp;
+    this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP, {}, { create: true });
+    this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP_ENABLE, true, { create: true });
+    this.device.writeKV(DeviceState.KEY_SYSTEM_SNMP_VERSION, snmp.version, { create: true }); // v1 and v2c only
+    await this.device.commit();
   }
 
 }

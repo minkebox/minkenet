@@ -232,18 +232,14 @@ class Devices extends Page {
       device.state.mergeIntoState(device.description.constants);
     }
 
-    this.html(`login-modal-status-${device._id}`, 'Login success. Reading device information ...');
+    this.html(`login-modal-status-${device._id}`, 'Login success. Adopting ...');
 
-    // Get some initial device state
-    await device.read();
-    // Commit the username/password that we entered. These are what's currently on the device so
-    // we don't want these to look like changes. We can never read these from the device.
-    device.writeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_USERNAME, msg.value.username, { track: false });
-    device.writeKV(DeviceState.KEY_SYSTEM_KEYCHAIN_PASSWORD, msg.value.password, { track: false });
-
-    // Adopt the newly authenticated device by setting up it's defaults
+    // Adopt the newly authenticated device.
     const adoption = new Adopt(device);
-    const status = await adoption.configure();
+    const status = await adoption.configure({
+      username: msg.value.username,
+      password: msg.value.password
+    });
 
     this.html(`login-modal-status-${device._id}`, 'Configuring device ...');
 

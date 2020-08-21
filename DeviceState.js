@@ -318,7 +318,7 @@ class DeviceStateInstance extends EventEmitter {
     this.emit('update', { op: 'revert' });
   }
 
-  localizeKV(key, local) {
+  localKV(key, local) {
     Log('localize:', key, local);
     const kv = JSONPath({ path: key, json: this.state });
     const kv0 = kv && kv[0];
@@ -456,6 +456,9 @@ class DeviceState {
     this.KEY_SYSTEM_KEYCHAIN = 'system.keychain';
     this.KEY_SYSTEM_KEYCHAIN_USERNAME = 'system.keychain.username';
     this.KEY_SYSTEM_KEYCHAIN_PASSWORD = 'system.keychain.password';
+    this.KEY_SYSTEM_SNMP = 'system.snmp';
+    this.KEY_SYSTEM_SNMP_ENABLE = 'system.snmp.enable';
+    this.KEY_SYSTEM_SNMP_VERSION = 'system.snmp.version';
     this.KEY_NETWORK_IGMP_SNOOP = 'network.igmp.snoop';
     this.KEY_NETWORK_VLANS_IVL = 'network.vlans.ivl';
     this.KEY_NETWORK_VLANS_8021Q = 'network.vlans.8021q';
