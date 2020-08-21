@@ -80,8 +80,9 @@ const Device = {
     $4: require('./read/igmp'),
     $5: require('./read/vlan'),
     $6: require('./read/lag'),
+    $7: require('./read/snmp'),
     $statistics: require('./read/statistics'),
-    $7: require('./read/clients')
+    $8: require('./read/clients')
   },
   write: {
     $1: require('./write/name'),
@@ -92,7 +93,8 @@ const Device = {
     $6: require('./write/ivl'),
     $7: require('./write/vlan'),
     $8: require('./write/physical'),
-    $9: require('./write/ip')
+    $9: require('./write/snmp'),
+    $A: require('./write/ip')
   },
   commit: require('./write/commit')
 
