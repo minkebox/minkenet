@@ -28,6 +28,10 @@ module.exports = {
                   true: 'up',
                   false: 'down'
                 }
+              },
+              framesize: {
+                $: 'literal',
+                arg: '1500'
               }
             }
           }
