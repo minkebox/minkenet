@@ -6,6 +6,7 @@ module.exports = {
         arg: {
           $: 'fetch',
           arg: '/iss/specific/rpc.js',
+          frame: 'myframe',
           method: 'post',
           params: {
             Gambit: {
@@ -21,6 +22,7 @@ module.exports = {
                   Template: 'snmpGlobal',
                   snmpGlobalState: {
                     $: 'kv',
+                    arg: 'system.snmp.enable',
                     map: {
                       true: 1,
                       false: 2
