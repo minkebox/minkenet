@@ -1,6 +1,7 @@
 module.exports = {
   system: {
     $: 'guard',
+    key: 'system.name,system.location,system.contact',
     arg: {
       $: 'fetch',
       arg: '/iss/specific/rpc.js',
