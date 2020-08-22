@@ -659,6 +659,14 @@ class Eval {
     switch (varbind.type) {
       case SNMP.ObjectType.OctetString:
         return varbind.value.toString('latin1');
+      case SNMP.ObjectType.IPAddress:
+        let ip32 = varbind.value;
+        let ip = ip32 % 256;
+        for (let i = 3; i > 0; i--) {
+          ip32 = Math.floor(ip32 / 256);
+          ip = `${ip}.${ip32 % 256}`;
+        }
+        return ip;
       case SNMP.ObjectType.Integer:
       case SNMP.ObjectType.ObjectIdentifier:
       case SNMP.ObjectType.TimeTicks:
