@@ -3,7 +3,6 @@ const Path = require('path');
 const JSONPath = require('jsonpath-plus').JSONPath;
 const SNMP = require('net-snmp');
 const TypeConversion = require('./utils/TypeConversion');
-const { type } = require('jquery');
 const Log = require('debug')('browser:eval');
 const LogNav = require('debug')('browser:nav');
 
@@ -659,7 +658,7 @@ class Eval {
   convertFromVarbind(varbind) {
     switch (varbind.type) {
       case SNMP.ObjectType.OctetString:
-        return varbind.value.toString('ascii');
+        return varbind.value.toString('latin1');
       case SNMP.ObjectType.Integer:
       case SNMP.ObjectType.ObjectIdentifier:
       case SNMP.ObjectType.TimeTicks:
