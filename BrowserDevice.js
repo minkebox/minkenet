@@ -328,6 +328,7 @@ class BrowserDeviceInstance extends DeviceInstance {
       catch (e) {
         // Whatever data we read from the device fails our basic sanity checks
         Log('read failed:', JSON.stringify(result, null, 1));
+        Log('error:', e);
         throw Error('device read failed');
       }
       this.mergeIntoState(result, true);
@@ -475,9 +476,11 @@ class BrowserDeviceInstance extends DeviceInstance {
       const ipv4 = this.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS);
       switch (snmp.version || '1') {
         case '1':
-        case '2c':
         default:
           this.session = SNMP.createSession(ipv4, snmp.community || 'public');
+          break;
+        case '2c':
+          this.session = SNMP.createSession(ipv4, snmp.community || 'public', { version: SNMP.Version2c });
           break;
         case '3':
           const user = {
