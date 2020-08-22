@@ -41,7 +41,7 @@ const Device = {
   },
 
   snmp: {
-    version: '1',
+    version: '2c',
     community: 'private'
   },
 
@@ -85,15 +85,15 @@ const Device = {
     $8: require('./read/clients')
   },
   write: {
-    $1: require('./write/name'),
-    $2: require('./write/keychain'),
-    $3: require('./write/dns'),
-    $4: require('./write/lag'),
-    $5: require('./write/igmp'),
-    $6: require('./write/ivl'),
-    $7: require('./write/vlan'),
-    $8: require('./write/physical'),
-    $9: require('./write/snmp'),
+    $1: require('./write/snmp'),
+    $2: require('./write/name'),
+    $3: require('./write/keychain'),
+    $4: require('./write/dns'),
+    $5: require('./write/lag'),
+    $6: require('./write/igmp'),
+    $7: require('./write/ivl'),
+    $8: require('./write/vlan'),
+    $9: require('./write/physical'),
     $A: require('./write/ip')
   },
   commit: require('./write/commit')
