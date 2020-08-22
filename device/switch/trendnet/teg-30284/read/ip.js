@@ -1,71 +1,27 @@
 module.exports = {
-  system$1: {
-    ipv4: {
-      $: 'fetch',
-      frame: 'myframe',
-      arg: '/iss/specific/rpc.js',
-      method: 'post',
-      params: {
-        Gambit: {
-          $: 'eval',
-          arg: 'GetInputGambit()'
-        },
-        RPC: {
-          $: 'tojson',
-          arg: {
-            method: 'CommonGet',
-            id: 0,
-            params: {
-              Template: 'sysIPv4SysSettings'
-            }
-          }
-        }
-      },
-      type: 'jsonp',
+  system: {
+    ipv4$1: {
+      $: 'oid',
+      arg: '1.3.6.1.4.1.28866.3.1.16.3',
       values: {
         mode: {
           $: 'jsonp',
-          arg: 'result.ipv4sysIpAddrCfgMode',
+          arg: '1.3.6.1.4.1.28866.3.1.16.3.1.0',
           map: {
             1: 'static',
             2: 'dhcp'
           }
         },
-        address: 'result.ipv4sysIpAddr',
-        netmask: 'result.ipv4SysIpSubnetMask',
-        gateway: 'result.ipv4SysGateway'
+        address: '1.3.6.1.4.1.28866.3.1.16.3.2.0',
+        netmask: '1.3.6.1.4.1.28866.3.1.16.3.3.0',
+        gateway: '1.3.6.1.4.1.28866.3.1.16.3.4.0'
       }
-    }
-  },
-  system$2: {
-    ipv4: {
+    },
+    ipv4$2: {
       dns: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'dnsGlobal'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
-        values: {
-          $: 'jsonp',
-          arg: 'result.dnsNameServerIPv4Addr',
-          map: val => val.split(':').map(v => parseInt(v, 16)).join('.')
-        }
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.28.1.1.0',
+        map: v => new Uint8Array(Buffer.from(v, 'latin1')).join('.')
       }
     }
   }
