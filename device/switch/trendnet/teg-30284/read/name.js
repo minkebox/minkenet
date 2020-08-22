@@ -1,60 +1,18 @@
+const OID = require('../../../../../OID');
+
 module.exports = {
-  system$1: {
-    $: 'fetch',
-    frame: 'myframe',
-    arg: '/iss/specific/rpc.js',
-    method: 'post',
-    params: {
-      Gambit: {
-        $: 'eval',
-        arg: 'GetInputGambit()'
-      },
-      RPC: {
-        $: 'tojson',
-        arg: {
-          method: 'CommonGet',
-          id: 0,
-          params: {
-            Template: 'sysSystemInfo'
-          }
-        }
-      }
+  system: {
+    name: { $: 'oid', arg: OID.system.name },
+    location: { $: 'oid', arg: OID.system.location },
+    contact: { $: 'oid', arg: OID.system.contact },
+    firmware: {
+      version: { $: 'oid', arg: '1.3.6.1.4.1.28866.3.1.16.1.2.0' }
     },
-    type: 'jsonp',
-    values: {
-      name: 'result.sysInfoSysName',
-      location: 'result.sysInfoSysLocation',
-      contact: 'result.sysInfoSysContact',
-      firmware: {
-        version: 'result.sysInfoFirmwareVersion'
-      }
-    }
-  },
-  system$2: {
     macAddress: {
       0: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'sysSystemCtrl'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
-        values: 'result.systemSwitchBaseMacAddress'
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.16.2.1.0',
+        map: v => Buffer.from(v, 'latin1').toString('hex').replace(/(..)(?!$)/g,'$1:')
       }
     }
   }

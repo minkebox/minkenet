@@ -2,29 +2,11 @@ module.exports = {
   network: {
     igmp: {
       snoop: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'igsSystem'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
-        values: {
-          $: 'jsonp', arg: `result.igsStatus`, map: { 2: false, 1: true }
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.11.2.1.1.0',
+        map: {
+          2: false,
+          1: true
         }
       }
     }

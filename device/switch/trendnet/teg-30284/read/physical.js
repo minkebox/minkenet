@@ -1,36 +1,19 @@
+const BASE = '1.3.6.1.4.1.28866.3.1.12.1.1';
+
 module.exports = {
   network: {
     physical: {
       port: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'phyInfEntry'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
+        $: 'oid',
+        arg: BASE,
         values: {
           $: 'iterate',
           arg: itr => [{
-            id: `result[${itr.index}].phyInfIndex`,
-            name: `result[${itr.index}].phyInfportSetDescription`,
+            id: `${BASE}.1.${itr.key + 1}.*`,
+            name: `${BASE}.13.${itr.key + 1}.*`,
             status: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfLinkStatus`,
+              arg: `${BASE}.3.${itr.key + 1}.*`,
               map: {
                 1: 'up',
                 2: 'down'
@@ -38,7 +21,7 @@ module.exports = {
             },
             framesize: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfJumboFrameEnable`,
+              arg: `${BASE}.10.${itr.key + 1}.*`,
               map: {
                 1: '9996',
                 2: '1518'
@@ -46,7 +29,7 @@ module.exports = {
             },
             type: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfMediaType`,
+              arg: `${BASE}.2.${itr.key + 1}.*`,
               map: {
                 1: '1G',
                 2: '10G'
@@ -54,7 +37,7 @@ module.exports = {
             },
             jumbo: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfJumboFrameEnable`,
+              arg: `${BASE}.10.${itr.key + 1}.*`,
               map: {
                 1: true,
                 2: false
@@ -62,7 +45,7 @@ module.exports = {
             },
             flowcontrol: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfFlowCtrl`,
+              arg: `${BASE}.7.${itr.key + 1}.*`,
               map: {
                 1: true,
                 2: false
@@ -70,7 +53,7 @@ module.exports = {
             },
             speed: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfSpeed`,
+              arg: `${BASE}.6.${itr.key + 1}.*`,
               map: {
                 4: '10G',
                 3: '1G',
@@ -80,7 +63,7 @@ module.exports = {
             },
             enable: {
               $: 'jsonp',
-              arg: `result[${itr.index}].phyInfAdminStatus`,
+              arg: `${BASE}.9.${itr.key + 1}.*`,
               map: {
                 1: true,
                 2: false

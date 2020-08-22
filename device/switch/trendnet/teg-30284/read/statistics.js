@@ -1,51 +1,34 @@
+const BASE = '1.3.6.1.4.1.28866.3.1.23.1.1';
+
 module.exports = {
   network: {
     physical: {
       port: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'statisticsChartEntry'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
+        $: 'oid',
+        arg: BASE,
         values: {
           $: 'iterate',
           arg: itr => [{
             statistics: {
               rx: {
-                bytes: `result[${itr.index}].statisInOctets`,
-                unicast: `result[${itr.index}].statisInUcastPkts`,
-                multicast: `result[${itr.index}].statisInNUcastPkts`,
-                discarded: `result[${itr.index}].statisInDiscards`,
-                errors: `result[${itr.index}].statisInErrors`,
-                undersized: `result[${itr.index}].statisEtherUndersizePkts`,
-                oversized: `result[${itr.index}].statisEtherOversizePkts`,
-                crc: `result[${itr.index}].statisEtherCRCAlignErrors`,
-                collisions: `result[${itr.index}].statisEtherCollisions`,
-                drop: `result[${itr.index}].statisEtherDropEvents`,
-                fragments: `result[${itr.index}].statisEtherFragments`
+                bytes: `${BASE}.2.${itr.index + 1}`,
+                unicast: `${BASE}.3.${itr.index + 1}`,
+                multicast: `${BASE}.4.${itr.index + 1}`,
+                discarded: `${BASE}.5.${itr.index + 1}`,
+                errors: `${BASE}.6.${itr.index + 1}`,
+                undersized: `${BASE}.14.${itr.index + 1}`,
+                oversized: `${BASE}.15.${itr.index + 1}`,
+                crc: `${BASE}.13.${itr.index + 1}`,
+                collisions: `${BASE}.17.${itr.index + 1}`,
+                drop: `${BASE}.12.${itr.index + 1}`,
+                fragments: `${BASE}.16.${itr.index + 1}`
               },
               tx: {
-                bytes: `result[${itr.index}].statisOutOctets`,
-                unicast: `result[${itr.index}].statisOutUcastPkts`,
-                multicast: `result[${itr.index}].statisOutNUcastPkts`,
-                discarded: `result[${itr.index}].statisOutDiscards`,
-                errors: `result[${itr.index}].statisOutErrors`,
+                bytes: `${BASE}.7.${itr.index + 1}`,
+                unicast: `${BASE}.8.${itr.index + 1}`,
+                multicast: `${BASE}.9.${itr.index + 1}`,
+                discarded: `${BASE}.10.${itr.index + 1}`,
+                errors: `${BASE}.11.${itr.index + 1}`,
               }
             }
           }]

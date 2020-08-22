@@ -1,34 +1,42 @@
+const BASE = '';
+
 module.exports = {
   network: {
     clients: {
-      $: 'fetch',
-      frame: 'myframe',
-      arg: '/iss/specific/dynamic_fdb_table_data.js',
-      params: {
-        Gambit: {
-          $: 'eval',
-          arg: 'GetInputGambit()'
-        },
-        Port: '0',
-        From: '1',
-        To: '256'
-      },
+      $: 'oid',
+      arg: '1.3.6.1.4.1.28866.3.1.5.2.1.1',
       values: {
-        $: 'iterate',
-        arg: itr => [{
-          mac: { $: 'eval', arg: `FdbEntry[${itr.index}].FdbMacAddr`, map: mac => mac.replace(/-/g,':').toLowerCase() },
-          vlan: `FdbEntry[${itr.index}].FdbId`,
-          portnr: {
-            $: 'fn',
-            arg: async ctx => {
-              const portnr = await ctx.eval('eval', `FdbEntry[${itr.index}].FdbPort - 1`);
-              if (portnr <= 27) {
-                return portnr;
+        $: 'fn',
+        arg: ctx => {
+          const base = ctx.context[1][3][6][1][4][1][28866][3][1][5][2][1][1];
+          function f(v) {
+            const l = [];
+            function _f(v) {
+              if (typeof v === 'object') {
+                for (let k in v) {
+                  _f(v[k]);
+                }
               }
-              return `lag${portnr - 27}`;
+              else {
+                l.push(v);
+              }
             }
+            _f(v);
+            return l;
           }
-        }]
+          const vlans = f(base[1]);
+          const macs = f(base[2]);
+          const ports = f(base[3]);
+          const values = {};
+          for (let k in macs) {
+            values[k] = {
+              mac: Buffer.from(macs[k], 'latin1').toString('hex').replace(/(..)(?!$)/g,'$1:'),
+              vlan: vlans[k],
+              portnr: ports[k][0] === 'p' ? `lag${ports[k].substring(2)}` : (parseInt(ports[k]) - 1)
+            };
+          }
+          return values;
+        }
       }
     }
   }
