@@ -198,6 +198,7 @@ class Eval {
         callContext.key = null;
         callContext.limit = value.limit || Number.MAX_SAFE_INTEGER;
         while (callContext.index < callContext.limit) {
+          callContext.key = callContext.index;
           let nvalue = await itr.call(callContext, callContext);
           if (!nvalue) {
             break;
@@ -208,7 +209,6 @@ class Eval {
               nvalue = [ nvalue ];
             }
             if (nvalue.length === 1) {
-              callContext.key = callContext.index;
               result = await this.eval(def$, nvalue[0], context, `${path}.${callContext.key}`, device);
             }
             else {
