@@ -1,153 +1,59 @@
-function c(str) {
-  return str.split(':').slice(0, 4).map(v => parseInt(v, 16))
-}
-
 module.exports = {
   network: {
     vlans: {
       ivl: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'vlanGlobal'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
-        values: {
-          $: 'jsonp', arg: `result.vlanFwdTabMode`, map: { 0: false, 1: true }
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.25.1.1.0',
+        map: {
+          2: false,
+          1: true
         }
       },
-      vlan$1: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'dot1qVlanStaticEntry'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
+      vlan: {
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.25.3',
         values: {
-          $: 'iterate',
-          arg: itr => [
-            `result[${itr.index}].dot1qVlanStaticVlanId`,
-            {
-              name: `result[${itr.index}].dot1qVlanStaticName`,
-              port: {
-                $: 'fn',
-                arg: async function() {
-                  const r = {};
-                  const ports = c(await this.eval('jsonp', `result[${itr.index}].dot1qVlanStaticEgressPorts`));
-                  const untagged = c(await this.eval('jsonp', `result[${itr.index}].dot1qVlanStaticUntaggedPorts`));
-                  let portnr = 0;
-                  for (let i = 0; i < 4; i++) {
-                    for (let j = 0x80; j; j = j >>> 1) {
-                      if (ports[i] & j) {
-                        r[portnr] = {
-                          tagged: (untagged[i] & j) ? false : true
-                        };
-                      }
-                      portnr++;
-                    }
+          $: 'fn',
+          arg: ctx => {
+            const base = ctx.context[1][3][6][1][4][1][28866][3][1][25][3];
+            const vid = base[1][1][1];
+            const name = base[1][1][2];
+            const egress = base[1][1][3];
+            const untagged = base[1][1][4];
+            const mgmt = base[2][1][2];
+            const values = {};
+            for (let k in vid) {
+              const p = {};
+              const ports = Buffer.from(egress[k], 'latin1');
+              const unt = Buffer.from(untagged[k], 'latin1');
+              let portnr = 0;
+              for (let i = 0; i < 4; i++) {
+                for (let j = 0x80; j; j = j >>> 1) {
+                  if (ports[i] & j) {
+                    p[portnr] = {
+                      tagged: (unt[i] & j) ? false : true
+                    };
                   }
-                  return r;
+                  portnr++;
                 }
               }
+              values[vid[k]] = {
+                name: name[k],
+                port: p,
+                management: mgmt[k] === 1 ? true : false
+              };
             }
-          ]
-        }
-      },
-      vlan$2: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'dot1qVlanStaticEntry'
-              }
-            }
+            return values;
           }
-        },
-        type: 'jsonp',
-        values: {
-          $: 'iterate',
-          arg: itr => [
-            `result[${itr.index}].dot1qMgmtVlanId`,
-            {
-              management: {
-                $: 'jsonp',
-                arg: `result[${itr.index}].dot1qMgmtVlanStatus`,
-                map: {
-                  1: true,
-                  2: false
-                }
-              }
-            }
-          ]
         }
       },
       pvid: {
-        $: 'fetch',
-        frame: 'myframe',
-        arg: '/iss/specific/rpc.js',
-        method: 'post',
-        params: {
-          Gambit: {
-            $: 'eval',
-            arg: 'GetInputGambit()'
-          },
-          RPC: {
-            $: 'tojson',
-            arg: {
-              method: 'CommonGet',
-              id: 0,
-              params: {
-                Template: 'dot1qPortVlanEntry'
-              }
-            }
-          }
-        },
-        type: 'jsonp',
+        $: 'oid',
+        arg: '1.3.6.1.4.1.28866.3.1.25.3.3.1.2',
         values: {
           $: 'iterate',
           arg: itr => [{
-            pvid: `result[${itr.index}].dot1qPvid`
+            pvid: `1.3.6.1.4.1.28866.3.1.25.3.3.1.2.${itr.key + 1}`
           }]
         }
       }

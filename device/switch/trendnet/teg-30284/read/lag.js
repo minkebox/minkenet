@@ -1,45 +1,24 @@
-function c(str) {
-  return str.split(':').slice(0, 4).map(v => parseInt(v, 16))
-}
-
 module.exports = {
   network: {
     lags: {
-      $: 'fetch',
-      frame: 'myframe',
-      arg: '/iss/specific/rpc.js',
-      method: 'post',
-      params: {
-        Gambit: {
-          $: 'eval',
-          arg: 'GetInputGambit()'
-        },
-        RPC: {
-          $: 'tojson',
-          arg: {
-            method: 'CommonGet',
-            id: 0,
-            params: {
-              Template: 'laPortChannelEntry'
-            }
-          }
-        }
-      },
-      type: 'jsonp',
+      $: 'oid',
+      arg: '1.3.6.1.4.1.28866.3.1.7.2.1.1',
       values: {
         $: 'fn',
-        arg: async ctx => {
+        arg: ctx => {
+          const nr = 8;
           const nrports = 28;
-          const result = await ctx.eval('jsonp', 'result');
-          const nr = result.length;
+          const base = ctx.context[1][3][6][1][4][1][28866][3][1][7][2][1][1];
+          const members = base[3];
+          const mode = base[2];
           const ports = {};
           for (let j = 0; j < nrports; j++) {
             ports[j] = { type: 'none', group: 0 };
           }
           for (let i = 0; i < nr; i++) {
-            const p = c(result[i].laPortChannelMemberList);
+            const idx = nrports + 1 + i;
             let type = null;
-            switch (result[i].laPortChannelMode) {
+            switch (mode[idx]) {
               case '1':
                 type = 'active';
                 break;
@@ -54,6 +33,7 @@ module.exports = {
                 break;
             }
             if (type !== 'none') {
+              const p = Buffer.from(members[idx], 'latin1')
               for (let j = 0; j < nrports; j++) {
                 if (p[Math.floor(j / 8)] & (0x80 >> (j % 8))) {
                   ports[j] = { type: type, group: i + 1 };
