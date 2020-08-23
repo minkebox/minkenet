@@ -76,8 +76,13 @@ class BrowserDeviceInstance extends DeviceInstance {
         }
         const start = Date.now();
         if (!TopologyManager.running) {
-          if (await this.update()) {
-            await DB.updateDeviceState(this._id, this.state.toDB());
+          try {
+            if (await this.update()) {
+              await DB.updateDeviceState(this._id, this.state.toDB());
+            }
+          }
+          catch (e) {
+            Log('watch:error:', e);
           }
         }
         setTimeout(task, Math.max(0, Date.now() - start + REFRESH_TIMING));

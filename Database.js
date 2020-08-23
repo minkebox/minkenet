@@ -61,16 +61,6 @@ class Database {
         this.createMonitor(Path.basename(name, '.db'));
       }
     });
-
-    // Put our own barrier around access to monitors. For whatever reason, insert is giving
-    // very occasional ENOSPC errors even when there is *lots* of space left. Could be some form
-    // of race condition, so this will hopefully avoid it ... horrible though this is.
-    const lock = {};
-    this.createMonitor = Barrier(this.createMonitor, lock);
-    this.updateMonitor = Barrier(this.updateMonitor, lock);
-    this.readMonitor = Barrier(this.readMonitor, lock);
-    this.removeMonitor = Barrier(this.removeMonitor, lock);
-    this.purgeMonitor = Barrier(this.purgeMonitor, lock);
   }
 
   async getConfig() {
