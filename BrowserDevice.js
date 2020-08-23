@@ -50,8 +50,12 @@ class BrowserDeviceInstance extends DeviceInstance {
   detach() {
     if (this._page) {
       Pup.disconnect(this._page);
+      this._page = null;
     }
-    this._page = null;
+    if (this.session) {
+      this.session.close();
+      this.session = null;
+    }
   }
 
   //
