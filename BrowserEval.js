@@ -524,10 +524,10 @@ class Eval {
       {
         let nvalue = '';
         if ('value' in value) {
-          nvalue = await this.eval(def$, value.value, frame, path, device);
+          nvalue = await this.eval(def$, value.value, context, path, device);
         }
         else {
-          nvalue = await this.eval('kv', path, frame, path, device);
+          nvalue = await this.eval('kv', path, context, path, device);
         }
         nvalue = await this.map(value, nvalue);
         let type;
@@ -551,6 +551,7 @@ class Eval {
           type: type,
           value: nvalue
         };
+        Log('varbind:', varbind);
         return await new Promise((resolve, reject) => {
           device.getSNMPSession().set([ varbind ], (err, varbinds) => {
             if (err) {
