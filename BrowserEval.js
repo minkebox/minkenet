@@ -235,11 +235,11 @@ class Eval {
         const obj = {};
         const itr = value.arg;
         const keys = ('keys' in value)
-          ? this.eval('literal', value.keys, context, path, device).split(',').reduce((a, b) => (a[b] = true, a), {})
+          ? (await this.eval('literal', value.keys, context, path, device)).split(',').reduce((a, b) => (a[b] = true, a), {})
           : device.readKV(path, Object.assign({ depth: 1 }, value.options));
         callContext.index = 0;
         for (let key in keys) {
-          callContext.key = key;
+          callContext.key = TypeConversion.toNatural(key);
           callContext.parent = path;
           callContext.path = `${path}.${key}`;
           let result = null;
