@@ -1,71 +1,77 @@
+const BASE = '1.3.6.1.4.1.28866.3.1.12.1.1';
+
 module.exports = {
   network: {
     physical: {
-      port: {
+      port$1: {
         $: 'foreach',
+        keys: '0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23',
         arg: itr => [{
           $: 'guard',
           arg: {
-            $: 'fetch',
-            arg: '/iss/specific/rpc.js',
-            frame: 'myframe',
-            method: 'post',
-            params: {
-              Gambit: {
-                $: 'eval',
-                arg: 'GetInputGambit()'
-              },
-              RPC: {
-                $: 'tojson',
-                arg: {
-                  method: "BatchPost",
-                  id: 0,
-                  params: [{
-                    phyInfJumboFrameEnable: {
-                      $: 'kv',
-                      arg: `${itr.path}.jumbo`,
-                      map: {
-                        true: 1,
-                        false: 2
-                      }
-                    },
-                    phyInfEAPPassThrough: 2,
-                    phyInfBPDUPassThrough: 1,
-                    phyInfSpeed: {
-                      $: 'kv',
-                      arg: `${itr.path}.speed`,
-                      map: {
-                        '10G': 4,
-                        '1G': 3,
-                        '100M': 2,
-                        '10M': 1
-                      }
-                    },
-                    phyInfAdminStatus: {
-                      $: 'kv',
-                      arg: `${itr.path}.enable`,
-                      map: {
-                        true: 1,
-                        false: 2
-                      }
-                    },
-                    phyInfFlowCtrl: {
-                      $: 'kv',
-                      arg: `${itr.path}.flowcontrol`,
-                      map: {
-                        true: 1,
-                        false: 2
-                      }
-                    },
-                    phyInfportSetDescription: {
-                      $: 'kv',
-                      arg: `${itr.path}.name`
-                    },
-                    phyInfIndex: itr.index + 1,
-                    phyInfMediaType: 1,
-                    FuncName: "Port_Set"
-                  }]
-                }
+            name: {
+              $: 'oid+set',
+              arg: `${BASE}.13.${itr.key + 1}.1`
+            },
+            jumbo: {
+              $: 'oid+set',
+              arg: `${BASE}.10.${itr.key + 1}.1`,
+              map: {
+                true: 1,
+                false: 2
+              }
+            },
+            flowcontrol: {
+              $: 'oid+set',
+              arg: `${BASE}.7.${itr.key + 1}.1`,
+              map: {
+                true: 1,
+                false: 2
+              }
+            },
+            enable: {
+              $: 'oid+set',
+              arg: `${BASE}.9.${itr.key + 1}.1`,
+              map: {
+                true: 1,
+                false: 2
+              }
+            }
+          }
+        }]
+      },
+      port$2: {
+        $: 'foreach',
+        keys: '24,25,26,27',
+        arg: itr => [{
+          $: 'guard',
+          arg: {
+            name: {
+              $: 'oid+set',
+              arg: `${BASE}.13.${itr.key + 1}.2`
+            },
+            jumbo: {
+              $: 'oid+set',
+              arg: `${BASE}.10.${itr.key + 1}.2`,
+              map: {
+                true: 1,
+                false: 2
+              }
+            },
+            flowcontrol: {
+              $: 'oid+set',
+              arg: `${BASE}.7.${itr.key + 1}.2`,
+              map: {
+                true: 1,
+                false: 2
+              }
+            },
+            enable: {
+              $: 'oid+set',
+              arg: `${BASE}.9.${itr.key + 1}.2`,
+              map: {
+                true: 1,
+                false: 2
               }
             }
           }
@@ -74,3 +80,4 @@ module.exports = {
     }
   }
 };
+
