@@ -530,27 +530,8 @@ class Eval {
           nvalue = await this.eval('kv', path, context, path, device);
         }
         nvalue = await this.map(value, nvalue);
-        let type;
-        if ('type' in value) {
-          type = SNMP.ObjectType[value.type];
-        }
-        else switch (typeof nvalue) {
-          case 'number':
-            type = SNMP.ObjectType.Integer;
-            break;
-          case 'boolean':
-            type = SNMP.ObjectType.Boolean;
-            break;
-          case 'string':
-          default:
-            type = SNMP.ObjectType.OctetString;
-            break;
-        }
-        const varbind = {
-          oid: await this.eval('literal', value.arg, context, path, device),
-          type: type,
-          value: nvalue
-        };
+        const oid = await this.eval('literal', value.arg, context, path, device);
+        const varbind = this.convertToVarbind(oid, value.type, nvalue);
         Log('varbind:', varbind);
         return await new Promise((resolve, reject) => {
           device.getSNMPSession().set([ varbind ], (err, varbinds) => {
@@ -657,24 +638,37 @@ class Eval {
   }
 
   convertFromVarbind(varbind) {
-    switch (varbind.type) {
-      case SNMP.ObjectType.OctetString:
-        return varbind.value.toString('latin1');
-      case SNMP.ObjectType.IPAddress:
-        let ip32 = varbind.value;
-        let ip = ip32 % 256;
-        for (let i = 3; i > 0; i--) {
-          ip32 = Math.floor(ip32 / 256);
-          ip = `${ip}.${ip32 % 256}`;
-        }
-        return ip;
-      case SNMP.ObjectType.Integer:
-      case SNMP.ObjectType.ObjectIdentifier:
-      case SNMP.ObjectType.TimeTicks:
-      case SNMP.ObjectType.Guage:
-      default:
-        return varbind.value;
+    if (varbind.type === SNMP.ObjectType.OctetString) {
+      return varbind.value.toString('latin1');
     }
+    else {
+      return varbind.value;
+    }
+  }
+
+  convertToVarbind(oid, type, value) {
+    if (type) {
+      type = SNMP.ObjectType[type];
+    }
+    if (!type) {
+      switch (typeof value) {
+        case 'number':
+          type = SNMP.ObjectType.Integer;
+          break;
+        case 'boolean':
+          type = SNMP.ObjectType.Boolean;
+          break;
+        case 'string':
+        default:
+          type = SNMP.ObjectType.OctetString;
+          break;
+      }
+    }
+    return {
+      oid: oid,
+      type: type,
+      value: value
+    };
   }
 
 }
