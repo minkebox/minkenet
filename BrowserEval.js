@@ -194,7 +194,7 @@ class Eval {
       {
         const obj = {};
         const itr = value.arg;
-        callContext.index = 0;
+        callContext.index = value.start || 0;
         callContext.key = null;
         callContext.limit = value.limit || Number.MAX_SAFE_INTEGER;
         while (callContext.index < callContext.limit) {
@@ -234,7 +234,9 @@ class Eval {
       {
         const obj = {};
         const itr = value.arg;
-        const keys = device.readKV(path, Object.assign({ depth: 1 }, value.options));
+        const keys = ('keys' in value)
+          ? this.eval('literal', value.keys, context, path, device).split(',').reduce((a, b) => (a[b] = true, a), {})
+          : device.readKV(path, Object.assign({ depth: 1 }, value.options));
         callContext.index = 0;
         for (let key in keys) {
           callContext.key = key;
