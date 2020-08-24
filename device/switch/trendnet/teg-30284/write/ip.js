@@ -1,3 +1,6 @@
+//
+// Note. We cannot set the IP address using OIDs, but we can this way.
+//
 module.exports = {
   system: {
     ipv4: {
