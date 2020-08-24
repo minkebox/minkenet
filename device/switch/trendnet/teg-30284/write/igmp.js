@@ -2,43 +2,11 @@ module.exports = {
   network: {
     igmp: {
       snoop: {
-        $: 'guard',
-        arg: {
-          $: 'fetch',
-          arg: '/iss/specific/rpc.js',
-          method: 'post',
-          params: {
-            Gambit: {
-              $: 'eval',
-              arg: 'GetInputGambit()'
-            },
-            RPC: {
-              $: 'tojson',
-              arg: {
-                method: 'BatchPost',
-                id: 0,
-                params: [{
-                  igsStatus: {
-                    $: 'kv',
-                    map: {
-                      true: '1',
-                      false: '2'
-                    }
-                  },
-                  //igsHostPortPurgeInterval: '260',
-                  //igsCfgQuerierStatus: '2',
-                  //igsQuerierQueryInterval: '125',
-                  //igsQueryMaxResponseTime: '10',
-                  //igsRobustnessValue: '2',
-                  //igsGrpQueryInterval: '1',
-                  //igsRouterTimeout: '250',
-                  //igsQuerierVersion: '2',
-                  //igsCfgFastLeaveStatus: '1',
-                  FuncName: 'IGSSystem_Set'
-                }]
-              }
-            }
-          }
+        $: 'oid+set',
+        arg: '1.3.6.1.4.1.28866.3.1.11.2.1.1.0',
+        map: {
+          false: 2,
+          true: 1
         }
       }
     }

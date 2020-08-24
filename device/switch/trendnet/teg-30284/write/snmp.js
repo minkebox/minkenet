@@ -1,3 +1,6 @@
+//
+// Note. Used to enable SNMP, so we can't use OIDs here.
+//
 module.exports = {
   system: {
     snmp: {
