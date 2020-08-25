@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 const DB = require('./Database');
+const Log = require('debug')('monitor');
 
 const MONITOR_EXPIRES = {
   FIVEMINUTES: 5 * 60 * 1000,
@@ -133,7 +134,9 @@ class MonitorManager extends EventEmitter {
               expires = MONITOR_EXPIRES.ONEHOUR;
               break;
           }
-          DB.updateMonitor(mon.name, { key: key, value: value, expiresAt: new Date(Date.now() + expires) });
+          DB.updateMonitor(mon.name, { key: key, value: value, expiresAt: new Date(Date.now() + expires) }).catch(err => {
+            Log(err);
+          });
         });
       }
     }
