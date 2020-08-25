@@ -10,6 +10,7 @@ module.exports = {
             arg: itr => [{
               $: 'fetch',
               arg: '/iss/specific/rpc.js',
+              frame: 'myframe',
               method: 'post',
               params: {
                 Gambit: {
@@ -37,6 +38,7 @@ module.exports = {
             arg: itr => [{
               $: 'fetch',
               arg: '/iss/specific/rpc.js',
+              frame: 'myframe',
               method: 'post',
               params: {
                 Gambit: {
@@ -63,6 +65,7 @@ module.exports = {
             arg: itr => [{
               $: 'fetch',
               arg: '/iss/specific/rpc.js',
+              frame: 'myframe',
               method: 'post',
               params: {
                 Gambit: {
@@ -106,7 +109,7 @@ module.exports = {
                       dot1qMgmtVlanStatus: {
                         $: 'fn',
                         arg: () => {
-                          const vlans = ctx.readKV(ctx.path);
+                          const vlans = itr.readKV(itr.path);
                           for (let p in vlans) {
                             if (vlans[p].management === true) {
                               return '0'
@@ -130,6 +133,7 @@ module.exports = {
               arg: {
                 $: 'fetch',
                 arg: '/iss/specific/rpc.js',
+                frame: 'myframe',
                 method: 'post',
                 params: {
                   Gambit: {
