@@ -105,7 +105,7 @@ class NSDP extends EventEmitter {
       msg.writeUInt8(0x00, p); // Target mac address (00:00:00:00:00:00 for broadcast)
     }
     msg.writeUInt16BE(0x0000, 20); // Unknown
-    msg.writeUInt16BE(this.seq++, 22); // Sequence nr.
+    msg.writeUInt16BE(this.seq++ & 0x7FFF, 22); // Sequence nr.
     msg.writeUInt32BE(0x4E534450, 24); // Signature NSDP
     msg.writeUInt32BE(0x00000000, 28); // Unknown
     // Body

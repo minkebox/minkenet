@@ -106,7 +106,7 @@ class ESCP extends EventEmitter {
     for (let p = 8; p < 14; p++) {
       msg.writeUInt8(this.mac[p - 8], p); // Host mac address
     }
-    msg.writeUInt16BE(this.seq++, 14); // Sequence nr.
+    msg.writeUInt16BE(this.seq++ & 0x7FFF, 14); // Sequence nr.
     msg.writeUInt32BE(0, 16); // Error code
     msg.writeUInt16BE(36, 20); // Length
     msg.writeUInt32BE(0, 22); // Fragment

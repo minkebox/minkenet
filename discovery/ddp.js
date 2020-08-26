@@ -89,7 +89,7 @@ class DDP extends EventEmitter {
     const msg = Buffer.alloc(22);
 
     msg.writeUInt16LE(0xfdfd, 0); // DLink header
-    msg.writeUInt16LE(this.seq++, 2); // Sequence nr
+    msg.writeUInt16LE(this.seq++ & 0x7FFF, 2); // Sequence nr
     msg.writeUInt16LE(0x00a1, 4); // 0x1a == Discovery
 
     for (let p = 6; p < 12; p++) {
