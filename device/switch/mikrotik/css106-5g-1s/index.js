@@ -79,7 +79,9 @@ const Device = {
     $1: require('../generic/write/name'),
     $2: require('../generic/write/keychain'),
     $3: require('../generic/write/physical'),
-    $4: require('../generic/write/ip')
+    $4: require('../generic/write/vlan'),
+    $5: require('../generic/write/ivl'),
+    $6: require('../generic/write/ip')
   }
 
 };

@@ -40,7 +40,10 @@ module.exports = {
                   }
                   return ports;
                 }
-              }
+              },
+              learning: { $: 'eval', arg: `$R[${itr.index}].lrn`, map: { 0: false, 1: true } },
+              mirror: { $: 'eval', arg: `$R[${itr.index}].mrr`, map: { 0: false, 1: true } },
+              isolation: { $: 'eval', arg: `$R[${itr.index}].piso`, map: { 0: false, 1: true } },
             }]
           }
         }

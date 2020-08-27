@@ -37,7 +37,19 @@ module.exports = {
       },
       network: {
         vlans: {
-          ivl: { $: 'eval', arg: '$R.ivl', map: { 0: false, 1: true } }
+          ivl: { $: 'eval', arg: '$R.ivl', map: { 0: false, 1: true } },
+          vlan: {
+            $: 'fn',
+            arg: async ctx => {
+              const vid = await ctx.eval({ $: 'eval', arg: '$R.avln' });
+              if (vid) {
+                return { [vid]: { management: true } };
+              }
+              else {
+                return {};
+              }
+            }
+          }
         },
         igmp: {
           snoop: { $: 'eval', arg: '$R.igmp', map: { 0: false, 1: true } }
