@@ -71,15 +71,18 @@ const Device = {
     $2: require('../generic/read/physical'),
     $3: require('../generic/read/vlan'),
     $4: require('../generic/read/clients'),
+    $5: require('../generic/read/snmp'),
     $statistics: require('../generic/read/statistics')
   },
   write: {
-    $1: require('../generic/write/name'),
-    $2: require('../generic/write/keychain'),
-    $3: require('../generic/write/physical'),
-    $4: require('../generic/write/vlan'),
-    $5: require('../generic/write/ivl'),
-    $6: require('../generic/write/ip')
+    $1: require('../generic/write/snmp'),
+    $2: require('../generic/write/name'),
+    $3: require('../generic/write/keychain'),
+    $4: require('../generic/write/physical'),
+    $5: require('../generic/write/vlan'),
+    $6: require('../generic/write/ivl'),
+    $7: require('../generic/write/igmp'),
+    $8: require('../generic/write/ip')
   }
 
 };

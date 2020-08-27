@@ -84,13 +84,13 @@ const Device = {
     $statistics: require('./read/statistics')
   },
   write: {
-    $1: require('./write/name'),
-    $2: require('./write/keychain'),
-    $3: require('./write/igmp'),
-    $4: require('./write/lag'),
-    $5: require('./write/vlan'),
-    $6: require('./write/physical'),
-    $7: require('./write/snmp'),
+    $1: require('./write/snmp'),
+    $2: require('./write/name'),
+    $3: require('./write/keychain'),
+    $4: require('./write/igmp'),
+    $5: require('./write/lag'),
+    $6: require('./write/vlan'),
+    $7: require('./write/physical'),
     $8: require('./write/ip')
   },
   commit: require('./write/commit')
