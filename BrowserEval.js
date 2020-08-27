@@ -366,7 +366,7 @@ class Eval {
         if (value.params) {
           try {
             let vals = {};
-            if ('$' in value.params) {
+            if (typeof params === 'string' || '$' in value.params) {
               vals = await this.eval('literal', value.params, frame, path, device);
             }
             else {
