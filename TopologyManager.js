@@ -298,7 +298,9 @@ class TopologyManager extends EventEmitter {
       // the connections between the switches in the network.
       snapDevices = this._snapDevices(measureDevices);
       timings[0] = await this._snap(snapDevices);
-      await new Promise(resolve => setTimeout(resolve, PROBE_TIME));
+      for (let t = 0; t < 10 && this.running; t++) {
+        await new Promise(resolve => setTimeout(resolve, PROBE_TIME / 10));
+      }
       timings[1] = await this._snap(snapDevices);
       if (!this.running) {
         this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
@@ -613,7 +615,10 @@ class TopologyManager extends EventEmitter {
         const start = Process.hrtime.bigint();
         client.send(data, PROBE_PORT, addr, () => {
           count++;
-          if (Date.now() - begin > PROBE_TIME) {
+          if (!this.running) {
+            resolve();
+          }
+          else if (Date.now() - begin > PROBE_TIME) {
             // Let the packets drain
             setTimeout(resolve, DRAIN_TIME);
           }
