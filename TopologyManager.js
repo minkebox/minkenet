@@ -10,6 +10,7 @@ const Log = require('debug')('topology');
 const LogTimings = Log.extend('timings');
 
 const PROBE_TIME = 5000;
+const DRAIN_TIME = 500;
 const PROBE_PAYLOAD_SIZE = 1400;
 const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
@@ -614,7 +615,7 @@ class TopologyManager extends EventEmitter {
           count++;
           if (Date.now() - begin > PROBE_TIME) {
             // Let the packets drain
-            setTimeout(resolve, 1000);
+            setTimeout(resolve, DRAIN_TIME);
           }
           else {
             const wait = usecperpkt - Number(Process.hrtime.bigint() - start);
