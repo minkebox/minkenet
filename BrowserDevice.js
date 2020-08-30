@@ -17,7 +17,6 @@ const TIMEOUT = { // in mseconds
   validateNavigation: 60000,
   ping: 3000,
 };
-const DEFAULT_REFRESH_TIMINGS = { general: 60, statistics: 10 }; // in seconds
 const REFRESH_TIMING = 60 * 1000; // 1 minute
 const UPDATE_RETRIES = 2;
 const HTTPCODE_OK = 200;

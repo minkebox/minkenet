@@ -3,6 +3,7 @@ const DeviceState = require('../DeviceState');
 const Template = require('./Template');
 const Page = require('./Page');
 const DevicesTab = require('./Device');
+const PortsTab = require('./Ports');
 const NetworksTab = require('./Network');
 const LinksTab = require('./Link');
 const ClientsTab = require('./Clients');
@@ -52,7 +53,7 @@ async function WS(ctx) {
     current: null,
     tabs: {
       overview: new VizTab(send),
-      devices: new DevicesTab(send),
+      devices: new Page({ details: new DevicesTab(send), ports: new PortsTab(send) }),
       networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send) }),
       clients: new ClientsTab(send),
       config: new Page({ defaults: new ConfigTab(send), monitor: new MonitorTab(send) })

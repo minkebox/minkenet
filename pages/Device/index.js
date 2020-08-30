@@ -1,11 +1,7 @@
 const Template = require('../Template');
 const DB = require('../../Database');
 const DeviceManager = require('../../DeviceManager');
-const DeviceState = require('../../DeviceState');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
-const TopologyManager = require('../../TopologyManager');
-const ClientManager = require('../../ClientManager');
-const TypeConversion = require('../../utils/TypeConversion');
 const NetworkScanner = require('../../NetworkScanner');
 const Discovery = require('../../discovery');
 const Debounce = require('../../utils/Debounce');
@@ -20,10 +16,6 @@ class Devices extends Page {
     this.state = {
       devices: null,
       selectedDevice: null,
-      selectedPort: null,
-      selectedPortNr: 0,
-      selected: [],
-      tab: null,
       updating: false
     };
     this.forceRefresh = 1;
@@ -38,16 +30,16 @@ class Devices extends Page {
   select() {
     super.select();
     DeviceInstanceManager.on('update', this.onListUpdate);
+    this.state.devices = DeviceInstanceManager.getAllDevices();
+    if (!this.state.selectedDevice && this.state.devices.length) {
+      this.state.selectedDevice = this.state.devices[0];
+    }
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.on('updating', this.onDeviceUpdating);
       this.state.selectedDevice.watch();
     }
-    if (!this.state.tab) {
-      this.state.tab = 'details';
-    }
     this.authenticating = false;
-    this.state.devices = DeviceInstanceManager.getAllDevices();
     this.html('main-container', Template.DeviceTab(this.state));
   }
 
@@ -60,26 +52,9 @@ class Devices extends Page {
     DeviceInstanceManager.off('update', this.onListUpdate);
   }
 
-  tabSelect(tab) {
-    if (this.state.tab !== tab) {
-      this.state.tab = tab;
-      this.html('device-details-column', Template.DeviceSelected(this.state));
-    }
-  }
-
   onDeviceUpdate() {
     this.state.updating = false;
-    this.selectPort();
-    switch (this.state.tab) {
-      case 'details':
-        this.html('details-device', Template.DeviceDetails(this.state));
-        break;
-      case 'ports':
-        this.html('details-ports', Template.DevicePortInfo(this.state));
-        break;
-      default:
-        break;
-    }
+    this.html('details-device', Template.DeviceDetails(this.state));
   }
 
   onDeviceUpdating() {
@@ -93,32 +68,6 @@ class Devices extends Page {
     }
     this.state.devices = DeviceInstanceManager.getAllDevices();
     this.html('devices-column', Template.DeviceList(this.state));
-  }
-
-  selectPort() {
-    this.state.selectedPort = null;
-    if (!this.state.selectedDevice) {
-      return;
-    }
-    const port = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}`);
-    if (!port) {
-      return;
-    }
-    const macs = ClientManager.getClientsForDeviceAndPort(this.state.selectedDevice, this.state.selectedPortnr);
-    this.state.selectedPort = {
-      port: port,
-      portnr: this.state.selectedPortnr,
-      clients: {
-        total: macs.length,
-        macs: macs
-      }
-    }
-    const peer = TopologyManager.findLink(this.state.selectedDevice, this.state.selectedPortnr);
-    if (peer) {
-      this.state.selectedPort.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
-    }
-    this.state.porthighlights = [];
-    this.state.porthighlights[this.state.selectedPortnr] = 'A';
   }
 
   async 'device.select' (msg) {
@@ -136,8 +85,6 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = device;
-    this.state.selectedPort = null;
-    this.state.selectedPortnr = 0;
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.on('updating', this.onDeviceUpdating);
@@ -150,26 +97,12 @@ class Devices extends Page {
     }
   }
 
-  'device.details.summary.updaterequest' (msg) {
-    if (!this.state.selectedDevice) {
-      return;
-    }
+  async 'device.details.summary.updaterequest' (msg) {
     send('device.details.summary.update', { html: Template.DeviceDetails(this.state), key: msg.value });
   }
 
-  'kv.update' (msg) {
-    if (!this.state.selectedDevice) {
-      return;
-    }
+  async 'kv.update' (msg) {
     this.state.selectedDevice.writeKV(msg.value.k, msg.value.v);
-  }
-
-  'device.port.select' (msg) {
-    this.state.selectedPortnr = TypeConversion.toNumber(msg.value.port);
-    this.selectPort();
-    if (this.state.selectedPort) {
-      this.html('details-ports', Template.DevicePortInfo(this.state));
-    }
   }
 
   async 'device.authenticate.cancel' (msg) {
