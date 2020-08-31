@@ -172,6 +172,7 @@ div[data-placeholder]:empty:before {
   justify-content: flex-end;
 }
 
+.details-column,
 .device-details-column,
 .networks-details-column,
 .bonds-details-column,
@@ -191,6 +192,7 @@ div[data-placeholder]:empty:before {
   height: 100%;
   overflow-y: scroll;
 }
+.details-container .card-header,
 .device-details-container .card-header,
 .ports-container .card-header,
 .network-details-container .card-header,
@@ -203,6 +205,7 @@ div[data-placeholder]:empty:before {
   padding: 8px 10px 8px 20px;
 }
 
+.entry-selected .col-form-label-sm,
 .device-details-container .col-form-label-sm,
 .bond-details-container .col-form-label-sm,
 .ports-container .col-form-label-sm,
@@ -278,8 +281,10 @@ div[data-placeholder]:empty:before {
   z-index: 1;
 }
 
+.list-column,
 .networks-column,
 .bonds-column,
+.wifi-column,
 .monitor-column,
 .clients-column {
   flex: 1;
@@ -303,18 +308,21 @@ div[data-placeholder]:empty:before {
   border-color: var(--minor-text-color);
 }
 
+.list-container .row:nth-child(2n),
 .networks-container .row:nth-child(2n),
 .bonds-container .bonds .row:nth-child(2n),
 .monitor-container .row:nth-child(2n),
 .clients-container .row:nth-child(2n) {
   background-color: var(--alt-list-background-color);
 }
+.list-container .row.active,
 .networks-container .row.active,
 .bonds-container .row.active,
 .monitor-container .row.active,
 .clients-container .row.active {
   background-color: var(--highlight-background-color) !important;
 }
+.list-container .row:hover,
 .networks-container .row:hover,
 .bonds-container .row:hover,
 .monitor-container .row:hover,
@@ -322,6 +330,7 @@ div[data-placeholder]:empty:before {
   color: var(--highlight-text-color);
   text-decoration: none;
 }
+.list-container .col,
 .networks-container .col,
 .bonds-container :not(.title) .col,
 .monitor-container .col,
@@ -329,7 +338,8 @@ div[data-placeholder]:empty:before {
   border-right: 1px solid var(--property-border-color);
   overflow: hidden;
 }
-.networks-container .col:last-child ,
+.list-container .col:last-child,
+.networks-container .col:last-child,
 .bonds-container .col:last-child,
 .monitor-container .col:last-child,
 .clients-container .col:last-child {

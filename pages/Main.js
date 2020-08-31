@@ -10,6 +10,7 @@ const ClientsTab = require('./Clients');
 const ConfigTab = require('./Config');
 const MonitorTab = require('./Monitor');
 const VizTab = require('./Viz');
+const WiFiTab = require('./WiFi');
 const Debounce = require('../utils/Debounce');
 const Log = require('debug')('ui');
 
@@ -54,7 +55,7 @@ async function WS(ctx) {
     tabs: {
       overview: new VizTab(send),
       devices: new Page({ details: new DevicesTab(send), ports: new PortsTab(send) }),
-      networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send) }),
+      networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send), wifi: new WiFiTab(send) }),
       clients: new ClientsTab(send),
       config: new Page({ defaults: new ConfigTab(send), monitor: new MonitorTab(send) })
     },
