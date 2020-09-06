@@ -12,6 +12,7 @@ const VLANManager = require('./VLANManager');
 const ClientManager = require('./ClientManager');
 const Discovery = require('./discovery');
 const MonitorManager = require('./MonitorManager');
+const WiFiManager = require('./WiFiManager');
 const SpeedTest = require('./SpeedTest');
 
 // Extend path so we can find 'ping' and 'arp'
@@ -53,6 +54,7 @@ App.ws.use(async (ctx, next) => {
   await ClientManager.start();
   Discovery.start();
   await MonitorManager.start();
+  await WiFiManager.start();
   SpeedTest.start();
 
   App.listen({
@@ -69,6 +71,7 @@ App.ws.use(async (ctx, next) => {
   });
 
   process.on('SIGTERM', async () => {
+    WiFiManager.stop();
     MonitorManager.stop();
     Discovery.stop();
     ClientManager.stop();

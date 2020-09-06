@@ -52,7 +52,7 @@
   </div>
   <div class="card">
     <div data-toggle="collapse" data-target="#device-details-hardware" class="card-header">
-      <div>Hardware</div>
+      <div>Ports</div>
     </div>
     <div id="device-details-hardware" class="collapse show">
       <div class="card-body">
@@ -70,6 +70,24 @@
       </div>
     </div>
   </div>
+  {{#if network.wireless}}
+  <div class="card">
+    <div data-toggle="collapse" data-target="#device-details-wireless" class="card-header">
+      <div>Wireless</div>
+    </div>
+    <div id="device-details-wireless" class="collapse show">
+      <div class="card-body">
+        <div class="list-group">
+          <form>
+            {{>RO name="Total radios" value=network.wireless.radios.nr.total}}
+            {{>RO name="2.4GHz radios" value=network.wireless.radios.nr.2_4ghz}}
+            {{>RO name="5GHz radios" value=network.wireless.radios.nr.5ghz}}
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  {{/if}}
   <div class="card">
     <div data-toggle="collapse" data-target="#device-details-network" class="card-header">
       <div>Network</div>
