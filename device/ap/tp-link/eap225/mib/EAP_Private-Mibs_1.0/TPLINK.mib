@@ -1,0 +1,20 @@
+TPLINK DEFINITIONS ::= BEGIN
+
+--iso             OBJECT IDENTIFIER ::= { 1 }
+--org             OBJECT IDENTIFIER ::= { iso 3 }
+--dod             OBJECT IDENTIFIER ::= { org 6 }
+--internet        OBJECT IDENTIFIER ::= { dod 1 }
+--private         OBJECT IDENTIFIER ::= { internet 4 }
+--enterprises     OBJECT IDENTIFIER ::= { private 1 }
+
+    IMPORTS
+        enterprises FROM RFC1155-SMI;
+
+tplink 		    OBJECT IDENTIFIER ::= { enterprises 11863 }
+ap              OBJECT IDENTIFIER ::= { tplink 10 }
+
+eap          	OBJECT IDENTIFIER ::= { ap 1 }
+--clientStatis      OBJECT IDENTIFIER ::= { eap 1 }
+systemTools	OBJECT IDENTIFIER ::= { eap 2}
+
+END
