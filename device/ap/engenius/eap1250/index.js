@@ -67,6 +67,23 @@ const Device = {
             '1G': 1
           }
         }
+      },
+      wireless: {
+        radios: {
+          nr: {
+            total: 2,
+            '2_4ghz': 1,
+            '5ghz': 1
+          }
+        },
+        stations: {
+          nr: {
+            total: 8,
+            '2.4GHz': 0,
+            '5GHz': 0,
+            '2.4GHz/5GHz': 8
+          }
+        }
       }
     }
   },
