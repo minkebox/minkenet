@@ -85,20 +85,105 @@ class Eval {
     switch (value.$) {
       case 'literal':
         return value.arg;
-      case 'type':
-        return await this.eval(value.type, value.arg, context, path, device);
       case 'eval':
       {
-        const frame = await this.getEvalFrame(context, value);
-        return await this.map(value, await frame.evaluate(await this.eval('literal', value.arg, context, path, device)));
+        try {
+          const frame = await this.getEvalFrame(context, value);
+          const result = await this.map(value, await frame.evaluate(await this.eval('literal', value.arg, context, path, device)));
+          if (result !== null && result !== undefined) {
+            return result;
+          }
+        }
+        catch (_) {
+        }
+        if ('fallback' in value) {
+          return await this.eval('literal', value.fallback, context, path, device);
+        }
+        return null;
       }
       case 'jsonp':
       {
-        return await this.map(value, JSONPath({ path: value.arg, json: context })[0]);
+        try {
+          const result = await this.map(value, JSONPath({ path: value.arg, json: context })[0]);
+          if (result !== null && result !== undefined) {
+            return result;
+          }
+        }
+        catch (_) {
+        }
+        if ('fallback' in value) {
+          return await this.eval('literal', value.fallback, context, path, device);
+        }
+        return null;
       }
       case 'selector':
       {
-        return await this.map(value, await (await this.getEvalFrame(context, value)).$eval(value.arg, elem => elem.type == 'radio' ? elem.checked : (elem.value || elem.innerText)));
+        try {
+          const result = await this.map(value, await (await this.getEvalFrame(context, value)).$eval(value.arg, elem => elem.type == 'radio' || elem.type == 'checkbox' ? elem.checked : (elem.value || elem.innerText)));
+          if (result !== null && result !== undefined) {
+            return result;
+          }
+        }
+        catch (_) {
+        }
+        if ('fallback' in value) {
+          return await this.eval('literal', value.fallback, context, path, device);
+        }
+        return null;
+      }
+      case 'oid':
+      {
+        const oid = await this.eval('literal', value.arg, context, path, device);
+        const session = device.getSNMPSession();
+        if ('values' in value) {
+          // Subtree
+          const ncontext = await new Promise(resolve => {
+            const v = {};
+            function add(oid, val) {
+              const p = oid.split('.');
+              let t = v;
+              for (let i = 0; i < p.length - 1; i++) {
+                t = t[p[i]] || (t[p[i]] = {});
+              }
+              t[p[p.length - 1]] = val;
+            }
+            session.subtree(oid,
+              varbinds => {
+                //Log('varbinds:', varbinds);
+                varbinds.forEach(varbind => add(varbind.oid, this.convertFromVarbind(varbind)));
+              },
+              () => {
+                resolve(v);
+              }
+            );
+          });
+          Log('varbinds:', JSON.stringify(ncontext, null, 1));
+          return await this.eval('jsonp', value.values, ncontext, path, device);
+        }
+        else {
+          // Single
+          const varbind = await new Promise((resolve, reject) => {
+            session.get([ oid ], (err, varbinds) => {
+              if (err) {
+                return reject(err);
+              }
+              resolve(varbinds[0]);
+            });
+          });
+          Log('varbind:', varbind);
+          try {
+            const result = this.map(value, this.convertFromVarbind(varbind));
+            if (result !== null && result !== undefined) {
+              return result;
+            }
+          }
+          catch (_) {
+          }
+          if ('fallback' in value) {
+            return await this.eval('literal', value.fallback, context, path, device);
+          }
+          return null;
+        }
       }
       case 'set':
       {
@@ -112,10 +197,50 @@ class Eval {
         }
         const text = await this.map(value, nvalue);
         Log('set text', text);
+        await frame.$eval(value.arg, (elem, text) => elem.value = text, text);
+        return true;
+      }
+      case 'type':
+      {
+        const frame = await this.getEvalFrame(context, value);
+        let nvalue = '';
+        if ('value' in value) {
+          nvalue = await this.eval(def$, value.value, frame, path, device)
+        }
+        else {
+          nvalue = await this.eval('kv', path, frame, path, device)
+        }
+        const text = await this.map(value, nvalue);
+        Log('type text', text);
         // Remove the INPUT value before we 'type' in the new text.
         await frame.$eval(value.arg, elem => elem.value = '');
         await frame.type(value.arg, text);
         return true;
+      }
+      case 'oid+set':
+      {
+        let nvalue = '';
+        if ('value' in value) {
+          nvalue = await this.eval(def$, value.value, context, path, device);
+        }
+        else {
+          nvalue = await this.eval('kv', path, context, path, device);
+        }
+        nvalue = await this.map(value, nvalue);
+        const oid = await this.eval('literal', value.arg, context, path, device);
+        const varbind = this.convertToVarbind(oid, value.type, nvalue);
+        Log('varbind:', varbind);
+        return await new Promise((resolve, reject) => {
+          device.getSNMPSession().set([ varbind ], (err, varbinds) => {
+            if (err) {
+              return reject(err);
+            }
+            if (SNMP.isVarbindError(varbinds[0])) {
+              return reject(SNMP.varbindError(varbinds[0]));
+            }
+            resolve(true);
+          });
+        });
       }
       case 'click':
       {
@@ -478,74 +603,6 @@ class Eval {
             break;
         }
         return await this.eval(type, value.values, ncontext, path, device);
-      }
-      case 'oid':
-      {
-        const oid = await this.eval('literal', value.arg, context, path, device);
-        const session = device.getSNMPSession();
-        if ('values' in value) {
-          // Subtree
-          const ncontext = await new Promise(resolve => {
-            const v = {};
-            function add(oid, val) {
-              const p = oid.split('.');
-              let t = v;
-              for (let i = 0; i < p.length - 1; i++) {
-                t = t[p[i]] || (t[p[i]] = {});
-              }
-              t[p[p.length - 1]] = val;
-            }
-            session.subtree(oid,
-              varbinds => {
-                //Log('varbinds:', varbinds);
-                varbinds.forEach(varbind => add(varbind.oid, this.convertFromVarbind(varbind)));
-              },
-              () => {
-                resolve(v);
-              }
-            );
-          });
-          Log('varbinds:', JSON.stringify(ncontext, null, 1));
-          return await this.eval('jsonp', value.values, ncontext, path, device);
-        }
-        else {
-          // Single
-          const varbind = await new Promise((resolve, reject) => {
-            session.get([ oid ], (err, varbinds) => {
-              if (err) {
-                return reject(err);
-              }
-              resolve(varbinds[0]);
-            });
-          });
-          Log('varbind:', varbind);
-          return this.map(value, this.convertFromVarbind(varbind));
-        }
-      }
-      case 'oid+set':
-      {
-        let nvalue = '';
-        if ('value' in value) {
-          nvalue = await this.eval(def$, value.value, context, path, device);
-        }
-        else {
-          nvalue = await this.eval('kv', path, context, path, device);
-        }
-        nvalue = await this.map(value, nvalue);
-        const oid = await this.eval('literal', value.arg, context, path, device);
-        const varbind = this.convertToVarbind(oid, value.type, nvalue);
-        Log('varbind:', varbind);
-        return await new Promise((resolve, reject) => {
-          device.getSNMPSession().set([ varbind ], (err, varbinds) => {
-            if (err) {
-              return reject(err);
-            }
-            if (SNMP.isVarbindError(varbinds[0])) {
-              return reject(SNMP.varbindError(varbinds[0]));
-            }
-            resolve(true);
-          });
-        });
       }
       case 'frame':
       {
