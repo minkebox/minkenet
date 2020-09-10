@@ -180,12 +180,12 @@ class BrowserDeviceInstance extends DeviceInstance {
         // Some devices have a username (other do not). Select the place to enter it.
         if (login.username) {
           Log('login', username);
-          await this.eval('literal', typeof login.username === 'string' ? { $: 'set', value: username, arg: login.username } : Object.assign({ value: username }, login.username), frame);
+          await this.eval('literal', typeof login.username === 'string' ? { $: 'type', value: username, arg: login.username } : Object.assign({ value: username }, login.username), frame);
         }
 
         // All devices have a password. Select and enter that.
         Log('password', password);
-        await this.eval('literal', typeof login.password === 'string' ? { $: 'set', value: password, arg: login.password } : Object.assign({ value: password }, login.password), frame);
+        await this.eval('literal', typeof login.password === 'string' ? { $: 'type', value: password, arg: login.password } : Object.assign({ value: password }, login.password), frame);
 
         // Activate the login. This probably involves clocking a button but other actions are possible.
         Log('activate', login.activate);
@@ -327,10 +327,10 @@ class BrowserDeviceInstance extends DeviceInstance {
       // Sanity check
       try {
         if (typeof result.system.macAddress[0] !== 'string') {
-          throw Error();
+          throw Error('Missing mac address');
         }
         if (typeof result.system.ipv4.address !== 'string') {
-          throw Error();
+          throw Error('Missing ip address');
         }
       }
       catch (e) {
