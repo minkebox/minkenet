@@ -1,4 +1,4 @@
-
+#! /usr/bin/env node
 const Koa = require('koa');
 const Websockify = require('koa-websocket');
 const CacheControl = require('koa-cache-control');
