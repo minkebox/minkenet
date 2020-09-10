@@ -12,7 +12,7 @@ module.exports = {
               arg: '/switch_info.cgi'
             },
             $1: {
-              $: 'set',
+              $: 'type',
               arg: `#switch_name`
             }
           }

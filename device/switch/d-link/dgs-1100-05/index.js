@@ -32,7 +32,7 @@ const Device = {
   login: {
     path: '/',
     password: {
-      $: 'set',
+      $: 'type',
       frame: 0,
       arg: '#pass'
     },

@@ -9,17 +9,17 @@ module.exports = {
         },
         $2: {
           oldPassword: {
-            $: 'set',
+            $: 'type',
             arg: '#content table:nth-child(2) tr:nth-child(1) input',
             value: { $: 'kv', arg: 'system.keychain.password', options: { original: true } }
           },
           newPassword: {
-            $: 'set',
+            $: 'type',
             arg: '#content table:nth-child(2) tr:nth-child(1) input',
             value: { $: 'kv', arg: 'system.keychain.password' }
           },
           rePassword: {
-            $: 'set',
+            $: 'type',
             arg: '#content table:nth-child(2) tr:nth-child(1) input',
             value: { $: 'kv', arg: 'system.keychain.password' }
           }
