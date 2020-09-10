@@ -79,9 +79,9 @@ const Device = {
         stations: {
           nr: {
             total: 8,
-            '2.4GHz': 0,
-            '5GHz': 0,
-            '2.4GHz/5GHz': 8
+            '2_4ghz': 0,
+            '5ghz': 0,
+            '2_4ghz+5ghz': 8
           }
         }
       }
@@ -89,11 +89,13 @@ const Device = {
   },
 
   read: {
+    $0: require('./read/radios'),
     $1: require('./read/name+version'),
     $2: require('./read/mac+physical'),
     $3: require('./read/ip+clients'),
     $4: require('./read/lag'),
-    $statistics: require('./read/statistics')
+    $statistics: require('./read/statistics'),
+    //$5: require('./read/radios')
   },
   write: {
     $1: require('./write/name'),
