@@ -1,17 +1,30 @@
 <div class="details-container tap-pane fade show active">
   <div class="accordion">
     <div class="card">
+      <div data-toggle="collapse" data-target="#bond-devices" class="card-header">
+        <div>Devices</div>
+      </div>
+      <div id="wifi-devices" class="collapse show">
+        {{> NetworkCardDevices}}
+      </div>
+    </div>
+    {{#with selected}}
+    <div class="card">
       <div data-toggle="collapse" data-target="" class="card-header">
-        <div>Overview</div>
+        <div>WiFi</div>
       </div>
       <div id="wifi-overview" class="collapse show">
         <div class="card-body">
           <div class="list-group">
             <form>
+              {{>RW name="Name (SSID)" value=ssid}}
+              {{>RWCheckbox name="Enable" value=enable}}
+              {{>RW name="VLAN" value=vlan}}
             </form>
           </div>
         </div>
       </div>
     </div>
+    {{/with}}
   </div>
 </div>

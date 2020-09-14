@@ -47,6 +47,10 @@ class DeviceInstanceManager extends EventEmitter {
     return devices;
   }
 
+  getWiFiDevices() {
+    return this.getAllDevices().filter(dev => dev.description.properties.ap);
+  }
+
   getAuthenticatedDevices() {
     return this.getAllDevices().filter(device => device._authenticated);
   }

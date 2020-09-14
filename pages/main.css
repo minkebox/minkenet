@@ -350,12 +350,14 @@ div[data-placeholder]:empty:before {
 .bonds-container a {
   text-decoration: none;
 }
+.list-container .row .col div,
 .networks-container .row .col div,
 .monitor-container .row .col div,
 .bonds-container .row .col div {
   padding: 3px 0;
 }
 
+.list-container .row.title .col div,
 .networks-container .row.title .col div,
 .bonds-container .row.title .col {
   font-weight: bold;
@@ -370,6 +372,7 @@ div[data-placeholder]:empty:before {
   padding: 5px 0 5px 15px;
 }
 
+.list-container .row .col .default,
 .networks-container .row .col .default,
 .bonds-container .row .col .default {
   position: relative;
@@ -403,6 +406,7 @@ div[data-placeholder]:empty:before {
 }
 
 .networks-new,
+.wifi-new,
 .bonds-new {
   margin-top: 20px;
 }
@@ -496,6 +500,7 @@ div[data-placeholder]:empty:before {
 }
 
 #bond-devices .active-,
+#wifi-devices .active-,
 #monitor-hardware .active- {
   opacity: 0.5;
 }

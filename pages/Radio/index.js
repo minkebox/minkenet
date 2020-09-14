@@ -16,14 +16,14 @@ class Wireless extends Page {
 
   select() {
     super.select();
-    this.state.devices = DeviceInstanceManager.getAllDevices();
+    this.state.devices = DeviceInstanceManager.getWiFiDevices();
     if (!this.state.selectedDevice && this.state.devices.length) {
       this.state.selectedDevice = this.state.devices[0];
     }
     //this.state.selectedDevice.on('update', this.onDeviceUpdate);
     //this.state.selectedDevice.on('updating', this.onDeviceUpdating);
     //this.state.selectedDevice.watch();
-    this.html('main-container', Template.WirelessTab(this.state));
+    this.html('main-container', Template.RadioTab(this.state));
   }
 
   deselect() {

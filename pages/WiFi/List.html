@@ -1,17 +1,18 @@
 <div class="list-container container-fluid">
   <div class="row title">
-    <div class="col col-name">Name</div>
+    <div class="col col-name"><div>Name</div></div>
   </div>
-  {{#each wifi}}
-  <a id="wifi-{{id}}" class="row {{#if (eq ../selected.ssid ssid)}}active{{/if}}" href="#" onclick="selectclient(event,'{{ssid}}')">
+  {{#each station}}
+  <a id="wifi-{{ssid}}" class="row {{#if (eq ../selected.ssid ssid)}}active{{/if}}" href="#" onclick="selectssid(event,'{{ssid}}')">
     {{> WiFiSummary selected=../selected}}
   </a>
   {{/each}}
   <script>
-    window.selectclient = function(evt,id) {
+    window.selectssid = function(evt,id) {
       $('.wifi-container .row').removeClass('active');
       send('select.client', id);
       $(evt.target).parents('.wifi-container .row').addClass('active');
     }
   </script>
 </div>
+<button type="button" class="wifi-new btn btn-secondary btn-sm" onclick="$('#wifi-new-modal').modal()">Create WiFi</button>
