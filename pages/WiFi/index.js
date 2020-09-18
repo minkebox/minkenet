@@ -12,6 +12,7 @@ class WiFi extends Page {
       selectdevicecmd: 'device.toggle',
       devices: [],
       station: [],
+      selectedIdx: -1,
       selected: null
     };
   }
@@ -30,10 +31,26 @@ class WiFi extends Page {
     this.state.ports = Array(this.state.devices.length);
     this.state.station = WiFiManager.getAllStations();
 
-    this.state.selected = this.state.station[0];
-    this.state.selected.instances.forEach(instance => {
-      this.state.ports[this.state.devices.indexOf(instance.device)] = { active: true };
-    });
+    if (this.state.selectedIdx === -1) {
+      this.state.selectedIdx = 0;
+    }
+    this.state.selected = this.state.station[this.state.selectedIdx];
+    if (this.state.selected) {
+      this.state.selected.instances.forEach(instance => {
+        this.state.ports[this.state.devices.indexOf(instance.device)] = { active: true };
+      });
+    }
+  }
+
+  async 'select.ssid' (msg) {
+    const ssid = msg.value;
+    const idx = this.state.station.findIndex(station => station.ssid == ssid);
+    if (idx === -1) {
+      return;
+    }
+    this.state.selectedIdx = idx;
+    this.updateState();
+    this.html('wifi-selected', Template.WiFiSelected(this.state));
   }
 
   async 'device.toggle' (msg) {

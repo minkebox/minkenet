@@ -9,9 +9,9 @@
   {{/each}}
   <script>
     window.selectssid = function(evt,id) {
-      $('.wifi-container .row').removeClass('active');
-      send('select.client', id);
-      $(evt.target).parents('.wifi-container .row').addClass('active');
+      $('.list-container .row').removeClass('active');
+      send('select.ssid', id);
+      $(evt.target).parents('.list-container .row').addClass('active');
     }
   </script>
 </div>
