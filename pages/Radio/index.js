@@ -4,7 +4,7 @@ const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const WiFiManager = require('../../WiFiManager');
 const Debounce = require('../../utils/Debounce');
 
-class Wireless extends Page {
+class Radio extends Page {
 
   constructor(send) {
     super(send);
@@ -31,4 +31,4 @@ class Wireless extends Page {
 
 }
 
-module.exports = Wireless;
+module.exports = Radio;
