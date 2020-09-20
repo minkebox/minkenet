@@ -56,7 +56,9 @@ class WiFiManager extends EventEmitter {
                 enable: true
               },
               steering: {
-                enable: true
+                enable: true,
+                preference: '5ghz',
+                minrssi: -50
               }
             };
           }

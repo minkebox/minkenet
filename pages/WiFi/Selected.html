@@ -32,7 +32,7 @@
           <div class="list-group">
             <form>
               {{>RW name="VLAN" value=vlan}}
-              {{>RWCheckbox name="Isolate" value=isolate.enable}}
+              {{>RWCheckbox name="Isolate clients" value=isolate.enable}}
             </form>
           </div>
         </div>
@@ -45,21 +45,25 @@
           <div class="list-group">
             <form>
               {{>RW name="Mode" value=security.mode}}
-              {{>RW name="Encrytion" value=security.encryption}}
+              {{>RW name="Encryption" value=security.encryption}}
               {{>RW name="Passphrase" value=security.passphrase}}
             </form>
           </div>
         </div>
       </div>
       <div data-toggle="collapse" data-target="" class="card-header">
-        <div>Options</div>
+        <div>Sharing</div>
       </div>
       <div id="wifi-options" class="collapse show">
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RWCheckbox name="Fast roaming" value=fastroaming.enable}}
               {{>RWCheckbox name="Steering" value=steering.enable}}
+              <div style="margin:0 6px">
+              {{>RW name="Preference" value=steering.preference}}
+              {{>RW name="RSSI" value=steering.minrssi}}
+              </div>
+              {{>RWCheckbox name="Fast roaming" value=fastroaming.enable}}
             </form>
           </div>
         </div>
