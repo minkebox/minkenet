@@ -57,9 +57,8 @@ async function WS(ctx) {
     tabs: {
       overview: new VizTab(send),
       devices: new Page({ summary: new DevicesTab(send), ports: new PortsTab(send), radios: new WirelessTab(send) }),
-      networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send), wifi: new WiFiTab(send) }),
+      networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send), wifi: new WiFiTab(send), capture: new CaptureTab(send) }),
       clients: new Page({ all: new ClientsTab(send) }),
-      utils: new Page({ capture: new CaptureTab(send) }),
       config: new Page({ defaults: new ConfigTab(send), monitor: new MonitorTab(send) })
     },
     needCommit: false
