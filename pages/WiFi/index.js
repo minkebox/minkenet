@@ -44,7 +44,7 @@ class WiFi extends Page {
 
   async 'select.ssid' (msg) {
     const ssid = msg.value;
-    const idx = this.state.station.findIndex(station => station.ssid == ssid);
+    const idx = this.state.station.findIndex(station => station.ssid.name == ssid);
     if (idx === -1) {
       return;
     }

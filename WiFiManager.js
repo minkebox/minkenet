@@ -36,7 +36,11 @@ class WiFiManager extends EventEmitter {
           const cstation = newstations[station.ssid];
           if (!cstation) {
             newstations[station.ssid] = {
-              ssid: station.ssid,
+              ssid: {
+                name: station.ssid,
+                enable: true,
+                hidden: false
+              },
               instances: [{
                 device: dev,
                 station: station
@@ -44,7 +48,16 @@ class WiFiManager extends EventEmitter {
               bands: station.bands.split(',').map(band => radios[band]),
               enable: station.enable,
               security: station.security,
-              vlan: station.vlan
+              vlan: station.vlan,
+              isolate: {
+                enable: false,
+              },
+              fastroaming: {
+                enable: true
+              },
+              steering: {
+                enable: true
+              }
             };
           }
           else {

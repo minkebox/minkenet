@@ -3,8 +3,8 @@
     <div class="col col-name"><div>Name</div></div>
   </div>
   {{#each station}}
-  <a id="wifi-{{ssid}}" class="row {{#if (eq ../selected.ssid ssid)}}active{{/if}}" href="#" onclick="selectssid(event,'{{ssid}}')">
-    {{> WiFiSummary selected=../selected}}
+  <a id="wifi-{{ssid.name}}" class="row {{#if (eq ../selected.ssid.name ssid.name)}}active{{/if}}" href="#" onclick="selectssid(event,'{{ssid.name}}')">
+    {{> WiFiSummary}}
   </a>
   {{/each}}
   <script>

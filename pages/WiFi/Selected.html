@@ -17,9 +17,49 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RW name="Name (SSID)" value=ssid}}
-              {{>RWCheckbox name="Enable" value=enable}}
+              {{>RW name="Name (SSID)" value=ssid.name}}
+              {{>RWCheckbox name="Enable" value=ssid.enable}}
+              {{>RWCheckbox name="Hidden" value=ssid.hidden}}
+            </form>
+          </div>
+        </div>
+      </div>
+      <div data-toggle="collapse" data-target="" class="card-header">
+        <div>Network</div>
+      </div>
+      <div id="wifi-network" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
               {{>RW name="VLAN" value=vlan}}
+              {{>RWCheckbox name="Isolate" value=isolate.enable}}
+            </form>
+          </div>
+        </div>
+      </div>
+      <div data-toggle="collapse" data-target="" class="card-header">
+        <div>Security</div>
+      </div>
+      <div id="wifi-security" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RW name="Mode" value=security.mode}}
+              {{>RW name="Encrytion" value=security.encryption}}
+              {{>RW name="Passphrase" value=security.passphrase}}
+            </form>
+          </div>
+        </div>
+      </div>
+      <div data-toggle="collapse" data-target="" class="card-header">
+        <div>Options</div>
+      </div>
+      <div id="wifi-options" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RWCheckbox name="Fast roaming" value=fastroaming.enable}}
+              {{>RWCheckbox name="Steering" value=steering.enable}}
             </form>
           </div>
         </div>
