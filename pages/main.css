@@ -303,10 +303,11 @@ div[data-placeholder]:empty:before {
   border-width: 0;
   padding-right: 20px;
 }
+.topology-notice .message {
+  display: inline-block;
+  width: calc(100% - 80px);
+}
 .topology-notice button {
-  position: relative;
-  top: -5px;
-  float: right;
   color: var(--minor-text-color);
   border-color: var(--minor-text-color);
 }
