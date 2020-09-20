@@ -185,6 +185,7 @@ div[data-placeholder]:empty:before {
 }
 
 .device-details-container,
+.details-container,
 .ports-container,
 .network-details-container,
 .monitor-details-container,
@@ -206,10 +207,12 @@ div[data-placeholder]:empty:before {
 }
 
 .entry-selected .col-form-label-sm,
+.details-container .col-form-label-sm,
 .device-details-container .col-form-label-sm,
 .bond-details-container .col-form-label-sm,
 .ports-container .col-form-label-sm,
 .monitor-details-container .col-form-label-sm,
+.network-details-container .col-form-label-sm,
 .clients-selected .col-form-label-sm {
   line-height: 1;
 }
