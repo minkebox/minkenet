@@ -21,6 +21,7 @@ class TopologyManager extends EventEmitter {
 
   constructor() {
     super();
+    this._entry = null;
     this._topology = [];
     this.valid = false;
     this.running = false;
@@ -34,6 +35,10 @@ class TopologyManager extends EventEmitter {
 
   getTopology() {
     return this._topology;
+  }
+
+  getAttachmentPoint() {
+    return this._entry;
   }
 
   // Find the path (a set of device/port to device/port links) between two devices.
@@ -106,6 +111,7 @@ class TopologyManager extends EventEmitter {
 
   clear() {
     this._topology = [];
+    this._entry = null;
     this.valid = false;
   }
 
@@ -457,6 +463,7 @@ class TopologyManager extends EventEmitter {
     for (let i = 0; i < nprobes.length; i++) {
       if (nprobes[i].rx.length === 1 && nprobes[i].tx.length === 0) {
         Log('filtering entry node');
+        this._entry = nprobes[i].rx[0];
         nprobes = this._filterProbes(nprobes, nprobes[i].rx[0], {});
         break;
       }
@@ -637,6 +644,7 @@ class TopologyManager extends EventEmitter {
     return {
       _id: 'topology',
       valid: this.valid,
+      entry: { deviceId: this._entry.device._id, port: this._entry.port },
       topology: this._topology.map(link => [
         { deviceId: link[0].device._id, port: link[0].port } , { deviceId: link[1].device._id, port: link[1].port }
       ])
@@ -647,6 +655,7 @@ class TopologyManager extends EventEmitter {
     this.valid = false;
     if (dbTopology) {
       try {
+        this._entry = { device: DeviceInstanceManager.getDeviceById(dbTopology.entry.deviceId), port: dbTopology.entry.port },
         this._topology = dbTopology.topology.map(link => {
           const d0 = DeviceInstanceManager.getDeviceById(link[0].deviceId);
           const d1 = DeviceInstanceManager.getDeviceById(link[1].deviceId);
@@ -659,7 +668,9 @@ class TopologyManager extends EventEmitter {
       }
       catch (_) {
         // Failed to rebuild topology - device deleted?
+        this._entry = null;
         this._topology = [];
+        this.valid = false;
       }
     }
   }
