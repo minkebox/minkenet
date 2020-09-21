@@ -25,6 +25,19 @@
         </div>
       </div>
       <div data-toggle="collapse" data-target="" class="card-header">
+        <div>Security</div>
+      </div>
+      <div id="wifi-security" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{>RWSelect name="Mode" value=security.mode options=(array "none" "wpa2/psk + aes")}}
+              {{>RW name="Passphrase" value=security.passphrase}}
+            </form>
+          </div>
+        </div>
+      </div>
+      <div data-toggle="collapse" data-target="" class="card-header">
         <div>Network</div>
       </div>
       <div id="wifi-network" class="collapse show">
@@ -38,20 +51,6 @@
         </div>
       </div>
       <div data-toggle="collapse" data-target="" class="card-header">
-        <div>Security</div>
-      </div>
-      <div id="wifi-security" class="collapse show">
-        <div class="card-body">
-          <div class="list-group">
-            <form>
-              {{>RW name="Mode" value=security.mode}}
-              {{>RW name="Encryption" value=security.encryption}}
-              {{>RW name="Passphrase" value=security.passphrase}}
-            </form>
-          </div>
-        </div>
-      </div>
-      <div data-toggle="collapse" data-target="" class="card-header">
         <div>Sharing</div>
       </div>
       <div id="wifi-options" class="collapse show">
@@ -60,8 +59,8 @@
             <form>
               {{>RWCheckbox name="Steering" value=steering.enable}}
               <div style="margin:0 6px">
-              {{>RW name="Preference" value=steering.preference}}
-              {{>RW name="RSSI" value=steering.minrssi}}
+              {{>RWSelect name="5GHz" value=steering.preference options=(array "prefer" "force" "balance")}}
+              {{>RW name="Minimum RSSI" value=steering.minrssi}}
               </div>
               {{>RWCheckbox name="Fast roaming" value=fastroaming.enable}}
             </form>
