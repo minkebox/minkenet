@@ -5,6 +5,7 @@ const SNMP = require('net-snmp');
 const TypeConversion = require('./utils/TypeConversion');
 const Log = require('debug')('browser:eval');
 const LogNav = require('debug')('browser:nav');
+const LogContent = require('debug')('browser:content');
 
 const TIMEOUT = {
   frameNavigation: 30000,
@@ -463,6 +464,7 @@ class Eval {
           LogNav('goto:', url);
           response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
           LogNav('goneto:', url, response.ok());
+          //LogContent(await frame.content());
         }
         catch (e) {
           Log(e);
