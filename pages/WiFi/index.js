@@ -61,7 +61,7 @@ class WiFi extends Page {
     else {
       this.state.ports[msg.value] = { active: true };
     }
-    this.html('wifi-devices', Template.NetworkCardDevices(this.state));
+    this.html('wifi-devices', Template.PortsDevices(this.state));
   }
 }
 

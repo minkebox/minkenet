@@ -100,7 +100,7 @@ class Networks extends Page {
     // List of networks names and vlan ids
     this.html('networks-column', Template.NetworkList(this.state));
     // Pictures of devices with vlans highlighted
-    this.html('network-devices', Template.NetworkCardDevices(this.state));
+    this.html('network-devices', Template.PortsDevices(this.state));
     // Selected vlan name and id
     this.html('network-overview', Template.NetworkCardNetwork(this.state));
     // Vlan information for device port
@@ -176,7 +176,7 @@ class Networks extends Page {
     }
     this.updateState();
     this.html('network-overview', Template.NetworkCardNetwork(this.state));
-    this.html('network-devices', Template.NetworkCardDevices(this.state));
+    this.html('network-devices', Template.PortsDevices(this.state));
     this.html('network-port', Template.NetworkCardPort(this.state));
   }
 
@@ -206,7 +206,7 @@ class Networks extends Page {
     this.state.phantoms.push({ id: id, name: name });
     this.updateState({ vid: id });
     this.html('networks-column', Template.NetworkList(this.state));
-    this.html('network-devices', Template.NetworkCardDevices(this.state));
+    this.html('network-devices', Template.PortsDevices(this.state));
     this.html('network-overview', Template.NetworkCardNetwork(this.state));
   }
 
