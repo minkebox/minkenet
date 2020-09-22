@@ -30,10 +30,12 @@ module.exports = {
             }
             const group = info[i][0];
             info[i][2].split(',').forEach(s => {
-              s = s.split('/')[2].split('-');
-              const limit = parseInt(s[1] || s[0]);
-              for (let j = parseInt(s[0]); j <= limit; j++) {
-                ports[j - 1] = { type: type, group: group };
+              if (s !== 'N/A') {
+                s = s.split('/')[2].split('-');
+                const limit = parseInt(s[1] || s[0]);
+                for (let j = parseInt(s[0]); j <= limit; j++) {
+                  ports[j - 1] = { type: type, group: group };
+                }
               }
             });
           }
