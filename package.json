@@ -26,6 +26,7 @@
     "net-snmp": "^2.7.1",
     "node-mndp": "git+https://github.com/patagonaa/node-mndp.git",
     "oui": "^11.0.28",
+    "pcap": "^3.1.0",
     "popper.js": "^1.16.1",
     "puppeteer": "^4.0.1",
     "sortablejs": "^1.10.2"

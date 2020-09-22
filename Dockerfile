@@ -4,7 +4,7 @@ ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 COPY . /app
 
-RUN apk add nodejs npm git chromium ;\
+RUN apk add nodejs npm git chromium libpcap-dev ;\
     cd /app ; npm install --production ;\
     apk del git npm
 
