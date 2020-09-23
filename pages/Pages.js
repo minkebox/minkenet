@@ -12,7 +12,7 @@ const JSPages = {
   '/js/script.js':      `${__dirname}/script.js`,
   '/js/jquery.js':      `${__dirname}/../node_modules/jquery/dist/jquery.js`,
   '/js/bootstrap.js':   `${__dirname}/../node_modules/bootstrap/dist/js/bootstrap.bundle.js`,
-  '/js/sortable.js':    `${__dirname}/../node_modules/sortablejs/Sortable.min.js`,
+  '/js/sortable.js':    `${__dirname}/../node_modules/sortablejs/dist/sortable.umd.js`,
   '/js/dx.all.js':      `${__dirname}/../node_modules/devextreme/dist/js/dx.all.js`
 };
 
