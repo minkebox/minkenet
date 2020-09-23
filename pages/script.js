@@ -125,7 +125,8 @@ onMessage['capture.packet'] = msg => {
   const win = document.getElementById('capture-window');
   if (win) {
     const builder = document.createElement('tbody');
-    builder.innerHTML = msg.value;
+    builder.innerHTML = msg.value.html;
+    builder.firstElementChild.raw = msg.value.raw;
     win.appendChild(builder.firstElementChild);
     if (win.childElementCount > MAX_CAPTURE_PACKETS) {
       win.firstElementChild.remove();
