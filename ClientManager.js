@@ -145,7 +145,8 @@ class ClientManager extends EventEmitter {
     const hosts = this.arp.getAddresses();
     for (let i = 0; i < hosts.length; i++) {
       const mac = hosts[i].txt.macAddress;
-      const updated = this.updateEntry(mac, { ip: hosts[i].ip, hostname: hosts[i].txt.hostname });
+      const hostname = hosts[i].txt.hostname;
+      const updated = this.updateEntry(mac, { ip: hosts[i].ip, hostname: hostname != '?' ? hostname : '' });
       if (updated) {
         Log('update arp mac:', mac);
         change = true;
