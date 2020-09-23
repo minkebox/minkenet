@@ -1,3 +1,4 @@
+const MacAddress = require('macaddress');
 const PCap = require('pcap');
 const Handlebars = require('handlebars');
 const Template = require('../Template');
@@ -44,7 +45,9 @@ class Capture extends Page {
     this.device = CAPTURE_DEVICE;
     this.state = {
       devices: [],
-      topologyValid: false
+      topologyValid: false,
+      ignoreBroadcast: true,
+      ignoreHost: true
     };
   }
 
@@ -63,12 +66,12 @@ class Capture extends Page {
     this.state.topologyValid = TopologyManager.valid;
   }
 
-  startCapture() {
+  async startCapture() {
     if (this.session) {
       this.stopCapture();
     }
     this.session = PCap.createSession(this.device, {
-      filter: this.buildFilter(),
+      filter: await this.buildFilter(),
       promiscuous: true,
       monitor: false,
       buffer_size: CAPTURE_BUFFER_SIZE,
@@ -80,7 +83,7 @@ class Capture extends Page {
       if (packet.link_type !== 'LINKTYPE_ETHERNET') {
         return;
       }
-      console.log(packet);
+      //console.log(packet);
       const ether = packet.payload;
       switch (ether.ethertype) {
         case 0x0800: // IPv4
@@ -105,15 +108,26 @@ class Capture extends Page {
     });
   }
 
-  stopCapture() {
+  async stopCapture() {
     if (this.session) {
       this.session.close(); // Removes all listeners
       this.session = null;
     }
   }
 
-  buildFilter() {
-    return 'arp'
+  async buildFilter() {
+    const filter = [];
+    if (this.state.ignoreBroadcast) {
+      filter.push('(not ether broadcast)');
+    }
+    if (this.state.ignoreHost) {
+      await this._setMacAddress();
+      if (this.eaddr) {
+        filter.push(`(not ether host ${this.eaddr})`);
+      }
+    }
+    //console.log(filter);
+    return filter.join(' and ');
   }
 
   packet(text) {
@@ -122,15 +136,28 @@ class Capture extends Page {
 
   async 'capture.start' (msg) {
     if (this.session) {
-      this.stopCapture();
+      await this.stopCapture();
     }
     else {
-      this.startCapture();
+      await this.startCapture();
     }
   }
 
   async 'capture.stop' (msg) {
     this.stopCapture();
+  }
+
+  async _setMacAddress() {
+    if (!this.eaddr) {
+      return new Promise(resolve => {
+        MacAddress.getMacAddress(this.device, (err, mac) => {
+          if (!err) {
+            this.eaddr = mac;
+          }
+          resolve();
+        });
+      });
+    }
   }
 
 }

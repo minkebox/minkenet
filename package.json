@@ -21,6 +21,7 @@
     "koa-router": "^9.1.0",
     "koa-websocket": "^6.0.0",
     "local-devices": "^3.0.0",
+    "macaddress": "^0.5.1",
     "nanotimer": "^0.3.15",
     "nedb": "^1.8.0",
     "net-snmp": "^2.7.1",
