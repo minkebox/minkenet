@@ -276,6 +276,10 @@ class ClientManager extends EventEmitter {
     return clients;
   }
 
+  getClientByMac(addr) {
+    return this.mac[addr];
+  }
+
   getClientByIP(address) {
     for (let addr in this.mac) {
       if (this.mac[addr].ip == address) {

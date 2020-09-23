@@ -120,6 +120,19 @@ onMessage['device.details.summary.update'] = msg => {
   details.replaceWith(builder);
 }
 
+const MAX_CAPTURE_PACKETS = 200;
+onMessage['capture.packet'] = msg => {
+  const win = document.getElementById('capture-window');
+  if (win) {
+    const builder = document.createElement('tbody');
+    builder.innerHTML = msg.value;
+    win.appendChild(builder.firstElementChild);
+    if (win.childElementCount > MAX_CAPTURE_PACKETS) {
+      win.firstElementChild.remove();
+    }
+  }
+}
+
 const GraphConfig = {
   colors: [ '#488a29', '#c0b125', '#347794' ]
 };

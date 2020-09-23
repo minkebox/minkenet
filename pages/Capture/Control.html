@@ -1,3 +1,19 @@
-{{#unless topologyValid}}
-{{> NetworkTopologyNotice}}
-{{/unless}}
+<div class="capture">
+  {{#unless topologyValid}}
+  {{> NetworkTopologyNotice}}
+  {{/unless}}
+  <div class="capture-config">
+    <button type="button" class="capture-start btn btn-secondary btn-sm" onclick="send('capture.start')">Start</button>
+  </div>
+  <div class="capture-window">
+    <div class="capture-window-title packet">
+      <div class="time">Time</div>
+      <div class="source">Source</div>
+      <div class="destination">Destination</div>
+      <div class="protocol">Proto</div>
+      <div class="info">Information</div>
+    </div>
+    <div class="capture-window-contents" id="capture-window"></div>
+  </div>
+  </div>
+</div>
