@@ -1,13 +1,13 @@
-<div class="packet">
+<div class="packet" onclick="selectpkt(event)">
   <div class="time">{{pcap_header.tv_sec}}</div>
   <div class="source">{{etheraddr payload.shost.addr}}</div>
   <div class="destination">{{etheraddr payload.dhost.addr}}</div>
   <div class="protocol">ARP</div>
   <div class="info">
     {{#if (eq payload.payload.operation 1)}}
-      Who has {{ipaddr payload.payload.target_pa.addr}}? Tell {{etheraddr payload.payload.sender_ha.addr}}
+    Who has {{ipaddr payload.payload.target_pa.addr}}? Tell {{etheraddr payload.payload.sender_ha.addr}}
     {{else if (eq payload.payload.operation 2)}}
-      {{ipaddr payload.payload.sender_pa.addr}} is at {{etheraddr payload.payload.sender_ha.addr}}
+    {{ipaddr payload.payload.sender_pa.addr}} is at {{etheraddr payload.payload.sender_ha.addr}}
     {{/if}}
   </div>
 </div>

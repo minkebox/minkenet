@@ -35,6 +35,27 @@ Handlebars.registerHelper({
   },
   ipaddr: function(addr) {
     return `${addr[0]}.${addr[1]}.${addr[2]}.${addr[3]}`;
+  },
+  iporhost: function(addr) {
+    const ip = `${addr[0]}.${addr[1]}.${addr[2]}.${addr[3]}`;
+    const dev = ClientManager.getClientByIP(ip);
+    if (dev) {
+      if (dev.name) {
+        return dev.name;
+      }
+      if (dev.hostname) {
+        return dev.hostname;
+      }
+    }
+    switch (ip) {
+      case '224.0.0.251':
+        return 'mDNS'
+      case '239.255.255.250':
+        return 'UPnP/SSDP';
+      default:
+        break;
+    }
+    return ip;
   }
 });
 
@@ -79,10 +100,10 @@ class Capture extends Page {
       snap_length: CAPTURE_SNAP_LENGTH
     });
     this.session.on('packet', raw => {
-      const packet = PCap.decode.packet(raw);
-      if (packet.link_type !== 'LINKTYPE_ETHERNET') {
+      if (raw.link_type !== 'LINKTYPE_ETHERNET') {
         return;
       }
+      const packet = PCap.decode.packet(raw);
       //console.log(packet);
       const ether = packet.payload;
       switch (ether.ethertype) {
@@ -91,14 +112,24 @@ class Capture extends Page {
           switch (ip4.protocol) {
             case 1: // ICMP
             case 2: // IGMP
+              break;
             case 6: // TCP
+              //this.packet(raw, Template.CaptureProtoTcp(packet));
+              break;
             case 17: // UDP
+              if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
+                this.packet(raw, Template.CaptureProtoDNS(packet));
+              }
+              else {
+                this.packet(raw, Template.CaptureProtoUdp(packet));
+              }
+              break;
             default:
               break;
           }
           break;
         case 0x0806: // ARP
-          this.packet(Template.CaptureProtoArp(packet));
+          this.packet(raw, Template.CaptureProtoArp(packet));
           break;
         case 0x86dd: // IPv6
           break;
@@ -130,8 +161,12 @@ class Capture extends Page {
     return filter.join(' and ');
   }
 
-  packet(text) {
-    this.send('capture.packet', text);
+  packet(raw, text) {
+    const data = JSON.stringify({
+      h: raw.header.toString('latin1'),
+      b: raw.buf.toString('latin1', 0, raw.header.readUInt32LE(12))
+    });
+    this.send('capture.packet', { raw: data, html: text });
   }
 
   async 'capture.start' (msg) {
@@ -145,6 +180,16 @@ class Capture extends Page {
 
   async 'capture.stop' (msg) {
     this.stopCapture();
+  }
+
+  async 'select.packet' (msg) {
+    const raw = JSON.parse(msg.value);
+    const packet = PCap.decode.packet({
+      link_type: 'LINKTYPE_ETHERNET',
+      header: Buffer.from(raw.h, 'latin1'),
+      buf: Buffer.from(raw.b, 'latin1')
+    });
+    console.log(packet);
   }
 
   async _setMacAddress() {
