@@ -626,8 +626,8 @@ div[data-placeholder]:empty:before {
 }
 .packet .protocol {
   display: inline-block;
-  min-width: 50px;
-  max-width: 50px;
+  min-width: 65px;
+  max-width: 65px;
   overflow: hidden;
 }
 .packet .info {
