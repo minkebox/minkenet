@@ -122,14 +122,14 @@ onMessage['device.details.summary.update'] = msg => {
 
 const MAX_CAPTURE_PACKETS = 200;
 onMessage['capture.packet'] = msg => {
-  const win = document.getElementById('capture-window');
+  const win = document.getElementById('capture-window-content');
   if (win) {
     const builder = document.createElement('tbody');
     builder.innerHTML = msg.value.html;
     builder.firstElementChild.raw = msg.value.raw;
     win.appendChild(builder.firstElementChild);
     if (win.childElementCount > MAX_CAPTURE_PACKETS) {
-      win.firstElementChild.remove();
+      win.firstElementChild.nextElementSibling.remove();
     }
     win.scrollTo(0, win.scrollHeight);
   }
