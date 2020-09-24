@@ -1,9 +1,11 @@
 <div class="packet" onclick="selectpkt(event)">
-  <div class="time">{{pcap_header.tv_sec}}</div><div class="source">{{etheraddr payload.shost.addr}}</div><div class="destination">{{etheraddr payload.dhost.addr}}</div><div class="protocol">ARP</div><div class="info">
-    {{#if (eq payload.payload.operation 1)}}
-    Who has {{ipaddr payload.payload.target_pa.addr}}? Tell {{etheraddr payload.payload.sender_ha.addr}}
-    {{else if (eq payload.payload.operation 2)}}
-    {{ipaddr payload.payload.sender_pa.addr}} is at {{etheraddr payload.payload.sender_ha.addr}}
+  <div class="time">{{pcap_header.tv_sec}}</div><div class="source">{{etherorhost payload.shost.addr}}</div><div class="destination">{{etherorhost payload.dhost.addr}}</div><div class="protocol">ARP</div><div class="info">
+    {{#with payload.payload}}
+    {{#if (eq operation 1)}}
+    Who has {{ipaddr target_pa.addr}}? Tell {{etherorhost sender_ha.addr}}
+    {{else if (eq operation 2)}}
+    {{ipaddr sender_pa.addr}} is at {{etherorhost sender_ha.addr}}
     {{/if}}
+    {{/with}}
   </div>
 </div>

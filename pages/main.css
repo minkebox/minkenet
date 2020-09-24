@@ -634,3 +634,24 @@ div[data-placeholder]:empty:before {
   display: inline-block;
   overflow: hidden;
 }
+
+.card .inspect.accordion {
+  margin: 10px;
+  font-size: 12px;
+}
+.card .inspect.accordion .card-header {
+  padding: 6px 10px;
+  font-weight: normal;
+}
+.inspect .details {
+  padding: 10px;
+}
+.inspect .frame {
+
+}
+.inspect .ethernet {
+
+}
+.inspect .arp {
+
+}

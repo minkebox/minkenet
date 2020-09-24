@@ -18,7 +18,14 @@ const hex = (v) => {
 }
 
 Handlebars.registerHelper({
-  etheraddr: function(addr) {
+  hex: function(v) {
+    const r = `${v.toString(16)}`;
+    return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
+  },
+  localtime: function(secs) {
+    return new Date(secs * 1000).toTimeString();
+  },
+  etherorhost: function(addr) {
     const eth = `${hex(addr[0])}:${hex(addr[1])}:${hex(addr[2])}:${hex(addr[3])}:${hex(addr[4])}:${hex(addr[5])}`;
     if (eth === 'ff:ff:ff:ff:ff:ff') {
       return 'broadcast'
@@ -33,6 +40,9 @@ Handlebars.registerHelper({
       }
     }
     return eth;
+  },
+  etheraddr: function(addr) {
+    return `${hex(addr[0])}:${hex(addr[1])}:${hex(addr[2])}:${hex(addr[3])}:${hex(addr[4])}:${hex(addr[5])}`;
   },
   ipaddr: function(addr) {
     return `${addr[0]}.${addr[1]}.${addr[2]}.${addr[3]}`;

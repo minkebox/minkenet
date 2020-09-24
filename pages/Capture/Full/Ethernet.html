@@ -1,0 +1,13 @@
+{{#with payload}}
+<div class="ethernet card">
+  <div data-toggle="collapse" data-target="#ethernet-details" class="card-header">
+    Ethernet: {{etheraddr shost.addr}} &rarr; {{etheraddr dhost.addr}}
+  </div>
+  <div id="ethernet-details" class="collapse details">
+    <div>Source: {{etherorhost shost.addr}} ({{etheraddr shost.addr}})</div>
+    <div>Destination: {{etherorhost dhost.addr}} ({{etheraddr dhost.addr}})</div>
+    <div>Type: {{#if (eq ethertype 2048)}}IPv4{{else if (eq ethertype 2054)}}ARP{{else}}Unknown{{/if}} ({{hex ethertype}})</div>
+    {{#if vlan}}<div>VLAN: {{vlan.id}}</div>{{/if}}
+  </div>
+</div>
+{{/with}}

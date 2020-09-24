@@ -1,0 +1,11 @@
+{{#with pcap_header}}
+<div class="ethernet card">
+  <div data-toggle="collapse" data-target="#frame-details" class="card-header">
+    Frame: {{len}} bytes
+  </div>
+  <div id="frame-details" class="collapse details">
+    <div>Arrival Time: {{localtime tv_sec}}</div>
+    <div>Frame Length: {{len}} bytes ({{mul len 8}} bits)</div>
+  </div>
+</div>
+{{/with}}

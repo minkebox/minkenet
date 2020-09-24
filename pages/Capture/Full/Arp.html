@@ -1,2 +1,29 @@
-<div class="inspect">
+<div class="inspect accordion">
+  {{> CaptureFullFrame }}
+  {{> CaptureFullEthernet }}
+  {{#with payload.payload}}
+  <div class="arp card">
+    <div data-toggle="collapse" data-target="#arp-details" class="card-header">
+      Address Resolution Protocol
+      {{#if (eq operation 1)}}
+      (request)
+      {{else if (eq operation 2)}}
+      (reply)
+      {{else}}
+      (unknown)
+      {{/if}}
+    </div>
+    <div id="arp-details" class="collapse details">
+      <div>Hardware type: {{#if (eq htype 1)}}Ethernet{{else}}Unknown{{/if}} ({{htype}})</div>
+      <div>Protocol type: {{#if (eq ptype 2048)}}IPv4{{else}}Unknown{{/if}} ({{hex ptype}})</div>
+      <div>Hardware size: {{hlen}}</div>
+      <div>Protocol size: {{plen}}</div>
+      <div>Opcode: {{#if (eq operation 1)}}request{{else if (eq operation 2)}}reply{{else}}unknown{{/if}} ({{operation}})</div>
+      <div>Sender MAC address: {{etherorhost sender_ha.addr}} ({{etheraddr sender_ha.addr}})</div>
+      <div>Sender IP address: {{ipaddr sender_pa.addr}}</div>
+      <div>Target MAC address: {{etherorhost target_ha.addr}} ({{etheraddr target_ha.addr}})</div>
+      <div>Target IP address: {{ipaddr target_pa.addr}}</div>
+    </div>
+  </div>
+  {{/with}}
 </div>
