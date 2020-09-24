@@ -8,9 +8,9 @@ const TopologyManager = require('../../TopologyManager');
 const ClientManager = require('../../ClientManager');
 
 const CAPTURE_DEVICE = 'br0';
-const CAPTURE_BUFFER_SIZE = 10 * 1024 * 1024; // 10MB
-const CAPTURE_BUFFER_TIMEOUT = 1000; // 1 second
-const CAPTURE_SNAP_LENGTH = 65535;
+const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
+const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
+const CAPTURE_SNAP_LENGTH = 10240; // Allow for jumbo
 
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
@@ -56,6 +56,31 @@ Handlebars.registerHelper({
         break;
     }
     return ip;
+  },
+  tcpflags: function(flags) {
+    const r = [];
+    if (flags.rst) {
+      r.push('RST');
+    }
+    if (flags.syn) {
+      r.push('SYN');
+    }
+    if (flags.psh) {
+      r.push('PSH');
+    }
+    if (flags.fin) {
+      r.push('FIN');
+    }
+    if (flags.ack) {
+      r.push('ACK');
+    }
+    if (flags.urg) {
+      r.push('URG');
+    }
+    if (r.length) {
+      return `[${r.join(', ')}]`;
+    }
+    return '';
   }
 });
 
@@ -70,6 +95,9 @@ class Capture extends Page {
       ignoreBroadcast: true,
       ignoreHost: true
     };
+    this.eaddr = [];
+
+    this.onPacket = this.onPacket.bind(this);
   }
 
   select() {
@@ -91,57 +119,64 @@ class Capture extends Page {
     if (this.session) {
       this.stopCapture();
     }
+    const filter = await this.buildFilter();
+    console.log(filter);
     this.session = PCap.createSession(this.device, {
-      filter: await this.buildFilter(),
+      filter: filter,
       promiscuous: true,
       monitor: false,
       buffer_size: CAPTURE_BUFFER_SIZE,
       buffer_timeout: CAPTURE_BUFFER_TIMEOUT,
       snap_length: CAPTURE_SNAP_LENGTH
     });
-    this.session.on('packet', raw => {
-      if (raw.link_type !== 'LINKTYPE_ETHERNET') {
-        return;
-      }
-      const packet = PCap.decode.packet(raw);
-      //console.log(packet);
-      const ether = packet.payload;
-      switch (ether.ethertype) {
-        case 0x0800: // IPv4
-          const ip4 = ether.payload;
-          switch (ip4.protocol) {
-            case 1: // ICMP
-            case 2: // IGMP
-              break;
-            case 6: // TCP
-              //this.packet(raw, Template.CaptureProtoTcp(packet));
-              break;
-            case 17: // UDP
-              if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
-                this.packet(raw, Template.CaptureProtoDNS(packet));
-              }
-              else {
-                this.packet(raw, Template.CaptureProtoUdp(packet));
-              }
-              break;
-            default:
-              break;
-          }
-          break;
-        case 0x0806: // ARP
-          this.packet(raw, Template.CaptureProtoArp(packet));
-          break;
-        case 0x86dd: // IPv6
-          break;
-        default:
-          break;
-      }
-    });
+    this.session.on('packet', this.onPacket);
+  }
+
+  onPacket(raw) {
+    if (raw.link_type !== 'LINKTYPE_ETHERNET') {
+      return;
+    }
+    const packet = PCap.decode.packet(raw);
+    const ether = packet.payload;
+    switch (ether.ethertype) {
+      case 0x0800: // IPv4
+        const ip4 = ether.payload;
+        switch (ip4.protocol) {
+          case 1: // ICMP
+          case 2: // IGMP
+            break;
+          case 6: // TCP
+            this.packet(raw, Template.CaptureProtoTcp(packet));
+            break;
+          case 17: // UDP
+            if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
+              this.packet(raw, Template.CaptureProtoDNS(packet));
+            }
+            else if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251') {
+              this.packet(raw, Template.CaptureProtoDNS(packet));
+            }
+            else {
+              this.packet(raw, Template.CaptureProtoUdp(packet));
+            }
+            break;
+          default:
+            break;
+        }
+        break;
+      case 0x0806: // ARP
+        this.packet(raw, Template.CaptureProtoArp(packet));
+        break;
+      case 0x86dd: // IPv6
+        break;
+      default:
+        break;
+    }
   }
 
   async stopCapture() {
     if (this.session) {
-      this.session.close(); // Removes all listeners
+      this.session.off('packet', this.onPacket);
+      this.session.close();
       this.session = null;
     }
   }
@@ -152,10 +187,10 @@ class Capture extends Page {
       filter.push('(not ether broadcast)');
     }
     if (this.state.ignoreHost) {
-      await this._setMacAddress();
-      if (this.eaddr) {
-        filter.push(`(not ether host ${this.eaddr})`);
-      }
+      await this._getMacAddress();
+      this.eaddr.forEach(mac => {
+        filter.push(`(not ether host ${mac})`);
+      });
     }
     //console.log(filter);
     return filter.join(' and ');
@@ -192,12 +227,17 @@ class Capture extends Page {
     console.log(packet);
   }
 
-  async _setMacAddress() {
-    if (!this.eaddr) {
+  async _getMacAddress() {
+    if (!this.eaddr.length) {
       return new Promise(resolve => {
-        MacAddress.getMacAddress(this.device, (err, mac) => {
+        MacAddress.all((err, ifaces) => {
           if (!err) {
-            this.eaddr = mac;
+            for (let name in ifaces) {
+              const mac = ifaces[name].mac;
+              if (mac) {
+                this.eaddr.push(mac);
+              }
+            }
           }
           resolve();
         });

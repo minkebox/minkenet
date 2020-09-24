@@ -4,5 +4,7 @@
   <div class="destination">{{iporhost payload.payload.daddr.addr}}</div>
   <div class="protocol">TCP</div>
   <div class="info">
+    Port {{payload.payload.payload.sport}} &rarr; {{payload.payload.payload.dport}} {{tcpflags payload.payload.payload.flags}}
+    Len={{payload.payload.payload.dataLength}}
   </div>
 </div>
