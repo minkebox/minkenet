@@ -93,6 +93,7 @@ class Capture extends Page {
       devices: [],
       topologyValid: false,
       ignoreBroadcast: true,
+      ignoreMulticast: true,
       ignoreHost: true
     };
     this.eaddr = [];
@@ -185,6 +186,9 @@ class Capture extends Page {
     const filter = [];
     if (this.state.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
+    }
+    if (this.state.ignoreMulticast) {
+      filter.push('(not ether multicast)');
     }
     if (this.state.ignoreHost) {
       await this._getMacAddress();
