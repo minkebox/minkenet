@@ -131,7 +131,7 @@ onMessage['capture.packet'] = msg => {
     if (win.childElementCount > MAX_CAPTURE_PACKETS) {
       win.firstElementChild.nextElementSibling.remove();
     }
-    win.scrollTo(0, win.scrollHeight);
+    win.parentElement.scrollTo(0, win.scrollHeight);
   }
 }
 
