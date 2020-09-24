@@ -6,8 +6,9 @@ const Page = require('../Page');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const TopologyManager = require('../../TopologyManager');
 const ClientManager = require('../../ClientManager');
+const Log = require('debug')('capture');
 
-const CAPTURE_DEVICE = 'br0';
+const CAPTURE_DEVICES = [ 'eth0', 'br0' ];
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_SNAP_LENGTH = 10240; // Allow for jumbo
@@ -88,7 +89,6 @@ class Capture extends Page {
 
   constructor(send) {
     super(send);
-    this.device = CAPTURE_DEVICE;
     this.state = {
       devices: [],
       topologyValid: false,
@@ -97,6 +97,13 @@ class Capture extends Page {
       ignoreHost: true
     };
     this.eaddr = [];
+    const ifaces = MacAddress.networkInterfaces();
+    for (let dev in CAPTURE_DEVICES) {
+      if (ifaces[dev]) {
+        this.device = dev;
+        break;
+      }
+    }
 
     this.onPacket = this.onPacket.bind(this);
   }
@@ -121,7 +128,7 @@ class Capture extends Page {
       this.stopCapture();
     }
     const filter = await this.buildFilter();
-    console.log(filter);
+    Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
       filter: filter,
       promiscuous: true,
@@ -137,41 +144,7 @@ class Capture extends Page {
     if (raw.link_type !== 'LINKTYPE_ETHERNET') {
       return;
     }
-    const packet = PCap.decode.packet(raw);
-    const ether = packet.payload;
-    switch (ether.ethertype) {
-      case 0x0800: // IPv4
-        const ip4 = ether.payload;
-        switch (ip4.protocol) {
-          case 1: // ICMP
-          case 2: // IGMP
-            break;
-          case 6: // TCP
-            this.packet(raw, Template.CaptureProtoTcp(packet));
-            break;
-          case 17: // UDP
-            if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
-              this.packet(raw, Template.CaptureProtoDNS(packet));
-            }
-            else if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251') {
-              this.packet(raw, Template.CaptureProtoDNS(packet));
-            }
-            else {
-              this.packet(raw, Template.CaptureProtoUdp(packet));
-            }
-            break;
-          default:
-            break;
-        }
-        break;
-      case 0x0806: // ARP
-        this.packet(raw, Template.CaptureProtoArp(packet));
-        break;
-      case 0x86dd: // IPv6
-        break;
-      default:
-        break;
-    }
+    this.packet(raw, this._render('Proto', PCap.decode.packet(raw)));
   }
 
   async stopCapture() {
@@ -201,11 +174,19 @@ class Capture extends Page {
   }
 
   packet(raw, text) {
-    const data = JSON.stringify({
-      h: raw.header.toString('latin1'),
-      b: raw.buf.toString('latin1', 0, raw.header.readUInt32LE(12))
-    });
-    this.send('capture.packet', { raw: data, html: text });
+    if (text) {
+      const data = JSON.stringify({
+        h: raw.header.toString('latin1'),
+        b: raw.buf.toString('latin1', 0, raw.header.readUInt32LE(12))
+      });
+      this.send('capture.packet', { raw: data, html: text });
+    }
+  }
+
+  inspect(text) {
+    if (text) {
+      this.html('capture-packet', text);
+    }
   }
 
   async 'capture.start' (msg) {
@@ -228,7 +209,40 @@ class Capture extends Page {
       header: Buffer.from(raw.h, 'latin1'),
       buf: Buffer.from(raw.b, 'latin1')
     });
-    console.log(packet);
+    this.inspect(this._render('Full', packet));
+  }
+
+  _render(style, packet) {
+    const ether = packet.payload;
+    switch (ether.ethertype) {
+      case 0x0800: // IPv4
+        const ip4 = ether.payload;
+        switch (ip4.protocol) {
+          case 1: // ICMP
+          case 2: // IGMP
+            break;
+          case 6: // TCP
+            return Template[`Capture${style}Tcp`](packet);
+          case 17: // UDP
+            if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
+              return Template[`Capture${style}DNS`](packet);
+            }
+            if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251') {
+              return Template[`Capture${style}DNS`](packet);
+            }
+            return Template[`Capture${style}Udp`](packet);
+          default:
+            break;
+        }
+        break;
+      case 0x0806: // ARP
+        return Template[`Capture${style}Arp`](packet);
+      case 0x86dd: // IPv6
+        break;
+      default:
+        break;
+    }
+    return null;
   }
 
   async _getMacAddress() {
