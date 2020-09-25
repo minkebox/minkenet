@@ -48,6 +48,12 @@ div[data-placeholder]:empty:before {
   color: var(--placeholder-text-color);
 }
 
+body.pending-changes .pending-changes-disabled {
+  color: #6c757d;
+  pointer-events: none;
+  cursor: default;
+}
+
 .sub-nav .nav-item.active {
   background-color: var(--highlight-background-color);
   color: var(--main-text-color);
