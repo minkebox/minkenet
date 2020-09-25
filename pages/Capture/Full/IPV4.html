@@ -1,7 +1,7 @@
 {{#with payload.payload}}
 <div class="ipv4 card">
   <div data-toggle="collapse" data-target="#ipv4-details" class="card-header">
-    Internet Protocol Version 4, {{ipaddr saddr.addr}} &rarr; {{ipaddr daddr.addr}}
+    Internet Protocol Version 4: {{ipaddr saddr.addr}} &rarr; {{ipaddr daddr.addr}}
   </div>
   <div id="ipv4-details" class="collapse details">
     <div>Version: {{version}}</div>

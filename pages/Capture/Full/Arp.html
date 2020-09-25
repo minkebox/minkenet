@@ -4,13 +4,13 @@
   {{#with payload.payload}}
   <div class="arp card">
     <div data-toggle="collapse" data-target="#arp-details" class="card-header">
-      Address Resolution Protocol
+      Address Resolution Protocol:
       {{#if (eq operation 1)}}
-      (request)
+      Request
       {{else if (eq operation 2)}}
-      (reply)
+      Reply
       {{else}}
-      (unknown)
+      Unknown
       {{/if}}
     </div>
     <div id="arp-details" class="collapse details">
