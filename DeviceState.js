@@ -391,11 +391,11 @@ class DeviceStateInstance extends EventEmitter {
         target[key] = {};
       }
       if (trim) {
-        if ('$' in target[key]) {
+        if ('$' in target[key] && target[key].$o !== NEW_VALUE) {
           okeys.$ = true;
         }
         for (let k in target[key]) {
-          if (k[0] !== '$') {
+          if (k[0] !== '$' && target[key][k].$o !== NEW_VALUE) {
             okeys[k] = true;
           }
         }
