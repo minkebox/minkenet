@@ -12,7 +12,7 @@ const CAPTURE_DEVICES = [ 'eth0', 'br0' ];
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_SNAP_LENGTH = 10240; // Allow for jumbo
-const MAX_BUFFER = 100240; // 100K in flight only
+const MAX_BUFFER = 102400; // 100K in flight only
 
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
