@@ -7,9 +7,9 @@
   </div>
   <script>
     window.selectpkt = function(evt) {
-      $('.capture-window-contents .packet').removeClass('active');
+      $('.capture-window-content .packet').removeClass('active');
       send('select.packet', evt.currentTarget.raw);
-      $(evt.target).parents('.capture-window-contents .packet').addClass('active');
+      $(evt.currentTarget).addClass('active');
     }
   </script>
 </div>

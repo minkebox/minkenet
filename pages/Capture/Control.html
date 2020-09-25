@@ -2,8 +2,52 @@
   {{#unless topologyValid}}
   {{> NetworkTopologyNotice}}
   {{/unless}}
-  <div class="capture-config">
-    <button type="button" class="capture-start btn btn-secondary btn-sm" onclick="send('capture.start')">Start</button>
+  <div class="capture-config-container" style="display: flex">
+    <div class="capture-config">
+      <div class="form-group">
+        Capture packets where
+        <select id="capture-host">
+          <option value="SD" >Source or Destination IP</option>
+          <option value="S" >Source IP</option>
+          <option value="D">Destination IP</option>
+        </select>
+        <span>equals</span>
+        <span style="white-space: nowrap;"><input id="capture-ip" type="text" placeholder="any" size="15">,</span>
+        <span>Protocol equals</span>
+        <span style="white-space: nowrap;"><select id="capture-protocol">
+          <option value="">Any</option>
+          <option>TCP</option>
+          <option>UDP</option>
+          <option>ARP</option>
+        </select>,</span>
+        <span>Port equals</span>
+        <input id="capture-port" type="text" placeholder="any" size="5">
+        <span>and</span>
+        <div class="dropdown" style="display: inline-block">
+          <button class="dropdown-toggle" style="line-height: 1" type="button" data-toggle="dropdown">
+            Options
+          </button>
+          <div id="capture-options" class="dropdown-menu">
+            <form class="px-4 pt-2" style="width:275px;font-size:12px">
+              <div class="form-group">
+                <div class="form-check">
+                  <input id="capture-o-broadcast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore broadcast packets</label>
+                </div>
+                <div class="form-check">
+                  <input id="capture-o-multicast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore multicast packets</label>
+                </div>
+                <div class="form-check">
+                  <input id="capture-o-host" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore packets to or from me</label>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div style="position: relative; width: 70px;">
+      <button id="capture-start" type="button" class="capture-start btn btn-secondary btn-sm" onclick="startCapture()">Start</button>
+    </div>
   </div>
   <div class="capture-window">
     <div class="capture-window-content" id="capture-window-content">
@@ -12,4 +56,28 @@
       </div>
     </div>
   </div>
+  <script>
+    window.startCapture = function() {
+      const button = document.getElementById('capture-start');
+      if (button.innerText === 'Start') {
+        const config = {
+          host: document.getElementById('capture-host').value,
+          ip: document.getElementById('capture-ip').value,
+          proto: document.getElementById('capture-protocol').value,
+          port: document.getElementById('capture-port').value,
+          options: {
+            ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
+            ignoreMulticast: document.getElementById('capture-o-multicast').checked,
+            ignoreHost: document.getElementById('capture-o-host').checked
+          }
+        };
+        send('capture.start', config);
+        button.innerText = 'Stop';
+      }
+      else {
+        send('capture.stop');
+        button.innerText = 'Start';
+      }
+    }
+  </script>
 </div>

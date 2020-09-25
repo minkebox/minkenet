@@ -121,10 +121,17 @@ class Capture extends Page {
     super(send);
     this.state = {
       devices: [],
-      topologyValid: false,
-      ignoreBroadcast: true,
-      ignoreMulticast: true,
-      ignoreHost: true
+      topologyValid: false
+    };
+    this.captureConfig = {
+      host: 'SD',
+      ip: '',
+      port: '',
+      options: {
+        ignoreBroadcast: true,
+        ignoreMulticast: true,
+        ignoreHost: true
+      }
     };
     this.eaddr = [];
     const ifaces = MacAddress.networkInterfaces();
@@ -153,10 +160,11 @@ class Capture extends Page {
     this.state.topologyValid = TopologyManager.valid;
   }
 
-  async startCapture() {
+  async startCapture(config) {
     if (this.session) {
       this.stopCapture();
     }
+    this.captureConfig = config;
     const filter = await this.buildFilter();
     Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
@@ -187,19 +195,56 @@ class Capture extends Page {
 
   async buildFilter() {
     const filter = [];
-    if (this.state.ignoreBroadcast) {
+    const config = this.captureConfig;
+    if (config.options.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
     }
-    if (this.state.ignoreMulticast) {
+    if (config.options.ignoreMulticast) {
       filter.push('(not ether multicast)');
     }
-    if (this.state.ignoreHost) {
+    if (config.options.ignoreHost) {
       await this._getMacAddress();
       this.eaddr.forEach(mac => {
         filter.push(`(not ether host ${mac})`);
       });
     }
-    //console.log(filter);
+    if (config.ip) {
+      switch (config.host) {
+        case 'S':
+          filter.push(`(src host ${config.ip})`);
+          break;
+        case 'D':
+          filter.push(`(dst host ${config.ip})`);
+          break;
+        case 'SD':
+          filter.push(`(host ${config.ip})`);
+          break;
+        default:
+          break;
+      }
+    }
+    switch (config.proto) {
+      case 'TCP':
+        filter.push(`(ip proto \\tcp)`);
+        if (config.port) {
+          filter.push(`(port ${config.port})`);
+        }
+        break;
+      case 'UDP':
+        filter.push(`(ip proto \\udp)`);
+        if (config.port) {
+          filter.push(`(port ${config.port})`);
+        }
+        break;
+      case 'ARP':
+        filter.push(`(ether proto \\arp)`);
+        break;
+      case '':
+        break;
+      default:
+        break;
+
+    }
     return filter.join(' and ');
   }
 
@@ -220,12 +265,7 @@ class Capture extends Page {
   }
 
   async 'capture.start' (msg) {
-    if (this.session) {
-      await this.stopCapture();
-    }
-    else {
-      await this.startCapture();
-    }
+    this.startCapture(msg.value);
   }
 
   async 'capture.stop' (msg) {
