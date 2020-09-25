@@ -12,6 +12,7 @@ const CAPTURE_DEVICES = [ 'eth0', 'br0' ];
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_SNAP_LENGTH = 10240; // Allow for jumbo
+const MAX_BUFFER = 100240; // 100K in flight only
 
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
@@ -21,6 +22,25 @@ Handlebars.registerHelper({
   hex: function(v) {
     const r = `${v.toString(16)}`;
     return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
+  },
+  hexdump: function(data) {
+    const LINE_LENGTH = 8;
+    const lines = [];
+    for (let p = 0; p < data.length;) {
+      let line = '';
+      let ascii = '';
+      for (let i = 0; i < LINE_LENGTH && p < data.length; i++, p++) {
+        line += ` ${hex(data[p])}`;
+        if (data[p] >= 32 && data[p] <= 126) {
+          ascii += String.fromCharCode(data[p]);
+        }
+        else {
+          ascii += '.';
+        }
+      }
+      lines.push(`<div class="hex">${line.substring(1)}</div><div class="ascii">${ascii}</div>`);
+    }
+    return '<div class="line">' + lines.join('</div><div class="line">') + '</div>';
   },
   localtime: function(secs) {
     return new Date(secs * 1000).toTimeString();
@@ -184,7 +204,7 @@ class Capture extends Page {
   }
 
   packet(raw, text) {
-    if (text) {
+    if (text && this.send.bufferedAmount() < MAX_BUFFER) {
       const data = JSON.stringify({
         h: raw.header.toString('latin1'),
         b: raw.buf.toString('latin1', 0, raw.header.readUInt32LE(12))
