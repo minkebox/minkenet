@@ -1,8 +1,10 @@
 <div class="data card">
   <div data-toggle="collapse" data-target="#data-details" class="card-header">
-    Data ({{data.length}} bytes)
+    Data: {{sub data.length offset}} bytes
   </div>
+  {{#if data}}
   <div id="data-details" class="collapse details">
-    {{{hexdump data}}}
+    {{{hexdump data offset}}}
   </div>
+  {{/if}}
 </div>

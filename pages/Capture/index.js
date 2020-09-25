@@ -29,12 +29,12 @@ const escape = (unsafe) => {
 Handlebars.registerHelper({
   hex: function(v) {
     const r = `${v.toString(16)}`;
-    return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
+    return '0x' + `00000000${r}`.substr(-2 * Math.ceil(r.length / 2));
   },
-  hexdump: function(data) {
+  hexdump: function(data, offset) {
     const LINE_LENGTH = 8;
     const lines = [];
-    for (let p = 0; p < data.length;) {
+    for (let p = offset; p < data.length;) {
       let line = '';
       let ascii = '';
       for (let i = 0; i < LINE_LENGTH && p < data.length; i++, p++) {
@@ -187,10 +187,9 @@ class Capture extends Page {
   }
 
   onPacket(raw) {
-    if (raw.link_type !== 'LINKTYPE_ETHERNET') {
-      return;
+    if (raw.link_type === 'LINKTYPE_ETHERNET' && this.send.bufferedAmount() < MAX_BUFFER) {
+      this.packet(raw, this._render('Proto', raw));
     }
-    this.packet(raw, this._render('Proto', PCap.decode.packet(raw)));
   }
 
   async stopCapture() {
@@ -257,7 +256,7 @@ class Capture extends Page {
   }
 
   packet(raw, text) {
-    if (text && this.send.bufferedAmount() < MAX_BUFFER) {
+    if (text) {
       const data = JSON.stringify({
         h: raw.header.toString('latin1'),
         b: raw.buf.toString('latin1', 0, raw.header.readUInt32LE(12))
@@ -281,16 +280,18 @@ class Capture extends Page {
   }
 
   async 'select.packet' (msg) {
-    const raw = JSON.parse(msg.value);
-    const packet = PCap.decode.packet({
+    const encoded = JSON.parse(msg.value);
+    const raw = {
       link_type: 'LINKTYPE_ETHERNET',
-      header: Buffer.from(raw.h, 'latin1'),
-      buf: Buffer.from(raw.b, 'latin1')
-    });
-    this.inspect(this._render('Full', packet));
+      header: Buffer.from(encoded.h, 'latin1'),
+      buf: Buffer.from(encoded.b, 'latin1')
+    };
+    this.inspect(this._render('Full', raw));
   }
 
-  _render(style, packet) {
+  _render(style, raw) {
+    const packet = PCap.decode.packet(raw);
+    packet.raw = raw.buf;//Uint8Array.from(raw);
     const ether = packet.payload;
     switch (ether.ethertype) {
       case 0x0800: // IPv4
@@ -298,7 +299,8 @@ class Capture extends Page {
         switch (ip4.protocol) {
           case 1: // ICMP
           case 2: // IGMP
-            break;
+          default:
+            return Template[`Capture${style}IPV4Unknown`](packet);
           case 6: // TCP
             return Template[`Capture${style}Tcp`](packet);
           case 17: // UDP
@@ -309,8 +311,6 @@ class Capture extends Page {
               return Template[`Capture${style}DNS`](packet);
             }
             return Template[`Capture${style}Udp`](packet);
-          default:
-            break;
         }
         break;
       case 0x0806: // ARP
