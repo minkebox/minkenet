@@ -41,6 +41,9 @@ async function WS(ctx) {
       Log(_);
     }
   }
+  send.bufferedAmount = function() {
+    return ctx.websocket.bufferedAmount;
+  }
 
   const pending = {};
   const html = (id, text) => {
