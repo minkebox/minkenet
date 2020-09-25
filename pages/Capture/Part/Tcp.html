@@ -1,0 +1,19 @@
+{{#with payload.payload.payload}}
+<div class="tcp card">
+  <div data-toggle="collapse" data-target="#tcp-details" class="card-header">
+    Transport Control Protocol: Port {{sport}} &rarr; {{dport}}
+  </div>
+  <div id="tcp-details" class="collapse details">
+    <div>Source Port: {{sport}}</div>
+    <div>Destination Port: {{dport}}</div>
+    <div>Sequence number: {{seqno}}</div>
+    <div>Acknowledge number: {{ackno}}</div>
+    <div>Header length: {{headerLength}}</div>
+    <div>Flags: {{tcpflags flags}}</div>
+    <div>Window size: {{windowSize}}</div>
+    <div>Checksum: {{hex checksum}}</div>
+    <div>Urgent pointer: {{urgentPointer}}</div>
+    <div>Options: ...</div>
+  </div>
+</div>
+{{/with}}

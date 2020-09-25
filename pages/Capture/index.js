@@ -286,19 +286,19 @@ class Capture extends Page {
         const ip4 = ether.payload;
         switch (ip4.protocol) {
           case 1: // ICMP
-            return Template[`Capture${style}ICMP`](packet);
+            return Template[`Capture${style}Icmp`](packet);
           case 2: // IGMP
-            return Template[`Capture${style}IGMP`](packet);
+            return Template[`Capture${style}Igmp`](packet);
           default:
             return Template[`Capture${style}IPV4Unknown`](packet);
           case 6: // TCP
             return Template[`Capture${style}Tcp`](packet);
           case 17: // UDP
             if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
-              return Template[`Capture${style}DNS`](packet);
+              return Template[`Capture${style}Dns`](packet);
             }
             if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251') {
-              return Template[`Capture${style}DNS`](packet);
+              return Template[`Capture${style}Dns`](packet);
             }
             return Template[`Capture${style}Udp`](packet);
         }

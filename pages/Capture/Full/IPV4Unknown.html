@@ -1,10 +1,10 @@
 <div class="inspect accordion">
-  {{> CaptureFullFrame }}
-  {{> CaptureFullEthernet }}
-  {{> CaptureFullIPV4 }}
+  {{> CapturePartFrame }}
+  {{> CapturePartEthernet }}
+  {{> CapturePartIPV4 }}
   {{#if payload.vlan}}
-  {{> CaptureFullData data=raw offset=(add payload.payload.headerLength 18)}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 18)}}
   {{else}}
-  {{> CaptureFullData data=raw offset=(add payload.payload.headerLength 14)}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 14)}}
   {{/if}}
 </div>
