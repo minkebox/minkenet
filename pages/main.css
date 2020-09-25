@@ -580,6 +580,7 @@ div[data-placeholder]:empty:before {
 }
 .capture-config-container {
   display: flex;
+  background-color: var(--info-background-color);
   border: 1px solid var(--property-border-color);
   border-radius: 10px;
   margin-bottom: 5px;
@@ -611,6 +612,7 @@ div[data-placeholder]:empty:before {
   border-radius: 10px;
   background-color: var(--main-background-color);
   overflow: scroll;
+  margin-bottom: 5px;
 }
 .capture-window-title.packet {
   position: sticky;
