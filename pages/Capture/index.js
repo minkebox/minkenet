@@ -17,6 +17,14 @@ const MAX_BUFFER = 102400; // 100K in flight only
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
 }
+const escape = (unsafe) => {
+  return unsafe
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 Handlebars.registerHelper({
   hex: function(v) {
@@ -38,7 +46,7 @@ Handlebars.registerHelper({
           ascii += '.';
         }
       }
-      lines.push(`<div class="hex">${line.substring(1)}</div><div class="ascii">${ascii}</div>`);
+      lines.push(`<div class="hex">${line.substring(1)}</div><div class="ascii">${escape(ascii)}</div>`);
     }
     return '<div class="line">' + lines.join('</div><div class="line">') + '</div>';
   },
