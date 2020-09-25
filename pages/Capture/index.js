@@ -131,16 +131,6 @@ class Capture extends Page {
       devices: [],
       topologyValid: false
     };
-    this.captureConfig = {
-      host: 'SD',
-      ip: '',
-      port: '',
-      options: {
-        ignoreBroadcast: true,
-        ignoreMulticast: true,
-        ignoreHost: true
-      }
-    };
     this.eaddr = [];
     const ifaces = MacAddress.networkInterfaces();
     for (let dev in CAPTURE_DEVICES) {
@@ -172,8 +162,7 @@ class Capture extends Page {
     if (this.session) {
       this.stopCapture();
     }
-    this.captureConfig = config;
-    const filter = await this.buildFilter();
+    const filter = await this.buildFilter(config);
     Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
       filter: filter,
@@ -186,12 +175,6 @@ class Capture extends Page {
     this.session.on('packet', this.onPacket);
   }
 
-  onPacket(raw) {
-    if (raw.link_type === 'LINKTYPE_ETHERNET' && this.send.bufferedAmount() < MAX_BUFFER) {
-      this.packet(raw, this._render('Proto', raw));
-    }
-  }
-
   async stopCapture() {
     if (this.session) {
       this.session.off('packet', this.onPacket);
@@ -200,9 +183,8 @@ class Capture extends Page {
     }
   }
 
-  async buildFilter() {
+  async buildFilter(config) {
     const filter = [];
-    const config = this.captureConfig;
     if (config.options.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
     }
@@ -255,6 +237,12 @@ class Capture extends Page {
     return filter.join(' and ');
   }
 
+  onPacket(raw) {
+    if (raw.link_type === 'LINKTYPE_ETHERNET' && this.send.bufferedAmount() < MAX_BUFFER) {
+      this.packet(raw, this._render('Proto', raw));
+    }
+  }
+
   packet(raw, text) {
     if (text) {
       const data = JSON.stringify({
@@ -298,7 +286,9 @@ class Capture extends Page {
         const ip4 = ether.payload;
         switch (ip4.protocol) {
           case 1: // ICMP
+            return Template[`Capture${style}ICMP`](packet);
           case 2: // IGMP
+            return Template[`Capture${style}IGMP`](packet);
           default:
             return Template[`Capture${style}IPV4Unknown`](packet);
           case 6: // TCP

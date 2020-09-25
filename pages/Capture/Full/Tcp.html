@@ -10,8 +10,14 @@
     <div id="tcp-details" class="collapse details">
       <div>Source Port: {{sport}}</div>
       <div>Destination Port: {{dport}}</div>
-      <div>Header Length: {{headerLength}}</div>
+      <div>Sequence number: {{seqno}}</div>
+      <div>Acknowledge number: {{ackno}}</div>
+      <div>Header length: {{headerLength}}</div>
+      <div>Flags: {{tcpflags flags}}</div>
+      <div>Window size: {{windowSize}}</div>
       <div>Checksum: {{hex checksum}}</div>
+      <div>Urgent pointer: {{urgentPointer}}</div>
+      <div>Options: ...</div>
     </div>
   </div>
   {{> CaptureFullData data=data offset=0}}
