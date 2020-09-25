@@ -1,0 +1,19 @@
+{{#with payload.payload}}
+<div class="ipv4 card">
+  <div data-toggle="collapse" data-target="#ipv4-details" class="card-header">
+    Internet Protocol Version 4, {{ipaddr saddr.addr}} &rarr; {{ipaddr daddr.addr}}
+  </div>
+  <div id="ipv4-details" class="collapse details">
+    <div>Version: {{version}}</div>
+    <div>Total Length: {{length}}</div>
+    <div>Identification: {{hex identification}}</div>
+    <div>Flags: {{#if flags.doNotFragment}}Don't fragment{{else if flags.moreFragments}}More fragments{{else}}None{{/if}}</div>
+    <div>Fragment offset: {{fragmentOffset}}</div>
+    <div>Time to live: {{ttl}}</div>
+    <div>Protocol: {{#if (eq protocol 1)}}ICMP{{else if (eq protocol 17)}}UDP{{else if (eq protocol 17)}}TCP{{else}}Unknown{{/if}} ({{protocol}})</div>
+    <div>Header checksum: {{hex headerChecksum}}</div>
+    <div>Source: {{iporhost saddr.addr}} ({{ipaddr saddr.addr}})</div>
+    <div>Destination: {{iporhost daddr.addr}} ({{ipaddr daddr.addr}})</div>
+  </div>
+</div>
+{{/with}}

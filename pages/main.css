@@ -637,7 +637,7 @@ div[data-placeholder]:empty:before {
 
 .card .inspect.accordion {
   margin: 10px;
-  font-size: 12px;
+  font-size: 13px;
 }
 .card .inspect.accordion .card-header {
   padding: 6px 10px;
@@ -646,12 +646,14 @@ div[data-placeholder]:empty:before {
 .inspect .details {
   padding: 10px;
 }
-.inspect .frame {
-
+.inspect .data .line {
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 14px;
 }
-.inspect .ethernet {
-
+.inspect .data .line .hex {
+  display: inline-block;
+  width: 220px;
 }
-.inspect .arp {
-
+.inspect .data .line .ascii {
+  display: inline-block;
 }
