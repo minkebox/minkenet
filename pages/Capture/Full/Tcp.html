@@ -1,1 +1,19 @@
-<div></div>
+<div class="inspect accordion">
+  {{> CaptureFullFrame }}
+  {{> CaptureFullEthernet }}
+  {{> CaptureFullIPV4 }}
+  {{#with payload.payload.payload}}
+  <div class="tcp card">
+    <div data-toggle="collapse" data-target="#tcp-details" class="card-header">
+      Transport Control Protocol: Port {{sport}} &rarr; {{dport}}
+    </div>
+    <div id="tcp-details" class="collapse details">
+      <div>Source Port: {{sport}}</div>
+      <div>Destination Port: {{dport}}</div>
+      <div>Header Length: {{headerLength}}</div>
+      <div>Checksum: {{hex checksum}}</div>
+    </div>
+  </div>
+  {{> CaptureFullData data=data }}
+  {{/with}}
+</div>
