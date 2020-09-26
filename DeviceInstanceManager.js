@@ -111,6 +111,31 @@ class DeviceInstanceManager extends EventEmitter {
     return false;
   }
 
+  async commit(updateCallback) {
+    const devices = DeviceInstanceManager.getAllDevices();
+    for (let id in this.devices) {
+      const device = this.devices[id];
+      if (device.needCommit()) {
+        if (updateCallback) {
+          updateCallback(device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS));
+        }
+        try {
+          await device.write();
+          await device.commit();
+        }
+        catch (e) {
+          Log(e);
+        }
+      }
+    }
+  }
+
+  revert() {
+    for (let id in this.devices) {
+      this.devices[id].revert();
+    }
+  }
+
 }
 
 module.exports = new DeviceInstanceManager();

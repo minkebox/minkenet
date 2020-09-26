@@ -152,23 +152,10 @@ async function WS(ctx) {
 
   onMessage['changes.commit'] = async msg => {
     if (msg.value === 'start') {
-      (async () => {
-        const devices = DeviceInstanceManager.getAllDevices();
-        for (let i = 0; i < devices.length; i++) {
-          if (devices[i].needCommit()) {
-            html('commit-changes-update', `Updating ${devices[i].readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}`);
-            try {
-              await devices[i].write();
-              await devices[i].commit();
-            }
-            catch (e) {
-              Log(e);
-            }
-          }
-        }
+      DeviceInstanceManager.commit(ip => html('commit-changes-update', `Updating ${ip}`)).then(() => {
         html('commit-changes-update', 'Done');
         html('commit-changes-primary', '');
-      })();
+      });
     }
     else if (msg.value === 'stop') {
       setTimeout(() => {
@@ -178,7 +165,7 @@ async function WS(ctx) {
   }
 
   onMessage['changes.revert'] = async msg => {
-    DeviceInstanceManager.getAllDevices().forEach(device => device.revert());
+    DeviceInstanceManager.revert();
   }
 }
 
