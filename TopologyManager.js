@@ -43,6 +43,10 @@ class TopologyManager extends EventEmitter {
 
   // Find the path (a set of device/port to device/port links) between two devices.
   findPath(fromDevice, toDevice) {
+    // Handle the empty path first.
+    if (fromDevice === toDevice) {
+      return [];
+    }
     const walk = (from, to, links) => {
       for (let i = 0; i < links.length; i++) {
         const link = links[i];
@@ -325,7 +329,7 @@ class TopologyManager extends EventEmitter {
       // Then probe each devices and snap the traffic
       for (let i = 0; i < probes.length && this.running; i++) {
         this.emit('status', { op: 'probe', device: probes[i].device });
-        counts[i + 1] = await this._probe(probes[i].device);
+        counts[i + 2] = await this._probe(probes[i].device);
         timings[i + 2] = await this._snap(snapDevices);
       }
       if (!this.running) {
@@ -375,12 +379,15 @@ class TopologyManager extends EventEmitter {
     }
 
     if (LogTimings.enabled) {
+      const f = (v) => ('               ' + v).substr(-15);
+      LogTimings('Original timings:');
+      LogTimings(` Count: ${counts}`);
       for (let i = 1; i < timings.length; i++) {
         LogTimings(`Timing ${i-1} to ${i}${i === 1 ? ' (baseline)' : ' (probe ' + probes[i-2].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) + ')'}:`);
         for (let d = 0; d < timings[i].length; d++) {
-          LogTimings(`  Device ${measureDevices[d].readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}:`)
+          LogTimings(` Device ${measureDevices[d].readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}:`)
           for (let p = 0; p < timings[i][d].length; p++) {
-            LogTimings(`    Port ${p}:    rx ${timings[i][d][p].rx.toLocaleString()} - ${timings[i - 1][d][p].rx.toLocaleString()} = ${((timings[i][d][p].rx - timings[i - 1][d][p].rx)>>>0).toLocaleString()}    tx ${timings[i][d][p].tx.toLocaleString()} - ${timings[i - 1][d][p].tx.toLocaleString()} = ${((timings[i][d][p].tx - timings[i - 1][d][p].tx)>>>0).toLocaleString()}`);
+            LogTimings(`  Port ${(' ' + p).substr(-2)}: RX ${f(timings[i][d][p].rx.toLocaleString())} - ${f(timings[i - 1][d][p].rx.toLocaleString())} = ${f(((timings[i][d][p].rx - timings[i - 1][d][p].rx)>>>0).toLocaleString())}  TX ${f(timings[i][d][p].tx.toLocaleString())} - ${f(timings[i - 1][d][p].tx.toLocaleString())} = ${f(((timings[i][d][p].tx - timings[i - 1][d][p].tx)>>>0).toLocaleString())}`);
           }
         }
       }
@@ -432,6 +439,20 @@ class TopologyManager extends EventEmitter {
       }
     }
 
+    if (LogTimings.enabled) {
+      LogTimings('Calculated timing differences');
+      const f = (v) => ('               ' + v).substr(-15);
+      for (let i = 0; i < timings.length - 1; i++) {
+        LogTimings(`Timing ${i}${i === 0 ? ' (baseline)' : ' (probe ' + probes[i-1].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) + ')'} (count ${counts[i+1]}):`);
+        for (let d = 0; d < timings[i].length; d++) {
+          LogTimings(` Device ${measureDevices[d].readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}:`)
+          for (let p = 0; p < timings[i][d].length; p++) {
+            LogTimings(`  Port ${(' ' + p).substr(-2)}: RX ${f(timings[i][d][p].rx.toLocaleString())}  TX ${f(timings[i][d][p].tx.toLocaleString())}`);
+          }
+        }
+      }
+    }
+
     // Calculate the maximum baseline traffic we saw. If this is in the same ballpark as the probe traffic
     // the network is too busy for this to work.
     const maxtraffic = timings[0].reduce((acc, dev) => {
@@ -440,7 +461,7 @@ class TopologyManager extends EventEmitter {
       }, 0));
     }, 0);
     const mincount = counts.reduce((acc, count) => Math.min(acc, count), Number.MAX_SAFE_INTEGER);
-    Log('maxtraffic', maxtraffic, 'mincount', mincount);
+    Log('maxtraffic', maxtraffic.toLocaleString(), 'mincount', mincount.toLocaleString());
     if (maxtraffic > mincount / 2) {
       Log('Network too busy to determine topology');
       this.emit('status', { op: 'complete', success: false, reason: 'busy' });
@@ -489,6 +510,9 @@ class TopologyManager extends EventEmitter {
     const success = remaining.length === 0;
     if (Log.enabled) {
       Log('network topology success', success);
+      if (this._entry) {
+        Log('Entry', JSON.stringify({ ip: this._entry.device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS), port: this._entry.port, lag: this._entry.lag }));
+      }
       Log(topology.map(link => [
         { ip: link[0].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS), port: link[0].port, lag: link[0].lag },
         { ip: link[1].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS), port: link[1].port, lag: link[1].lag }
@@ -644,7 +668,7 @@ class TopologyManager extends EventEmitter {
     return {
       _id: 'topology',
       valid: this.valid,
-      entry: { deviceId: this._entry.device._id, port: this._entry.port },
+      entry: this._entry ? { deviceId: this._entry.device._id, port: this._entry.port } : null,
       topology: this._topology.map(link => [
         { deviceId: link[0].device._id, port: link[0].port } , { deviceId: link[1].device._id, port: link[1].port }
       ])
