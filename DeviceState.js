@@ -104,7 +104,7 @@ class DeviceStateInstance extends EventEmitter {
   }
 
   writeKV(key, value, options) {
-    options = Object.assign({ create: false, track: true }, options);
+    options = Object.assign({ create: false, track: true, replace: false }, options);
     Log('write:', key, value, options);
     const kv = JSONPath({ path: key, json: this.state, resultType: 'all' });
     if (!kv) {
@@ -174,6 +174,10 @@ class DeviceStateInstance extends EventEmitter {
           LogError(`writekv: deleted key ${key}`);
           return null;
         }
+        if (options.replace) {
+          LogError(`writekv: cannot replace a deleted tree ${key}`);
+          return null;
+        }
         // Cannot restore a key in a deleted parent
         if (kv[0].parent.$o === DELETED_VALUE) {
           LogError(`writekv: bad parent ${key}`);
@@ -185,12 +189,42 @@ class DeviceStateInstance extends EventEmitter {
         return 'restore';
       }
 
-      // Writing to an existing key does nothing.
-      return 'unmodified';
+      if (!options.replace) {
+        // Writing to an existing key does nothing unless we're replacing it.
+        return 'unmodified';
+      }
+
+      // Replacing a tree with a new tree
+      // There might be an optimal way to do this, but for now we just delete the current tree,
+      // recreate it, and then fill it with these new values
+      this.deleteKV(key);
+      this.writeKV(key, {}, { create: true });
+      const noptions = { create: true, track: options.track };
+      const walk = (basek, basev) => {
+        for (let childk in basev) {
+          const childv = basev[childk];
+          const childp = (typeof childv === 'number' || typeof childv === 'string' || typeof childv === 'boolean');
+          if (childp) {
+            this.writeKV(`${basek}.${childk}`, childv, noptions);
+          }
+          else {
+            this.writeKV(`${basek}.${childk}`, {}, noptions);
+            walk(`${basek}.${childk}`, childv);
+          }
+        }
+      }
+      walk(key, value);
+      this.emit('update', { op: 'replace', key: key });
+      return 'replace';
     }
 
     if (!options.create) {
       LogError(`writekv: missing key ${key}`);
+      return null;
+    }
+
+    if (options.replace) {
+      LogError(`writekv: cannot replace a non-existant tree ${key}`);
       return null;
     }
 
