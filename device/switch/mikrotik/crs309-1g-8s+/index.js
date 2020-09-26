@@ -72,7 +72,8 @@ const Device = {
     $3: require('../generic/read/vlan'),
     $4: require('../generic/read/clients'),
     $5: require('../generic/read/snmp'),
-    $statistics: require('../generic/read/statistics')
+    $statistics: require('../generic/read/statistics'),
+    $6: require('../generic/read/mirror')
   },
   write: {
     $1: require('../generic/write/snmp'),
