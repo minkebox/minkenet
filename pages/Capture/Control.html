@@ -6,13 +6,13 @@
     <div class="capture-config">
       <div class="form-group">
         Capture packets where
-        <select id="capture-host">
+        <select id="capture-host-type">
           <option value="SD" >Source or Destination IP</option>
           <option value="S" >Source IP</option>
           <option value="D">Destination IP</option>
         </select>
         <span>equals</span>
-        <span style="white-space: nowrap;"><input id="capture-ip" type="text" placeholder="any" size="15">,</span>
+        <span style="white-space: nowrap;"><input id="capture-host" type="text" placeholder="any" size="15">,</span>
         <span>Protocol equals</span>
         <span style="white-space: nowrap;"><select id="capture-protocol">
           <option value="">Any</option>
@@ -20,7 +20,11 @@
           <option>UDP</option>
           <option>ARP</option>
         </select>,</span>
-        <span>Port equals</span>
+        <select id="capture-port-type">
+          <option value="SD" >Source or Destination Port</option>
+          <option value="S" >Source Port</option>
+          <option value="D">Destination Port</option>
+        </select>
         <input id="capture-port" type="text" placeholder="any" size="5">
         <span>and</span>
         <div class="dropdown" style="display: inline-block">
@@ -61,9 +65,10 @@
       const button = document.getElementById('capture-start');
       if (button.innerText === 'Start') {
         const config = {
+          hostType: document.getElementById('capture-host-type').value,
           host: document.getElementById('capture-host').value,
-          ip: document.getElementById('capture-ip').value,
           proto: document.getElementById('capture-protocol').value,
+          portType: document.getElementById('capture-port-type').value,
           port: document.getElementById('capture-port').value,
           options: {
             ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
@@ -71,6 +76,7 @@
             ignoreHost: document.getElementById('capture-o-host').checked
           }
         };
+        $('#capture-network-update').modal('show');
         send('capture.start', config);
         button.innerText = 'Stop';
       }
@@ -81,3 +87,4 @@
     }
   </script>
 </div>
+{{> CaptureUModal }}

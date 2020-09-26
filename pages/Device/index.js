@@ -201,7 +201,7 @@ class Devices extends Page {
 
     DeviceInstanceManager.authenticated(device);
 
-    this.send('modal.hide', { selector: `#login-modal-${device._id}` });
+    this.send('modal.hide.all');
     this.html(`device-card-${device._id}`, Template.DeviceCard({
       device: device,
       selectedDevice: null

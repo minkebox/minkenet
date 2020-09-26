@@ -101,8 +101,24 @@ function createVlan() {
   });
 }
 
-onMessage['modal.hide'] = msg => {
-  $(msg.value.selector).modal('hide');
+let pendingModals = 0;
+let pendingHide = false;
+$(document).on('show.bs.modal', () => {
+  pendingModals++;
+});
+$(document).on('shown.bs.modal', () => {
+  pendingModals--;
+  if (!pendingModals && pendingHide) {
+    $('.modal').modal('hide');
+  }
+});
+onMessage['modal.hide.all'] = msg => {
+  if (!pendingModals) {
+    $('.modal').modal('hide');
+  }
+  else {
+    pendingHide = true;
+  }
 }
 
 onMessage['device.details.summary.update'] = msg => {
@@ -120,7 +136,7 @@ onMessage['device.details.summary.update'] = msg => {
   details.replaceWith(builder);
 }
 
-const MAX_CAPTURE_PACKETS = 200;
+const MAX_CAPTURE_PACKETS = 500;
 onMessage['capture.packet'] = msg => {
   const win = document.getElementById('capture-window-content');
   if (win) {

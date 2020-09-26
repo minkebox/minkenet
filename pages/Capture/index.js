@@ -221,32 +221,39 @@ class Capture extends Page {
         filter.push(`(not ether host ${mac})`);
       });
     }
-    if (config.ip) {
-      switch (config.host) {
+    if (config.host) {
+      switch (config.hostType) {
         case 'S':
-          filter.push(`(src host ${config.ip})`);
+          filter.push(`(src host ${config.host})`);
           break;
         case 'D':
-          filter.push(`(dst host ${config.ip})`);
+          filter.push(`(dst host ${config.host})`);
           break;
         case 'SD':
-          filter.push(`(host ${config.ip})`);
+          filter.push(`(host ${config.host})`);
           break;
         default:
           break;
       }
     }
     switch (config.proto) {
-      case 'TCP':
-        filter.push(`(ip proto \\tcp)`);
-        if (config.port) {
-          filter.push(`(port ${config.port})`);
-        }
-        break;
       case 'UDP':
-        filter.push(`(ip proto \\udp)`);
+      case 'TCP':
+        filter.push(`(ip proto \\${config.proto === 'UDP' ? 'udp' : 'tcp'})`);
         if (config.port) {
-          filter.push(`(port ${config.port})`);
+          switch (config.portType) {
+            case 'S':
+              filter.push(`(src port ${config.port})`);
+              break;
+            case 'D':
+              filter.push(`(dst port ${config.port})`);
+              break;
+            case 'SD':
+              filter.push(`(port ${config.port})`);
+              break;
+            default:
+              break;
+          }
         }
         break;
       case 'ARP':
@@ -285,6 +292,7 @@ class Capture extends Page {
 
   async 'capture.start' (msg) {
     this.activateMirrors().then(() => {
+      this.send('modal.hide.all');
       this.startCapture(msg.value);
     });
   }
@@ -333,7 +341,10 @@ class Capture extends Page {
       Log(`bad link to attach: ${current.device._id} - ${attach.device._id}`);
       return;
     }
-    mirrors.push({ device: attach.device, source: current.port, target: attach.port });
+    // Dont need this is the attachment port the last port in the mirror list (e.g. we're monitoring ourself).
+    if (current.port !== attach.port) {
+      mirrors.push({ device: attach.device, source: current.port, target: attach.port });
+    }
 
     this.mirrors = mirrors;
     this.state.selectedDevice = device;
