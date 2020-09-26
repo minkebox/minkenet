@@ -497,8 +497,11 @@ body.pending-changes .pending-changes-disabled {
   color: var(--disabled-text-color);
 }
 
+
 #device-ports-hardware .port.selected-A,
 #device-ports-hardware .port.selected-A .inner-port,
+#capture-devices .port.selected-A,
+#capture-devices .port.selected-A .inner-port,
 .clients-details-column .port.selected-A,
 .clients-details-column .port.selected-A .inner-port,
 #monitor-hardware .port.selected-A,

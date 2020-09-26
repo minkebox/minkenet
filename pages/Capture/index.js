@@ -138,7 +138,9 @@ class Capture extends Page {
     super(send);
     this.state = {
       devices: [],
-      topologyValid: false
+      topologyValid: false,
+      selectedDevice: null,
+      selectedPortNr: null
     };
     this.eaddr = [];
     const ifaces = MacAddress.networkInterfaces();
@@ -147,6 +149,14 @@ class Capture extends Page {
         this.device = dev;
         break;
       }
+    }
+    this.mirrors = [];
+    this.restores = [];
+
+    const attach = TopologyManager.getAttachmentPoint();
+    if (attach) {
+      this.state.selectedDevice = attach.device;
+      this.state.selectedPortNr = attach.port;
     }
 
     this.onPacket = this.onPacket.bind(this);
@@ -160,11 +170,16 @@ class Capture extends Page {
 
   deselect() {
     this.stopCapture();
+    this.deactivateMirrors();
   }
 
   updateState() {
     this.state.devices = DeviceInstanceManager.getCaptureDevices();
     this.state.topologyValid = TopologyManager.valid;
+    const porthighlights = [];
+    porthighlights[this.state.selectedPortNr] = 'A';
+    this.state.ports = Array(this.state.devices.length);
+    this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = porthighlights;
   }
 
   async startCapture(config) {
@@ -269,11 +284,14 @@ class Capture extends Page {
   }
 
   async 'capture.start' (msg) {
-    this.startCapture(msg.value);
+    this.activateMirrors().then(() => {
+      this.startCapture(msg.value);
+    });
   }
 
   async 'capture.stop' (msg) {
     this.stopCapture();
+    this.deactivateMirrors();
   }
 
   async 'select.packet' (msg) {
@@ -284,6 +302,68 @@ class Capture extends Page {
       buf: Buffer.from(encoded.b, 'latin1')
     };
     this.inspect(this._render('Full', raw));
+  }
+
+  async 'device.port.select' (msg) {
+    const device = DeviceInstanceManager.getDeviceById(msg.value.id);
+    const port = parseInt(msg.value.port);
+    const attach = TopologyManager.getAttachmentPoint();
+    if (!attach) {
+      Log('no attachment port:');
+      return;
+    }
+
+    // Find the path between the attachment point and the port we want to capture.
+    const path = TopologyManager.findPath(device, attach.device);
+
+    // Convert path into a set of mirrors
+    const mirrors = [];
+    let current = { device: device, port: port };
+    for (let i = 0; i < path.length; i++) {
+      const link = path[i];
+      const exit = link[0];
+      if (current.device != exit.device) {
+        Log(`bad link: ${current.device._id} - ${exit.device._id}`);
+        return;
+      }
+      mirrors.push({ device: current.device, source: current.port, target: exit.port });
+      current = link[1];
+    }
+    if (current.device != attach.device) {
+      Log(`bad link to attach: ${current.device._id} - ${attach.device._id}`);
+      return;
+    }
+    mirrors.push({ device: attach.device, source: current.port, target: attach.port });
+
+    this.mirrors = mirrors;
+    this.state.selectedDevice = device;
+    this.state.selectedPortNr = port;
+    this.updateState();
+    this.html('capture-devices', Template.PortsDevices(this.state));
+  }
+
+  async activateMirrors() {
+    // Create chain of mirrors, keeping a record of what the there before so we can restore it later
+    this.restores = [];
+    this.mirrors.forEach(mirror => {
+      this.restores.push({ device: mirror.device, mirror: mirror.device.readKV(`network.mirror.0`) });
+      mirror.device.writeKV('network.mirror.0',
+      {
+        enable: true,
+        target: mirror.target,
+        port: {
+          [mirror.source]: (mirror === this.mirrors[0] ? { egress: true, ingress: true } : { ingress: true })
+        }
+      }, { replace: true });
+    });
+    //await DeviceInstanceManager.commit();
+  }
+
+  async deactivateMirrors() {
+    this.restores.forEach(restore => {
+      restore.device.writeKV('network.mirror.0', restore.mirror, { replace: true });
+    });
+    //await DeviceInstanceManager.commit();
   }
 
   _render(style, raw) {
