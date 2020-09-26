@@ -1,4 +1,7 @@
 <div class="packet" onclick="selectpkt(event)">
   <div class="time">{{pcap_header.tv_sec}}</div><div class="source">{{iporhost payload.payload.saddr.addr}}</div><div class="destination">{{iporhost payload.payload.daddr.addr}}</div><div class="protocol">DNS</div><div class="info">
+    {{#with (decode 'dns' payload.payload.payload.data 0)}}
+    {{#if header.isResponse}}Response{{else}}Request{{/if}}
+    {{/with}}
   </div>
 </div>

@@ -1,5 +1,6 @@
 const MacAddress = require('macaddress');
 const PCap = require('pcap');
+const PCapDNS = require('pcap/decode/dns')
 const Handlebars = require('handlebars');
 const Template = require('../Template');
 const Page = require('../Page');
@@ -120,6 +121,14 @@ Handlebars.registerHelper({
       return `[${r.join(', ')}]`;
     }
     return '';
+  },
+  decode: function(type, data, offset) {
+    switch (type) {
+      case 'dns':
+        return new PCapDNS().decode(data, offset, data.length);
+      default:
+        return null;
+    }
   }
 });
 

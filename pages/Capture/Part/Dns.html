@@ -1,1 +1,51 @@
-{{> CapturePartData data=payload.payload.payload.data offset=0}}
+{{#with (decode 'dns' payload.payload.payload.data 0)}}
+<div class="dns card">
+  <div data-toggle="collapse" data-target="#dns-details" class="card-header">
+    Domain Name System ({{#if header.isResponse}}response{{else}}request{{/if}})
+  </div>
+  <div id="dns-details" class="collapse details">
+    <div>Transaction ID: {{hex id}}</div>
+    <div>Flags:
+      {{#if header.isResponse}}
+      Response,
+      {{else}}
+      Query,
+      {{/if}}
+      {{#if header.isTuncared}}Truncated,{{/if}}
+      {{#if header.isRecursionDesired}}Recursion desired,{{/if}}
+      {{#if header.isRecursionAvailible}}Recursion available,{{/if}}
+      {{#if (eq header.responseCode 0)}}
+      No error
+      {{else if (eq header.responseCode 1)}}
+      Format error
+      {{else if (eq header.responseCode 2)}}
+      Server error
+      {{else if (eq header.responseCode 3)}}
+      Name error
+      {{else if (eq header.responseCode 4)}}
+      Unsupported request
+      {{else if (eq header.responseCode 5)}}
+      Refused
+      {{else}}
+      Error code {{header.responseCode}}
+      {{/if}}
+    </div>
+    <div>Questions: {{qdcount}}</div>
+    <div>Answers: {{ancount}}</div>
+    <div>Authories: {{nscount}}</div>
+    <div>Additionals: {{arcount}}</div>
+    {{#if qdcount}}
+    <div>Queries ...</div>
+    {{/if}}
+    {{#if ancount}}
+    <div>Answers ...</div>
+    {{/if}}
+    {{#if nscount}}
+    <div>Authorities ...</div>
+    {{/if}}
+    {{#if arcount}}
+    <div>Additionals ...</div>
+    {{/if}}
+  </div>
+</div>
+{{/with}}
