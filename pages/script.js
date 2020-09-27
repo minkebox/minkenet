@@ -107,10 +107,13 @@ $(document).on('show.bs.modal', () => {
   pendingModals++;
 });
 $(document).on('shown.bs.modal', () => {
-  pendingModals--;
-  if (!pendingModals && pendingHide) {
-    $('.modal').modal('hide');
-  }
+  // Keep modal on the screen for at least a moment
+  setTimeout(() => {
+    pendingModals--;
+    if (!pendingModals && pendingHide) {
+      $('.modal').modal('hide');
+    }
+  }, 300);
 });
 onMessage['modal.hide.all'] = msg => {
   if (!pendingModals) {

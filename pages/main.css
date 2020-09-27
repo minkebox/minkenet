@@ -604,7 +604,7 @@ body.pending-changes .pending-changes-disabled {
 .capture-config > .form-group > span > input,
 .capture-config .dropdown-toggle {
   height: 100%;
-  margin: 2px;
+  margin: 2px 0;
   color: var(--main-text-color);
   background-color: var(--info-background-color);
   border: 1px solid var(--minor-background-color)

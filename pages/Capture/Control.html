@@ -6,47 +6,57 @@
     <div class="capture-config">
       <div class="form-group">
         Capture packets where
-        <select id="capture-host-type">
-          <option value="SD" >Source or Destination IP</option>
-          <option value="S" >Source IP</option>
-          <option value="D">Destination IP</option>
-        </select>
-        <span>equals</span>
-        <span style="white-space: nowrap;"><input id="capture-host" type="text" placeholder="any" size="15">,</span>
-        <span>Protocol equals</span>
-        <span style="white-space: nowrap;"><select id="capture-protocol">
-          <option value="">Any</option>
-          <option>TCP</option>
-          <option>UDP</option>
-          <option>ARP</option>
-        </select>,</span>
-        <select id="capture-port-type">
-          <option value="SD" >Source or Destination Port</option>
-          <option value="S" >Source Port</option>
-          <option value="D">Destination Port</option>
-        </select>
-        <input id="capture-port" type="text" placeholder="any" size="5">
-        <span>and</span>
-        <div class="dropdown" style="display: inline-block">
-          <button class="dropdown-toggle" style="line-height: 1" type="button" data-toggle="dropdown">
-            Options
-          </button>
-          <div id="capture-options" class="dropdown-menu">
-            <form class="px-4 pt-2" style="width:275px;font-size:12px">
-              <div class="form-group">
-                <div class="form-check">
-                  <input id="capture-o-broadcast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore broadcast packets</label>
+        <span style="white-space: nowrap;">
+          <select id="capture-host-type">
+            <option value="SD" >Source or Destination IP</option>
+            <option value="S" >Source IP</option>
+            <option value="D">Destination IP</option>
+          </select>
+          <span>is</span>
+          <input id="capture-host" type="text" placeholder="any" size="15">,
+        </span>
+        <span style="white-space: nowrap;">
+          <span>Protocol is</span>
+          <select id="capture-protocol">
+            <option value="">Any</option>
+            <option>TCP</option>
+            <option>UDP</option>
+            <option>ARP</option>
+          </select>,
+        </span>
+        <span style="white-space: nowrap;">
+          <select id="capture-port-type">
+            <option value="SD" >Source or Destination Port</option>
+            <option value="S" >Source Port</option>
+            <option value="D">Destination Port</option>
+          </select>
+          <span>is</span>
+          <input id="capture-port" type="text" placeholder="any" size="5">
+          <span>,</span>
+        </span>
+        <span style="white-space: nowrap;">
+          <span>and</span>
+          <div class="dropdown" style="display: inline-block">
+            <button class="dropdown-toggle" style="line-height: 1" type="button" data-toggle="dropdown">
+              Options
+            </button>
+            <div id="capture-options" class="dropdown-menu">
+              <form class="px-4 pt-2" style="width:275px;font-size:12px">
+                <div class="form-group">
+                  <div class="form-check">
+                    <input id="capture-o-broadcast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore broadcast packets</label>
+                  </div>
+                  <div class="form-check">
+                    <input id="capture-o-multicast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore multicast packets</label>
+                  </div>
+                  <div class="form-check">
+                    <input id="capture-o-host" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore packets to or from me</label>
+                  </div>
                 </div>
-                <div class="form-check">
-                  <input id="capture-o-multicast" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore multicast packets</label>
-                </div>
-                <div class="form-check">
-                  <input id="capture-o-host" class="form-check-input" type="checkbox" checked><label class="form-check-label">Ignore packets to or from me</label>
-                </div>
-              </div>
-            </form>
+              </form>
+            </div>
           </div>
-        </div>
+        </span>
       </div>
     </div>
     <div style="position: relative; width: 70px;">
