@@ -51,10 +51,6 @@ class DeviceInstanceManager extends EventEmitter {
     return this.getAllDevices().filter(device => device.readKV('network.wireless', { depth: 1 }));
   }
 
-  getCaptureDevices() {
-    return this.getAllDevices().filter(device => device.readKV('network.mirror', { depth: 1 }));
-  }
-
   getAuthenticatedDevices() {
     return this.getAllDevices().filter(device => device._authenticated);
   }

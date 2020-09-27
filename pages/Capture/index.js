@@ -12,7 +12,7 @@ const Log = require('debug')('capture');
 const CAPTURE_DEVICES = [ 'eth0', 'br0' ];
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
-const CAPTURE_SNAP_LENGTH = 10240; // Allow for jumbo
+const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
 const MAX_BUFFER = 102400; // 100K in flight only
 
 const hex = (v) => {
@@ -174,7 +174,7 @@ class Capture extends Page {
   }
 
   updateState() {
-    this.state.devices = DeviceInstanceManager.getCaptureDevices();
+    this.state.devices = this.getCaptureDevices();
     this.state.topologyValid = TopologyManager.valid;
     const porthighlights = [];
     porthighlights[this.state.selectedPortNr] = 'A';
@@ -186,6 +186,7 @@ class Capture extends Page {
     if (this.session) {
       this.stopCapture();
     }
+    const snapsize = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE;
     const filter = await this.buildFilter(config);
     Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
@@ -194,7 +195,7 @@ class Capture extends Page {
       monitor: false,
       buffer_size: CAPTURE_BUFFER_SIZE,
       buffer_timeout: CAPTURE_BUFFER_TIMEOUT,
-      snap_length: CAPTURE_SNAP_LENGTH
+      snap_length: snapsize
     });
     this.session.on('packet', this.onPacket);
   }
@@ -209,6 +210,7 @@ class Capture extends Page {
 
   async buildFilter(config) {
     const filter = [];
+    await this._getMacAddress();
     if (config.options.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
     }
@@ -216,7 +218,6 @@ class Capture extends Page {
       filter.push('(not ether multicast)');
     }
     if (config.options.ignoreHost) {
-      await this._getMacAddress();
       this.eaddr.forEach(mac => {
         filter.push(`(not ether host ${mac})`);
       });
@@ -263,8 +264,13 @@ class Capture extends Page {
         break;
       default:
         break;
-
     }
+
+    // Filter traffic from this application
+    this.eaddr.forEach(mac => {
+      filter.push(`(not (ether host ${mac} and ip proto \\tcp and port 8080))`);
+    });
+
     return filter.join(' and ');
   }
 
@@ -429,6 +435,39 @@ class Capture extends Page {
         });
       });
     }
+  }
+
+  getCaptureDevices() {
+    const attach = TopologyManager.getAttachmentPoint();
+    if (!attach) {
+      return [];
+    }
+    // Get a list of all devices capable of capture
+    const devices = DeviceInstanceManager.getAllDevices();
+    const caps = {};
+    devices.forEach(device => {
+      if (device.readKV('network.mirror', { depth: 1 })) {
+        caps[device._id] = device;
+      }
+    });
+    // Make sure there's a capturable path from the attachment point to each device.
+    for (let id in caps) {
+      const path = TopologyManager.findPath(attach.device, caps[id]);
+      if (!path) {
+        delete caps[id];
+      }
+      else {
+        for (let i = 0; i < path.length; i++) {
+          const link = path[i];
+          if (!caps[link[0].device._id] || !caps[link[1].device._id]) {
+            delete caps[id];
+            break;
+          }
+        }
+      }
+    }
+    // Return only devices we can capture from.
+    return Object.values(caps);
   }
 
 }
