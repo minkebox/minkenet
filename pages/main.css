@@ -43,6 +43,10 @@ a {
   color: var(--minor-text-color);
 }
 
+*::placeholder {
+  color: var(--placeholder-text-color);
+}
+
 div[data-placeholder]:empty:before {
   content: attr(data-placeholder);
   color: var(--placeholder-text-color);
@@ -591,6 +595,12 @@ body.pending-changes .pending-changes-disabled {
   color: var(--main-text-color);
   background-color: var(--info-background-color);
   border: 1px solid var(--minor-background-color)
+}
+#capture-controls > .form-group select:invalid {
+  color: var(--placeholder-text-color) !important;
+}
+#capture-controls > .form-group select option {
+  color: var(--main-text-color);
 }
 .capture-start {
   float: right;
