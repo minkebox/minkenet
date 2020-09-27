@@ -241,6 +241,8 @@ class Capture extends Page {
       case 'UDP':
       case 'TCP':
         filter.push(`(ip proto \\${config.proto === 'UDP' ? 'udp' : 'tcp'})`);
+        // Fall through
+      case '':
         if (config.port) {
           switch (config.portType) {
             case 'S':
@@ -259,8 +261,6 @@ class Capture extends Page {
         break;
       case 'ARP':
         filter.push(`(ether proto \\arp)`);
-        break;
-      case '':
         break;
       default:
         break;
