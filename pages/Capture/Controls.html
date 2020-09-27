@@ -61,8 +61,10 @@
       $('#capture-network-update').modal('show');
       send('capture.start', config);
       button.innerText = 'Stop';
+      captureRunning = true;
     }
     else {
+      captureRunning = false;
       send('capture.stop');
       button.innerText = 'Start';
     }

@@ -141,7 +141,11 @@ onMessage['device.details.summary.update'] = msg => {
 
 const MAX_CAPTURE_PACKETS = 500;
 let pendingCaptureScroll = null;
+let captureRunning = false;
 onMessage['capture.packet'] = msg => {
+  if (!captureRunning) {
+    return false;
+  }
   const win = document.getElementById('capture-window-content');
   if (win) {
     const builder = document.createElement('tbody');
