@@ -579,46 +579,30 @@ body.pending-changes .pending-changes-disabled {
   overflow-y: scroll;
 }
 
-#capture-control {
-  width: 0;
+#capture-controls {
+  margin: 35px;
+  font-size: 14px;
 }
+#capture-controls > .form-group select,
+#capture-controls > .form-group input,
+#capture-controls .dropdown-toggle {
+  margin: 2px 0;
+  padding: 0 10px;
+  color: var(--main-text-color);
+  background-color: var(--info-background-color);
+  border: 1px solid var(--minor-background-color)
+}
+.capture-start {
+  float: right;
+}
+
 .capture {
   display: flex;
   flex-direction: column;
   height: 100%;
 }
-.capture-config-container {
-  display: flex;
-  background-color: var(--info-background-color);
-  border: 1px solid var(--property-border-color);
-  border-radius: 10px;
-  margin-bottom: 5px;
-}
-.capture-config {
-  flex: 1;
-  padding: 10px 15px;
-}
-.capture-config > .form-group > select,
-.capture-config > .form-group > input,
-.capture-config > .form-group > span > select,
-.capture-config > .form-group > span > input,
-.capture-config .dropdown-toggle {
-  height: 100%;
-  margin: 2px 0;
-  color: var(--main-text-color);
-  background-color: var(--info-background-color);
-  border: 1px solid var(--minor-background-color)
-}
-#capture-options {
-  color: var(--minor-text-color);
-  background-color: var(--info-background-color);
-  border: 1px solid var(--minor-background-color)
-}
-
 .capture-window {
   flex: 1;
-  border: 1px solid var(--property-border-color);
-  border-radius: 10px;
   background-color: var(--main-background-color);
   overflow: scroll;
   margin-bottom: 5px;
@@ -631,14 +615,9 @@ body.pending-changes .pending-changes-disabled {
   font: inherit;
 }
 
-.capture-start {
-  position: absolute;
-  bottom: 10px;
-  right: 10px;
-}
 
 .packet {
-  width: 2000px;
+  width: 1000px;
   color: var(--minor-text-color);
   font-family: 'Courier New', Courier, monospace;
   font-size: 12px;

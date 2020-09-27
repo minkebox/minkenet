@@ -140,6 +140,7 @@ onMessage['device.details.summary.update'] = msg => {
 }
 
 const MAX_CAPTURE_PACKETS = 500;
+let pendingCaptureScroll = null;
 onMessage['capture.packet'] = msg => {
   const win = document.getElementById('capture-window-content');
   if (win) {
@@ -150,7 +151,10 @@ onMessage['capture.packet'] = msg => {
     if (win.childElementCount > MAX_CAPTURE_PACKETS) {
       win.firstElementChild.nextElementSibling.remove();
     }
-    win.parentElement.scrollTo(0, win.scrollHeight);
+    clearTimeout(pendingCaptureScroll);
+    pendingCaptureScroll = setTimeout(() => {
+      win.scrollTo(0, win.scrollHeight);
+    });
   }
 }
 

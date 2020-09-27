@@ -1,5 +1,14 @@
-<div id="capture-control" class="list-column">
-  {{> CaptureControl}}
+<div class="list-column" style="width:0">
+  <div class="capture">
+    {{#unless topologyValid}}
+    {{> NetworkTopologyNotice}}
+    {{/unless}}
+    <div id="capture-window-content" class="capture-window">
+      <div class="capture-window-title packet">
+        <div class="time">Time</div><div class="source">Source</div><div class="destination">Destination</div><div class="protocol">Protocol</div><div class="info">Information</div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="details-column">
   <div id="capture-selected" class="tab-content">
@@ -7,7 +16,7 @@
   </div>
   <script>
     window.selectpkt = function(evt) {
-      $('.capture-window-content .packet').removeClass('active');
+      $('#capture-window-content .packet').removeClass('active');
       send('select.packet', evt.currentTarget.raw);
       $(evt.currentTarget).addClass('active');
     }
