@@ -14,26 +14,32 @@ module.exports = {
               false: 2
             }
           },
-          target: {
-            $: 'oid+set',
-            arg: `${BASE}.2.0`
-          },
-          port: {
-            $: 'fn',
-            arg: async ctx => {
-              const ports = ctx.readKV(ctx.path);
-              const ingress = [ 0, 0, 0, 0, 0, 0, 0, 0 ];
-              const egress = [ 0, 0, 0, 0, 0, 0, 0, 0 ];
-              for (let p in ports) {
-                if (ports[p].ingress) {
-                  ingress[Math.floor(p / 4)] |= 8 >> (p % 4);
-                }
-                if (ports[p].egress) {
-                  egress[Math.floor(p / 4)] |= 8 >> (p % 4);
+          $1: {
+            $: 'guard',
+            key: { $: 'kv', arg: 'network.mirror.0.enable' },
+            arg: {
+              target: {
+                $: 'oid+set',
+                arg: `${BASE}.2.0`
+              },
+              port: {
+                $: 'fn',
+                arg: async ctx => {
+                  const ports = ctx.readKV(ctx.path);
+                  const ingress = [ 0, 0, 0, 0 ];
+                  const egress = [ 0, 0, 0, 0 ];
+                  for (let p in ports) {
+                    if (ports[p].ingress) {
+                      ingress[Math.floor(p / 8)] |= 0x80 >> (p % 8);
+                    }
+                    if (ports[p].egress) {
+                      egress[Math.floor(p / 8)] |= 0x80 >> (p % 8);
+                    }
+                  }
+                  await ctx.eval({ $: 'oid+set', arg: `${BASE}.3.0`, value: Buffer.from(ingress) });
+                  await ctx.eval({ $: 'oid+set', arg: `${BASE}.4.0`, value: Buffer.from(egress) });
                 }
               }
-              await ctx.eval({ $: 'oid+set', arg: `${BASE}.3.0`, value: Buffer.from(ingress) });
-              await ctx.eval({ $: 'oid+set', arg: `${BASE}.4.0`, value: Buffer.from(egress) });
             }
           }
         }
