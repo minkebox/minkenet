@@ -3,6 +3,7 @@ const EventEmitter = require('events');
 const DB = require('./Database');
 const DeviceManager = require('./DeviceManager');
 const DeviceState = require('./DeviceState');
+const Log = require('debug')('device');
 
 class DeviceInstanceManager extends EventEmitter {
 
@@ -108,7 +109,7 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   async commit(updateCallback) {
-    const devices = DeviceInstanceManager.getAllDevices();
+    const devices = this.getAllDevices();
     for (let id in this.devices) {
       const device = this.devices[id];
       if (device.needCommit()) {
