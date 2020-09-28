@@ -391,14 +391,15 @@ class Capture extends Page {
         }
       }, { replace: true });
     });
-    //await DeviceInstanceManager.commit();
+    await DeviceInstanceManager.commit();
   }
 
   async deactivateMirrors() {
     this.restores.forEach(restore => {
+      Log('restore:', restore.device._id, restore.mirror);
       restore.device.writeKV('network.mirror.0', restore.mirror, { replace: true });
     });
-    //await DeviceInstanceManager.commit();
+    await DeviceInstanceManager.commit();
   }
 
   _render(style, raw) {
