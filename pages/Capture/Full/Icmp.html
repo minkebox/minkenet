@@ -4,8 +4,8 @@
   {{> CapturePartIPV4 }}
   {{> CapturePartIcmp }}
   {{#if payload.vlan}}
-  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 22)}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 26)}}
   {{else}}
-  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 18)}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 22)}}
   {{/if}}
 </div>
