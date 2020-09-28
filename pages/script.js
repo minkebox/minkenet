@@ -111,6 +111,7 @@ $(document).on('shown.bs.modal', () => {
   setTimeout(() => {
     pendingModals--;
     if (!pendingModals && pendingHide) {
+      pendingHide = false;
       $('.modal').modal('hide');
     }
   }, 300);
