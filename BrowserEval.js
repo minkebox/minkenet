@@ -19,8 +19,8 @@ class Eval {
   // various forms and mappings.
   //
   async eval(def$, value, context, path, device) {
-    Log('eval:', path, value);
-    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean') {
+    Log('eval:', def$, path, value);
+    if (typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' || Buffer.isBuffer(value)) {
       // Short circuit a common case
       if (def$ === 'literal') {
         return value;
@@ -222,7 +222,7 @@ class Eval {
       {
         let nvalue = '';
         if ('value' in value) {
-          nvalue = await this.eval(def$, value.value, context, path, device);
+          nvalue = await this.eval('literal', value.value, context, path, device);
         }
         else {
           nvalue = await this.eval('kv', path, context, path, device);
