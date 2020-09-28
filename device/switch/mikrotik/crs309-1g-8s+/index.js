@@ -83,7 +83,8 @@ const Device = {
     $5: require('../generic/write/vlan'),
     $6: require('../generic/write/ivl'),
     $7: require('../generic/write/igmp'),
-    $8: require('../generic/write/ip')
+    $8: require('../generic/write/mirror'),
+    $9: require('../generic/write/ip')
   }
 
 };
