@@ -109,12 +109,26 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   async commit(updateCallback) {
-    const devices = this.getAllDevices();
     for (let id in this.devices) {
       const device = this.devices[id];
       if (device.needCommit()) {
         if (updateCallback) {
-          updateCallback(device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS));
+          updateCallback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+        }
+        try {
+          await device.connect();
+        }
+        catch (_) {
+          // We give connect a couple of tries before we fail.
+          await device.connect();
+        }
+      }
+    }
+    for (let id in this.devices) {
+      const device = this.devices[id];
+      if (device.needCommit()) {
+        if (updateCallback) {
+          updateCallback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
         }
         try {
           await device.write();
