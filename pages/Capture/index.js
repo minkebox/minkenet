@@ -1,6 +1,6 @@
 const MacAddress = require('macaddress');
 const PCap = require('pcap');
-const PCapDNS = require('pcap/decode/dns')
+const PCapDNS = require('pcap/decode/dns');
 const Handlebars = require('handlebars');
 const Template = require('../Template');
 const Page = require('../Page');
@@ -14,6 +14,9 @@ const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
 const MAX_BUFFER = 102400; // 100K in flight only
+
+// Keep handle on old session objects to avoid the library corrupting memory. Not a desirable fix and hopefully temporary.
+const oldSessions = [];
 
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
@@ -204,6 +207,9 @@ class Capture extends Page {
     if (this.session) {
       this.session.off('packet', this.onPacket);
       this.session.close();
+
+      this.session.session.read_callback = null;
+      oldSessions.push(this.session.session);
       this.session = null;
     }
   }
@@ -264,6 +270,10 @@ class Capture extends Page {
         break;
       default:
         break;
+    }
+
+    if (config.freeFormQuery) {
+      filter.push(`(${config.freeFormQuery})`);
     }
 
     // Filter traffic from this application

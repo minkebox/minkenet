@@ -584,22 +584,21 @@ body.pending-changes .pending-changes-disabled {
 }
 
 #capture-controls {
-  margin: 35px;
+  margin: 20px;
   font-size: 14px;
 }
-#capture-controls > .form-group select,
-#capture-controls > .form-group input,
-#capture-controls .dropdown-toggle {
+#capture-controls .form-group select,
+#capture-controls .form-group input {
   margin: 2px 0;
   padding: 0 10px;
   color: var(--main-text-color);
   background-color: var(--info-background-color);
   border: 1px solid var(--minor-background-color)
 }
-#capture-controls > .form-group select:invalid {
+#capture-controls .form-group select:invalid {
   color: var(--placeholder-text-color) !important;
 }
-#capture-controls > .form-group select option {
+#capture-controls .form-group select option {
   color: var(--main-text-color);
 }
 .capture-start {

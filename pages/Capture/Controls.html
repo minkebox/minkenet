@@ -1,73 +1,79 @@
-<div class="form-group">
-  <div class="row">
-    <select class="col-sm-6" id="capture-host-type">
-      <option value="SD" >Source or Destination IP</option>
-      <option value="S" >Source IP</option>
-      <option value="D">Destination IP</option>
-    </select>
-    <div class="col-sm-2"></div>
-    <input class="col-sm-4" id="capture-host" type="text" placeholder="Any" size="15" autocomplete="off">
+<div class="card-body">
+  <div class="form-group">
+    <div class="row">
+      <select class="col-sm-6" id="capture-host-type">
+        <option value="SD" >Source or Destination IP</option>
+        <option value="S" >Source IP</option>
+        <option value="D">Destination IP</option>
+      </select>
+      <div class="col-sm-2"></div>
+      <input class="col-sm-4" id="capture-host" type="text" placeholder="Any" size="15" autocomplete="off">
+    </div>
+    <div class="row">
+      <div class="col-sm-8">Protocol</div>
+      <select required class="col-sm-4" style="padding-left: 6px"id="capture-protocol">
+        <option value="">Any</option>
+        <option>TCP</option>
+        <option>UDP</option>
+        <option>ARP</option>
+      </select>
+    </div>
+    <div class="row">
+      <select class="col-sm-6" id="capture-port-type">
+        <option value="SD" >Source or Destination Port</option>
+        <option value="S" >Source Port</option>
+        <option value="D">Destination Port</option>
+      </select>
+      <div class="col-sm-2"></div>
+      <input class="col-sm-4" id="capture-port" type="text" placeholder="Any" size="5" autocomplete="off">
+    </div>
+    <div class="row">
+      <input class="col-sm" id="capture-query" type="text" placeholder="Freeform pcap filter query" autocomplete="off">
+    </div>
+    <div class="row">
+      <div class="col-sm-8">Ignore broadcast packets</div>
+      <input id="capture-o-broadcast" type="checkbox" checked>
+    </div>
+    <div class="row">
+      <div class="col-sm-8">Ignore multicast packets</div>
+      <input id="capture-o-multicast" type="checkbox" checked>
+    </div>
+    <div class="row">
+      <div class="col-sm-8">Ignore packets to or from me</div>
+      <input id="capture-o-host" type="checkbox" checked>
+    </div>
   </div>
-  <div class="row">
-    <div class="col-sm-8">Protocol</div>
-    <select required class="col-sm-4" style="padding-left: 6px"id="capture-protocol">
-      <option value="">Any</option>
-      <option>TCP</option>
-      <option>UDP</option>
-      <option>ARP</option>
-    </select>
+  <div class="form-group">
+    <button id="capture-start" type="button" class="capture-start btn btn-secondary btn-sm" onclick="startCapture()">Start</button>
   </div>
-  <div class="row">
-    <select class="col-sm-6" id="capture-port-type">
-      <option value="SD" >Source or Destination Port</option>
-      <option value="S" >Source Port</option>
-      <option value="D">Destination Port</option>
-    </select>
-    <div class="col-sm-2"></div>
-    <input class="col-sm-4" id="capture-port" type="text" placeholder="Any" size="5" autocomplete="off">
-  </div>
-  <div class="row">
-    <div class="col-sm-8">Ignore broadcast packets</div>
-    <input id="capture-o-broadcast" type="checkbox" checked>
-  </div>
-  <div class="row">
-    <div class="col-sm-8">Ignore multicast packets</div>
-    <input id="capture-o-multicast" type="checkbox" checked>
-  </div>
-  <div class="row">
-    <div class="col-sm-8">Ignore packets to or from me</div>
-    <input id="capture-o-host" type="checkbox" checked>
-  </div>
-</div>
-<div class="form-group">
-  <button id="capture-start" type="button" class="capture-start btn btn-secondary btn-sm" onclick="startCapture()">Start</button>
-</div>
-<script>
-  window.startCapture = function() {
-    const button = document.getElementById('capture-start');
-    if (button.innerText === 'Start') {
-      const config = {
-        hostType: document.getElementById('capture-host-type').value,
-        host: document.getElementById('capture-host').value,
-        proto: document.getElementById('capture-protocol').value,
-        portType: document.getElementById('capture-port-type').value,
-        port: document.getElementById('capture-port').value,
-        options: {
-          ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
-          ignoreMulticast: document.getElementById('capture-o-multicast').checked,
-          ignoreHost: document.getElementById('capture-o-host').checked
-        }
-      };
-      $('#capture-network-update').modal('show');
-      send('capture.start', config);
-      button.innerText = 'Stop';
-      captureRunning = true;
+  <script>
+    window.startCapture = function() {
+      const button = document.getElementById('capture-start');
+      if (button.innerText === 'Start') {
+        const config = {
+          hostType: document.getElementById('capture-host-type').value,
+          host: document.getElementById('capture-host').value,
+          proto: document.getElementById('capture-protocol').value,
+          portType: document.getElementById('capture-port-type').value,
+          port: document.getElementById('capture-port').value,
+          freeFormQuery: document.getElementById('capture-query').value,
+          options: {
+            ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
+            ignoreMulticast: document.getElementById('capture-o-multicast').checked,
+            ignoreHost: document.getElementById('capture-o-host').checked
+          }
+        };
+        $('#capture-network-update').modal('show');
+        send('capture.start', config);
+        button.innerText = 'Stop';
+        captureRunning = true;
+      }
+      else {
+        captureRunning = false;
+        send('capture.stop');
+        button.innerText = 'Start';
+      }
     }
-    else {
-      captureRunning = false;
-      send('capture.stop');
-      button.innerText = 'Start';
-    }
-  }
-</script>
-{{> CaptureUModal }}
+  </script>
+  {{> CaptureUModal }}
+</div>
