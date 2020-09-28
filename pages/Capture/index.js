@@ -15,8 +15,6 @@ const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
 const MAX_BUFFER = 102400; // 100K in flight only
 
-// Keep handle on old session objects to avoid the library corrupting memory. Not a desirable fix and hopefully temporary.
-const oldSessions = [];
 
 const hex = (v) => {
   return `0${v.toString(16)}`.substr(-2);
@@ -189,7 +187,7 @@ class Capture extends Page {
     if (this.session) {
       this.stopCapture();
     }
-    const snapsize = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE;
+    const snapsize = parseInt(this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
     const filter = await this.buildFilter(config);
     Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
@@ -207,9 +205,6 @@ class Capture extends Page {
     if (this.session) {
       this.session.off('packet', this.onPacket);
       this.session.close();
-
-      this.session.session.read_callback = null;
-      oldSessions.push(this.session.session);
       this.session = null;
     }
   }
