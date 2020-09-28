@@ -403,7 +403,7 @@ class Capture extends Page {
 
   _render(style, raw) {
     const packet = PCap.decode.packet(raw);
-    packet.raw = raw.buf;//Uint8Array.from(raw);
+    packet.raw = raw.buf;
     const ether = packet.payload;
     switch (ether.ethertype) {
       case 0x0800: // IPv4
