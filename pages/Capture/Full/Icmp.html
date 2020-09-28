@@ -1,1 +1,11 @@
-{{> CaptureFullIPV4Unknown }}
+<div class="inspect accordion">
+  {{> CapturePartFrame }}
+  {{> CapturePartEthernet }}
+  {{> CapturePartIPV4 }}
+  {{> CapturePartIcmp }}
+  {{#if payload.vlan}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 22)}}
+  {{else}}
+  {{> CapturePartData data=raw offset=(add payload.payload.headerLength 18)}}
+  {{/if}}
+</div>

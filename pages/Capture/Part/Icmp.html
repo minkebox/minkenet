@@ -1,29 +1,35 @@
-<div class="packet" onclick="selectpkt(event)">
-  <div class="time">{{pcap_header.tv_sec}}</div><div class="source">{{iporhost payload.payload.saddr.addr}}</div><div class="destination">{{iporhost payload.payload.daddr.addr}}</div><div class="protocol">ICMP</div><div class="info">
-    {{#with payload.payload.payload}}
-    {{#if (eq type 0)}}
-      Echo reply
+{{#with payload.payload.payload}}
+<div class="icmp card">
+  <div data-toggle="collapse" data-target="#icmp-details" class="card-header">
+    Internet Control Message Protocol
+  </div>
+  <div id="icmp-details" class="collapse details">
+    <div>Type: {{type}}
+      {{#if (eq type 0)}}
+      (Echo reply)
       {{else if (eq type 4)}}
-      Source quench
+      (Source quench)
       {{else if (eq type 6)}}
-      Alternate Host Address
+      (Alternate Host Address)
       {{else if (eq type 7)}}
-      Reserved
+      (Reserved)
       {{else if (eq type 8)}}
-      Echo request
+      (Echo request)
       {{else if (eq type 9)}}
-      Router advertisement
+      (Router advertisement)
       {{else if (eq type 10)}}
-      Router solicitation
+      (Router solicitation)
       {{else if (eq type 3)}}
-      Destination unreachable
+      (Destination unreachable)
       {{else if (eq type 5)}}
-      Redirect
+      (Redirect)
       {{else if (eq type 11)}}
-      Time exceeded
+      (Time exceeded)
       {{else}}
-      Unknown
+      (Unknown)
       {{/if}}
+    </div>
+    <div>Code: {{code}}
       {{#if (eq type 3)}}
         {{#if (eq code 0)}}
         (Destination network unreachable)
@@ -78,6 +84,8 @@
         {{/if}}
       {{else}}
       {{/if}}
-    {{/with}}
+    </div>
+    <div>Checksum: {{hex checksum}}</div>
   </div>
 </div>
+{{/with}}

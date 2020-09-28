@@ -217,6 +217,7 @@ class Capture extends Page {
   async buildFilter(config) {
     const filter = [];
     await this._getMacAddress();
+
     if (config.options.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
     }
@@ -228,6 +229,7 @@ class Capture extends Page {
         filter.push(`(not ether host ${mac})`);
       });
     }
+
     if (config.host) {
       switch (config.hostType) {
         case 'S':
@@ -243,13 +245,27 @@ class Capture extends Page {
           break;
       }
     }
+
     switch (config.proto) {
+      case 'ICMP':
+        filter.push(`(ip proto \\icmp)`);
+        break;
       case 'UDP':
+        filter.push(`(ip proto \\udp)`);
+        break;
       case 'TCP':
-        filter.push(`(ip proto \\${config.proto === 'UDP' ? 'udp' : 'tcp'})`);
-        // Fall through
-      case '':
-        if (config.port) {
+        filter.push(`(ip proto \\tcp)`);
+        break;
+      case 'ARP':
+        filter.push(`(ether proto \\arp)`);
+        break;
+    }
+
+    if (config.port) {
+      switch (config.proto) {
+        case '':
+        case 'UDP':
+        case 'TCP':
           switch (config.portType) {
             case 'S':
               filter.push(`(src port ${config.port})`);
@@ -263,13 +279,10 @@ class Capture extends Page {
             default:
               break;
           }
+          break;
+        default:
+          break;
         }
-        break;
-      case 'ARP':
-        filter.push(`(ether proto \\arp)`);
-        break;
-      default:
-        break;
     }
 
     if (config.freeFormQuery) {

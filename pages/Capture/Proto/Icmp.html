@@ -1,4 +1,83 @@
 <div class="packet" onclick="selectpkt(event)">
   <div class="time">{{pcap_header.tv_sec}}</div><div class="source">{{iporhost payload.payload.saddr.addr}}</div><div class="destination">{{iporhost payload.payload.daddr.addr}}</div><div class="protocol">ICMP</div><div class="info">
+    {{#with payload.payload.payload}}
+    {{#if (eq type 0)}}
+      Echo reply
+      {{else if (eq type 4)}}
+      Source quench
+      {{else if (eq type 6)}}
+      Alternate Host Address
+      {{else if (eq type 7)}}
+      Reserved
+      {{else if (eq type 8)}}
+      Echo request
+      {{else if (eq type 9)}}
+      Router advertisement
+      {{else if (eq type 10)}}
+      Router solicitation
+      {{else if (eq type 3)}}
+      Destination unreachable
+      {{else if (eq type 5)}}
+      Redirect
+      {{else if (eq type 11)}}
+      Time exceeded
+      {{else}}
+      Unknown
+      {{/if}}
+      {{#if (eq type 3)}}
+        {{#if (eq code 0)}}
+        (Destination network unreachable)
+        {{else if (eq code 1)}}
+        (Destination host unreachable)
+        {{else if (eq code 2)}}
+        (Destination protocol unreachable)
+        {{else if (eq code 3)}}
+        (Destination port unreachable)
+        {{else if (eq code 4)}}
+        (Fragmentation required, and DF flag set)
+        {{else if (eq code 5)}}
+        (Source route failed)
+        {{else if (eq code 6)}}
+        (Destination network unknown)
+        {{else if (eq code 7)}}
+        (Destination host unknown)
+        {{else if (eq code 8)}}
+        (Source host isolated)
+        {{else if (eq code 9)}}
+        (Network administratively prohibited)
+        {{else if (eq code 10)}}
+        (Host administratively prohibited)
+        {{else if (eq code 11)}}
+        (Network unreachable for TOS)
+        {{else if (eq code 12)}}
+        (Host unreachable for TOS)
+        {{else if (eq code 13)}}
+        (Communication administratively prohibited)
+        {{else}}
+        (Unknown)
+        {{/if}}
+      {{else if (eq type 5)}}
+        {{#if (eq code 0)}}
+        (Redirect network)
+        {{else if (eq code 1)}}
+        (Redirect host)
+        {{else if (eq code 2)}}
+        (Redirect TOS and network)
+        {{else if (eq code 3)}}
+        (Redirect TOS and host)
+        {{else}}
+        (Unknown)
+        {{/if}}
+      {{else if (eq type 11)}}
+        {{#if (eq code 0)}}
+        (TTL expired in transit)
+        {{else if (eq code 1)}}
+        (Fragment reassembly time exceeded)
+        {{else}}
+        (Unknown)
+        {{/if}}
+      {{else}}
+      {{/if}}
+    {{/with}}
   </div>
 </div>
