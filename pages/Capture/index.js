@@ -165,7 +165,8 @@ class Capture extends Page {
     DeviceInstanceManager.on('remove', this.onUpdate);
     TopologyManager.on('update', this.onUpdate);
 
-    this.updateState();
+    this.updateState(this.state.selectedDevice, this.state.selectedPortNr);
+
     this.html('main-container', Template.CaptureTab(this.state));
   }
 
@@ -176,29 +177,6 @@ class Capture extends Page {
 
     this.stopCapture();
     this.deactivateMirrors();
-  }
-
-  updateState() {
-    if (!this.state.devices) {
-      this.state.devices = this.getCaptureDevices();
-    }
-    this.state.topologyValid = TopologyManager.valid;
-
-    const porthighlights = [];
-
-    if (!this.state.selectedDevice) {
-      const attach = TopologyManager.getAttachmentPoint();
-      if (attach) {
-        this.state.selectedDevice = attach.device;
-        this.state.selectedPortNr = attach.port;
-      }
-    }
-    if (this.state.selectedDevice) {
-      porthighlights[this.state.selectedPortNr] = 'A';
-    }
-
-    this.state.ports = Array(this.state.devices.length);
-    this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = porthighlights;
   }
 
   async startCapture(config) {
@@ -318,9 +296,7 @@ class Capture extends Page {
 
   onUpdate() {
     this.state.devices = null;
-    this.state.selectedDevice = null;
-    this.state.selectedPortNr = null;
-    this.updateState();
+    this.updateState(null, null);
   }
 
   packet(raw, text) {
@@ -364,6 +340,39 @@ class Capture extends Page {
   async 'device.port.select' (msg) {
     const device = DeviceInstanceManager.getDeviceById(msg.value.id);
     const port = parseInt(msg.value.port);
+    this.updateState(device, port);
+    this.html('capture-devices', Template.PortsDevices(this.state));
+  }
+
+
+  updateState(device, portnr) {
+    this.state.selectedDevice = device;
+    this.state.selectedPortNr = portnr;
+
+    if (!this.state.devices) {
+      this.state.devices = this.getCaptureDevices();
+    }
+    this.state.topologyValid = TopologyManager.valid;
+
+    const porthighlights = [];
+
+    if (!this.state.selectedDevice) {
+      const attach = TopologyManager.getAttachmentPoint();
+      if (attach) {
+        this.state.selectedDevice = attach.device;
+        this.state.selectedPortNr = attach.port;
+      }
+    }
+    if (this.state.selectedDevice) {
+      this.calcMirrors();
+      porthighlights[this.state.selectedPortNr] = 'A';
+    }
+
+    this.state.ports = Array(this.state.devices.length);
+    this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = porthighlights;
+  }
+
+  calcMirrors() {
     const attach = TopologyManager.getAttachmentPoint();
     if (!attach) {
       Log('no attachment port:');
@@ -371,11 +380,11 @@ class Capture extends Page {
     }
 
     // Find the path between the attachment point and the port we want to capture.
-    const path = TopologyManager.findPath(device, attach.device);
+    const path = TopologyManager.findPath(this.state.selectedDevice, attach.device);
 
     // Convert path into a set of mirrors
     const mirrors = [];
-    let current = { device: device, port: port };
+    let current = { device: this.state.selectedDevice, port: this.state.selectedPortNr };
     for (let i = 0; i < path.length; i++) {
       const link = path[i];
       const exit = link[0];
@@ -396,10 +405,6 @@ class Capture extends Page {
     }
 
     this.mirrors = mirrors;
-    this.state.selectedDevice = device;
-    this.state.selectedPortNr = port;
-    this.updateState();
-    this.html('capture-devices', Template.PortsDevices(this.state));
   }
 
   async activateMirrors() {
