@@ -165,6 +165,7 @@ class Capture extends Page {
     DeviceInstanceManager.on('remove', this.onUpdate);
     TopologyManager.on('update', this.onUpdate);
 
+    this.state.devices = null;
     this.updateState(this.state.selectedDevice, this.state.selectedPortNr);
 
     this.html('main-container', Template.CaptureTab(this.state));
@@ -351,6 +352,9 @@ class Capture extends Page {
 
     if (!this.state.devices) {
       this.state.devices = this.getCaptureDevices();
+      if (this.state.devices.indexOf(this.state.selectedDevice) === -1) {
+        this.state.selectedDevice = null;
+      }
     }
     this.state.topologyValid = TopologyManager.valid;
 
