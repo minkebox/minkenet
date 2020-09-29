@@ -138,7 +138,7 @@ class Capture extends Page {
   constructor(send) {
     super(send);
     this.state = {
-      devices: [],
+      devices: null,
       topologyValid: false,
       selectedDevice: null,
       selectedPortNr: null
@@ -153,30 +153,35 @@ class Capture extends Page {
     }
     this.mirrors = [];
     this.restores = [];
-    this.captureDevices = null;
 
-    this.onDeviceUpdate = this.onDeviceUpdate.bind(this);
+    this.onUpdate = this.onUpdate.bind(this);
     this.onPacket = this.onPacket.bind(this);
   }
 
   select() {
     super.select();
 
-    DeviceInstanceManager.on('update', this.onDeviceUpdate);
+    DeviceInstanceManager.on('add', this.onUpdate);
+    DeviceInstanceManager.on('remove', this.onUpdate);
+    TopologyManager.on('update', this.onUpdate);
 
     this.updateState();
     this.html('main-container', Template.CaptureTab(this.state));
   }
 
   deselect() {
-    DeviceInstanceManager.off('update', this.onDeviceUpdate);
+    DeviceInstanceManager.off('add', this.onUpdate);
+    DeviceInstanceManager.off('remove', this.onUpdate);
+    TopologyManager.off('update', this.onUpdate);
 
     this.stopCapture();
     this.deactivateMirrors();
   }
 
   updateState() {
-    this.state.devices = this.getCaptureDevices();
+    if (!this.state.devices) {
+      this.state.devices = this.getCaptureDevices();
+    }
     this.state.topologyValid = TopologyManager.valid;
 
     const porthighlights = [];
@@ -311,9 +316,11 @@ class Capture extends Page {
     }
   }
 
-  onDeviceUpdate() {
-    this.captureDevices = null;
+  onUpdate() {
+    this.state.devices = null;
     this.state.selectedDevice = null;
+    this.state.selectedPortNr = null;
+    this.updateState();
   }
 
   packet(raw, text) {
@@ -475,39 +482,36 @@ class Capture extends Page {
   }
 
   getCaptureDevices() {
-    if (!this.captureDevices) {
-      const attach = TopologyManager.getAttachmentPoint();
-      if (!attach) {
-        return [];
+    const attach = TopologyManager.getAttachmentPoint();
+    if (!attach) {
+      return [];
+    }
+    // Get a list of all devices capable of capture
+    const devices = DeviceInstanceManager.getAllDevices();
+    const caps = {};
+    devices.forEach(device => {
+      if (device.readKV('network.mirror', { depth: 1 })) {
+        caps[device._id] = device;
       }
-      // Get a list of all devices capable of capture
-      const devices = DeviceInstanceManager.getAllDevices();
-      const caps = {};
-      devices.forEach(device => {
-        if (device.readKV('network.mirror', { depth: 1 })) {
-          caps[device._id] = device;
-        }
-      });
-      // Make sure there's a capturable path from the attachment point to each device.
-      for (let id in caps) {
-        const path = TopologyManager.findPath(attach.device, caps[id]);
-        if (!path) {
-          delete caps[id];
-        }
-        else {
-          for (let i = 0; i < path.length; i++) {
-            const link = path[i];
-            if (!caps[link[0].device._id] || !caps[link[1].device._id]) {
-              delete caps[id];
-              break;
-            }
+    });
+    // Make sure there's a capturable path from the attachment point to each device.
+    for (let id in caps) {
+      const path = TopologyManager.findPath(attach.device, caps[id]);
+      if (!path) {
+        delete caps[id];
+      }
+      else {
+        for (let i = 0; i < path.length; i++) {
+          const link = path[i];
+          if (!caps[link[0].device._id] || !caps[link[1].device._id]) {
+            delete caps[id];
+            break;
           }
         }
       }
-      // Return only devices we can capture from.
-      this.captureDevices = Object.values(caps);
     }
-    return this.captureDevices;
+    // Return only devices we can capture from.
+    return Object.values(caps);
   }
 
 }
