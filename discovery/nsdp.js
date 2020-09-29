@@ -121,7 +121,12 @@ class NSDP extends EventEmitter {
     msg.writeUInt32BE(0xffff0000, 40);
 
     for (let p = 0; p < this.port.length; p++) {
-      this.port[p].socket.send(msg, 0, msg.length, this.port[p].target, BCAST_ADDRESS);
+      try {
+        this.port[p].socket.send(msg, 0, msg.length, this.port[p].target, BCAST_ADDRESS);
+      }
+      catch (e) {
+        Log('send error:', e);
+      }
     }
   }
 

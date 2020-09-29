@@ -122,7 +122,12 @@ class ESCP extends EventEmitter {
     const cmsg = cipher.update(msg)
     cipher.final();
 
-    this.socket.send(cmsg, 0, cmsg.length, PORT_SEND, BCAST_ADDRESS);
+    try {
+      this.socket.send(cmsg, 0, cmsg.length, PORT_SEND, BCAST_ADDRESS);
+    }
+    catch (e) {
+      Log('send error:', e);
+    }
   }
 
   getMacAddress() {

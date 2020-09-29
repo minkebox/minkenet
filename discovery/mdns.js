@@ -149,9 +149,15 @@ class MDNS extends EventEmitter {
           additionals: [],
           questions: queries.map(query => Object.assign({ class: 'IN', flush: false, ttl: 120 }, query))
         });
-        this._socket.send(msg, 0, msg.length, PORT, MCAST_ADDRESS, () => {
-          resolve(true);
-        });
+        try {
+          this._socket.send(msg, 0, msg.length, PORT, MCAST_ADDRESS, () => {
+            resolve(true);
+          });
+        }
+        catch (e) {
+          Log('send error:', e);
+          resolve(false);
+        }
       });
     }
     else {

@@ -105,7 +105,12 @@ class DDP extends EventEmitter {
     msg.writeUInt16LE(0x00, 2); // length == 0
 
     //Log('probe:');
-    this.socket.send(msg, 0, msg.length, PORT_SEND, BCAST_ADDRESS);
+    try {
+      this.socket.send(msg, 0, msg.length, PORT_SEND, BCAST_ADDRESS);
+    }
+    catch (e) {
+      Log('send error:', e);
+    }
   }
 
   getAddresses() {
