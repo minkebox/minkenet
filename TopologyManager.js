@@ -192,8 +192,10 @@ class TopologyManager extends EventEmitter {
     // Build a mapping for each device from port to lag group.
     const dev2portmap = this._buildDevicesPortmap(DeviceInstanceManager.getAuthenticatedDevices());
     // Walk each link and add the appropriate lag information.
+    let update = false;
     this._topology.forEach(link => {
       link.forEach(point => {
+        const oldLag = JSON.stringify(point.lag);
         const portmap = dev2portmap[point.device._id];
         if (portmap) {
           const map = portmap[point.port];
@@ -207,9 +209,14 @@ class TopologyManager extends EventEmitter {
         else {
           point.lag = { type: 'none', ports: [ point.port ], group: 0 };
         }
+        if (JSON.stringify(point.lag) !== oldLag) {
+          update = true;
+        }
       });
     });
-    this.emit('update');
+    if (update) {
+      this.emit('update');
+    }
   }
 
   //
