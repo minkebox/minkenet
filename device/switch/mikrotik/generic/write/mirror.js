@@ -12,6 +12,7 @@ module.exports = {
           $: 'fetch',
           arg: '/fwd.b',
           method: 'post',
+          wait: false,
           params: {
             $: 'fn',
             arg: ctx => {
@@ -29,7 +30,7 @@ module.exports = {
                   }
                 }
               }
-              return `[mrto:${hex(mrto)},imr:${hex(imr)},omr:${hex(omr)}]`
+              return `{mrto:${hex(mrto)},imr:${hex(imr)},omr:${hex(omr)}}`
             }
           }
         }

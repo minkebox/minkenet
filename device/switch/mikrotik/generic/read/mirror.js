@@ -12,7 +12,7 @@ module.exports = {
             $: 'fn',
             arg: async ctx => {
               const ports = {};
-              const nrports = this.readKV('network.physical.ports.nr.total');
+              const nrports = ctx.readKV('network.physical.ports.nr.total');
               const im = await ctx.eval({ $: 'eval', arg: '$R.imr '});
               const om = await ctx.eval({ $: 'eval', arg: '$R.omr '});
               for (let j = 0; j < nrports; j++) {
