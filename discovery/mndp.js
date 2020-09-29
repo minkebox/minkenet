@@ -11,12 +11,14 @@ class MNDP extends EventEmitter {
     this.discovery = null;
     this.found = {};
     this._onDeviceFound = this._onDeviceFound.bind(this);
+    this._onError = this._onError.bind(this);
   }
 
   start() {
     if (!this.discovery) {
       this.discovery = new NodeMndp({});
       this.discovery.on('deviceFound', this._onDeviceFound);
+      this.discovery.on('error', this._onError);
       this.discovery.start();
     }
   }
@@ -25,12 +27,17 @@ class MNDP extends EventEmitter {
     if (this.discovery) {
       this.discovery.stop();
       this.discovery.off('deviceFound', this._onDeviceFound);
+      this.discovery.off('error', this._onError);
       this.discovery = null;
     }
   }
 
   clear() {
     this.found = {};
+  }
+
+  _onError(err) {
+    Log('mndp error:', err);
   }
 
   _onDeviceFound(device) {
