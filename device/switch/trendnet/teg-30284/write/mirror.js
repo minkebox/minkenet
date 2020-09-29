@@ -20,7 +20,8 @@ module.exports = {
             arg: {
               target: {
                 $: 'oid+set',
-                arg: `${BASE}.2.0`
+                arg: `${BASE}.2.0`,
+                map: v => v + 1
               },
               port: {
                 $: 'fn',

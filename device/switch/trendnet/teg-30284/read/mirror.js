@@ -15,7 +15,11 @@ module.exports = {
               1: true
             }
           },
-          target: `${BASE}.2.0`,
+          target: {
+            $: 'jsonp',
+            arg: `${BASE}.2.0`,
+            map: v => v - 1
+          },
           port: {
             $: 'fn',
             arg: ctx => {
