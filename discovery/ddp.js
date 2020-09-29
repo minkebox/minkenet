@@ -26,6 +26,9 @@ class DDP extends EventEmitter {
     }, (msg, _) => {
       this._incoming(msg);
     });
+    this.socket.on('error', err => {
+      Log('socket bind error: ', err);
+    });
     this.socket.bind(PORT_LISTEN, () => {
       this.socket.setBroadcast(true);
     });

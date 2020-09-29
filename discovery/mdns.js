@@ -43,6 +43,9 @@ class MDNS extends EventEmitter {
         type: 'udp4',
         reuseAddr: true
       }, msg => this._incoming(msg));
+      this._socket.on('error', err => {
+        Log('socket bind error: ', err);
+      });
       this._socket.bind(PORT, MCAST_ADDRESS, () => {
         this._socket.setMulticastTTL(255);
         this._socket.setMulticastLoopback(false);

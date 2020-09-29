@@ -2,6 +2,7 @@ const UDP = require('dgram');
 const OS = require('os');
 const EventEmitter = require('events');
 const Crypto = require('crypto');
+const Log = require('debug')('discovery');
 
 const PORT_LISTEN = 29809;
 const PORT_SEND = 29808;
@@ -28,6 +29,9 @@ class ESCP extends EventEmitter {
       reuseAddr: true
     }, (msg, _) => {
       this._incoming(msg);
+    });
+    this.socket.on('error', err => {
+      Log('socket bind error: ', err);
     });
     this.socket.bind(PORT_LISTEN, () => {
       this.socket.setBroadcast(true);

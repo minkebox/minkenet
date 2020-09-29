@@ -1,6 +1,7 @@
 const UDP = require('dgram');
 const OS = require('os');
 const EventEmitter = require('events');
+const Log = require('debug')('discovery');
 
 const PORT_LISTEN = [ 63321, 63323 ];
 const PORT_SEND = [ 63322, 63324 ];
@@ -32,6 +33,9 @@ class NSDP extends EventEmitter {
           this._incoming(msg);
         })
       };
+      this.port[i].socket.on('error', err => {
+        Log('socket bind error: ', err);
+      });
       this.port[i].socket.bind(port, () => {
         this.port[i].socket.setBroadcast(true);
       });
