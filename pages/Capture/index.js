@@ -282,7 +282,7 @@ class Capture extends Page {
 
     // Filter traffic from this application
     this.eaddr.forEach(mac => {
-      filter.push(`(not (ether host ${mac} and ip proto \\tcp and port 8080))`);
+      filter.push(`(not (ether host ${mac} and ip proto \\tcp and port ${global.WEBPORT}))`);
     });
 
     return filter.join(' and ');
@@ -399,7 +399,7 @@ class Capture extends Page {
       Log(`bad link to attach: ${current.device._id} - ${attach.device._id}`);
       return;
     }
-    // Dont need this is the attachment port the last port in the mirror list (e.g. we're monitoring ourself).
+    // Dont need this if the attachment port the last port in the mirror list (e.g. we're monitoring ourself).
     if (current.port !== attach.port) {
       mirrors.push({ device: attach.device, source: current.port, target: attach.port });
     }

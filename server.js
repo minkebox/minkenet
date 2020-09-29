@@ -24,8 +24,8 @@ process.umask(0);
 // More listeners
 EventEmitter.defaultMaxListeners = 50;
 
-// Web port
-const PORT = parseInt(process.env.PORT || 8080);
+// Web port (global)
+global.WEBPORT = parseInt(process.env.PORT || 8080);
 
 const App = Websockify(new Koa());
 App.on('error', err => console.error(err));
@@ -58,7 +58,7 @@ App.ws.use(async (ctx, next) => {
   SpeedTest.start();
 
   App.listen({
-    port: PORT
+    port: WEBPORT
   });
 
   process.on('uncaughtException', e => {
