@@ -1,5 +1,5 @@
 <div class="col col-name" data-placeholder="{{mac}}">{{name}}</div>
-<a class="col col-ip" {{#if ip}}href="http://{{ip}}" target="_blank"{{/if}}>{{ip}}</a>
+<div class="col col-ip">{{#if ip}}<a href="http://{{ip}}" target="_blank">{{ip}}</a>{{/if}}</div>
 <div class="col col-location">{{connected.device.name}}</div>
 <div class="col col-wifi">{{ssid}}</div>
 <div class="col col-oui">{{oui}}</div>
