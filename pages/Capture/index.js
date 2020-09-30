@@ -141,7 +141,8 @@ class Capture extends Page {
       devices: null,
       topologyValid: false,
       selectedDevice: null,
-      selectedPortNr: null
+      selectedPortNr: null,
+      selectedPortName: null
     };
     this.eaddr = [];
     const ifaces = MacAddress.networkInterfaces();
@@ -343,6 +344,7 @@ class Capture extends Page {
     const port = parseInt(msg.value.port);
     this.updateState(device, port);
     this.html('capture-devices', Template.PortsDevices(this.state));
+    this.html('capture-port', Template.CapturePort(this.state));
   }
 
 
@@ -361,6 +363,8 @@ class Capture extends Page {
     const porthighlights = [];
 
     if (!this.state.selectedDevice) {
+      this.state.selectedPortNr = null;
+      this.state.selectedPortName = null;
       const attach = TopologyManager.getAttachmentPoint();
       if (attach) {
         this.state.selectedDevice = attach.device;
@@ -370,6 +374,7 @@ class Capture extends Page {
     if (this.state.selectedDevice) {
       this.calcMirrors();
       porthighlights[this.state.selectedPortNr] = 'A';
+      this.state.selectedPortName = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.name`);
     }
 
     this.state.ports = Array(this.state.devices.length);

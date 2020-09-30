@@ -10,6 +10,14 @@
     </div>
     <div class="card">
       <div data-toggle="collapse" data-target="#capture-controls" class="card-header">
+        <div>Port</div>
+      </div>
+      <div id="capture-port" class="collapse show">
+        {{> CapturePort }}
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#capture-controls" class="card-header">
         <div>Capture</div>
       </div>
       <div id="capture-controls" class="collapse show">
@@ -22,9 +30,7 @@
       </div>
       <div id="capture-packet" class="collapse show">
         <div class="list-group">
-          <form>
-            <div>&nbsp;</div>
-          </form>
+          <div>&nbsp;</div>
         </div>
       </div>
     </div>
