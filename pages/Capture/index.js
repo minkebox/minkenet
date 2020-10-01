@@ -419,8 +419,10 @@ class Capture extends Page {
   async activateMirrors() {
     // Create chain of mirrors, keeping a record of what the there before so we can restore it later
     this.restores = [];
-    this.mirrors.forEach(mirror => {
-      this.restores.push({ device: mirror.device, mirror: mirror.device.readKV(`network.mirror.0`) });
+    for (let i = 0; i < this.mirrors.length; i++) {
+      const mirror = this.mirrors[i];
+      const current = mirror.device.readKV(`network.mirror.0`);
+      this.restores.push({ device: mirror.device, mirror: current });
       mirror.device.writeKV('network.mirror.0',
       {
         enable: true,
@@ -429,7 +431,7 @@ class Capture extends Page {
           [mirror.source]: (mirror === this.mirrors[0] ? { egress: true, ingress: true } : { ingress: true })
         }
       }, { replace: true });
-    });
+    }
     await DeviceInstanceManager.commit();
   }
 
@@ -504,7 +506,7 @@ class Capture extends Page {
     const devices = DeviceInstanceManager.getAllDevices();
     const caps = {};
     devices.forEach(device => {
-      if (device.readKV('network.mirror', { depth: 1 })) {
+      if (device.readKV('network.mirror.0', { depth: 1 })) {
         caps[device._id] = device;
       }
     });
