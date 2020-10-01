@@ -1,6 +1,16 @@
-<div class="card-body">
+<div class="card-body" style="padding: 1.25rem 60px 1.25rem 20px">
   <div class="list-group">
-    {{>RO name="Port id" value=(add 1 selectedPortNr)}}
-    {{>RO name="Name" value=selectedPortName default=''}}
+    <div class="row">
+      <label class="col-sm-8 col-form-label col-form-label-sm">Port</label>
+      <div class="col-sm-4 d-flex align-items-center">
+        <div class="device-property-ro small">{{add 1 selectedPortNr}}</div>
+      </div>
+    </div>
+    <div class="row">
+      <label class="col-sm-8 col-form-label col-form-label-sm">Name</label>
+      <div class="col-sm-4 d-flex align-items-center">
+        <div class="device-property-ro small">{{selectedPortName}}</div>
+      </div>
+    </div>
   </div>
 </div>
