@@ -668,6 +668,10 @@ body.pending-changes .pending-changes-disabled {
   overflow: hidden;
 }
 
+#capture-packet .card {
+  border: none;
+}
+
 .card .inspect.accordion {
   margin: 10px;
   font-size: 13px;
@@ -689,4 +693,11 @@ body.pending-changes .pending-changes-disabled {
 }
 .inspect .data .line .ascii {
   display: inline-block;
+}
+
+.dnsrr {
+  padding: 5px 0;
+}
+.dnsrrs {
+  padding: 5px 0;
 }

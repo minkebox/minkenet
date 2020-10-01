@@ -26,7 +26,7 @@
         <option value="D">Destination Port</option>
       </select>
       <div class="col-sm-1"></div>
-      <input class="col-sm-5" id="capture-port" type="text" placeholder="Any" size="5" autocomplete="off">
+      <input class="col-sm-5" id="capture-port-nr" type="text" placeholder="Any" size="5" autocomplete="off">
     </div>
     <div class="row">
       <input class="col-sm" style="padding-left:14px" id="capture-query" type="text" placeholder="Freeform pcap filter query" autocomplete="off">
@@ -56,7 +56,7 @@
           host: document.getElementById('capture-host').value,
           proto: document.getElementById('capture-protocol').value,
           portType: document.getElementById('capture-port-type').value,
-          port: document.getElementById('capture-port').value,
+          port: document.getElementById('capture-port-nr').value,
           freeFormQuery: document.getElementById('capture-query').value,
           options: {
             ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,

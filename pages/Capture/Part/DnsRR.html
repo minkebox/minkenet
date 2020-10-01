@@ -1,0 +1,61 @@
+<div class="dnsrr card">
+  <div data-toggle="collapse" data-target="#dnsrr-{{title}}-details" class="card-header">
+    {{title}}
+  </div>
+  <div id="dnsrr-{{title}}-details" class="collapse details show">
+    {{#each rr.rrs}}
+    {{print this}}
+    <div class="dnsrrs">
+      <div>Name: {{name}}</div>
+      <div>Type:
+        {{#if (eq type 1)}}A
+        {{else if (eq type 2)}}NS
+        {{else if (eq type 3)}}MD
+        {{else if (eq type 4)}}MF
+        {{else if (eq type 5)}}CNAME
+        {{else if (eq type 6)}}SOA
+        {{else if (eq type 7)}}MB
+        {{else if (eq type 8)}}MG
+        {{else if (eq type 9)}}MR
+        {{else if (eq type 10)}}NULL
+        {{else if (eq type 11)}}WKS
+        {{else if (eq type 12)}}PTR
+        {{else if (eq type 13)}}HINFO
+        {{else if (eq type 14)}}MINFO
+        {{else if (eq type 15)}}MX
+        {{else if (eq type 16)}}TXT
+        {{else if (eq type 28)}}AAAA
+        {{else if (eq type 41)}}OPT
+        {{else if (eq type 252)}}AXFR
+        {{else if (eq type 254)}}MAILB
+        {{else if (eq type 254)}}MAILA
+        {{else if (eq type 255)}}*
+        {{else if (eq type 257)}}CAA
+        {{else}}
+        Unknown
+        {{/if}}
+      </div>
+      {{#if (eq type 41)}}
+      <div>Payload size: {{class}}</div>
+      {{else}}
+      <div>Class:
+        {{#if (eq class 1)}}IN
+        {{else if (eq class 2)}}CS
+        {{else if (eq class 3)}}CH
+        {{else if (eq class 4)}}HS
+        {{else if (eq class 255)}}*
+        {{else}}
+        Unknown
+        {{/if}}
+      </div>
+      {{/if}}
+      {{#unless is_question}}
+        <div>TTL: {{ttl}}</div>
+      {{/unless}}
+      {{#if (and (eq type 1) rdata)}}
+      <div>IP Address: {{ipaddr rdata.addr}}</div>
+      {{/if}}
+    </div>
+    {{/each}}
+  </div>
+</div>

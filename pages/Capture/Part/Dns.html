@@ -35,16 +35,16 @@
     <div>Authories: {{nscount}}</div>
     <div>Additionals: {{arcount}}</div>
     {{#if qdcount}}
-    <div>Queries ...</div>
+    {{> CapturePartDnsRR title='Queries' rr=question}}
     {{/if}}
     {{#if ancount}}
-    <div>Answers ...</div>
+    {{> CapturePartDnsRR title='Answers' rr=answer}}
     {{/if}}
     {{#if nscount}}
-    <div>Authorities ...</div>
+    {{> CapturePartDnsRR title='Authorities' rr=authority}}
     {{/if}}
     {{#if arcount}}
-    <div>Additionals ...</div>
+    {{> CapturePartDnsRR title='Additionals' rr=additional}}
     {{/if}}
   </div>
 </div>
