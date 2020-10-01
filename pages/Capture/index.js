@@ -459,12 +459,12 @@ class Capture extends Page {
           case 6: // TCP
             return Template[`Capture${style}Tcp`](packet);
           case 17: // UDP
-            if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53 ||
-                packet.payload.payload.payload.sport === 5353 || packet.payload.payload.payload.dport === 5353) {
+            if (packet.payload.payload.payload.sport === 53 || packet.payload.payload.payload.dport === 53) {
               return Template[`Capture${style}Dns`](packet);
             }
-            if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251') {
-              return Template[`Capture${style}Dns`](packet);
+            if (packet.payload.payload.daddr.toString() === '224.0.0.251' || packet.payload.payload.saddr.toString() == '224.0.0.251' ||
+                packet.payload.payload.payload.sport === 5353 || packet.payload.payload.payload.dport === 5353) {
+              return Template[`Capture${style}mDns`](packet);
             }
             return Template[`Capture${style}Udp`](packet);
         }
