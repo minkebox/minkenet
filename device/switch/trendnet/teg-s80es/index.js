@@ -84,6 +84,7 @@ const Device = {
     $6: require('./write/vlan'),
     $7: require('./write/ip'),
     $8: require('./write/physical'),
+    $9: require('./write/mirror')
   },
   commit: require('./write/commit')
 
