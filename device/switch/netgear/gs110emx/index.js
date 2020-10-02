@@ -67,7 +67,8 @@ const Device = {
     $3: require('./read/igmp'),
     $4: require('./read/vlan'),
     $5: require('./read/lag'),
-    $statistics: require('./read/statistics')
+    $statistics: require('./read/statistics'),
+    $6: require('./read/mirror')
   },
   write: {
     $1: require('./write/physical'),

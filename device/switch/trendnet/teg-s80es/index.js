@@ -73,6 +73,7 @@ const Device = {
     $8: require('./read/snmp'),
     $9: require('./read/clients'),
     $statistics: require('./read/statistics'),
+    $A: require('./read/mirror')
   },
   write: {
     $1: require('./write/snmp'),
