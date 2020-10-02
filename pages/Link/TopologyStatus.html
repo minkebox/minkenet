@@ -18,7 +18,8 @@ Failed to connect to one or more devices
 {{else if (eq reason 'baseline')}}
 Failed to collect baseline network data from devices. Make sure nothing else is accessing your devices during this test.
 {{else if (eq reason 'probes')}}
-Failed probing for one or more devices. This an happen randoming when some device will suddenly stops responding for a few seconds.
+Failed probing for one or more devices. This can happen randoming when some device will suddenly stops responding for a few seconds
+or because something else is accessing a device.
 {{else if (eq reason 'busy')}}
 Network is too busy to successfully analyze
 {{else if (eq reason 'topology')}}
