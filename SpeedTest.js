@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const SpeedTestNet = require('@lh2020/speedtest-net');
 const ConfigDB = require('./Config');
+const Log = require('debug')('speedtest');
 
 const SPEEDTEST_TIMER = 60 * 60 * 1000; // 1 hour
 
@@ -51,6 +52,8 @@ class SpeedTest extends EventEmitter {
     }).then(result => {
       this.last = result;
       this.emit('update');
+    }).catch(err => {
+      Log(err);
     });
   }
 
