@@ -1,5 +1,4 @@
 const DeviceInstanceManager = require('../DeviceInstanceManager');
-const DeviceState = require('../DeviceState');
 const Template = require('./Template');
 const Page = require('./Page');
 const DevicesTab = require('./Device');
@@ -8,8 +7,9 @@ const WirelessTab = require('./Radio');
 const NetworksTab = require('./Network');
 const LinksTab = require('./Link');
 const ClientsTab = require('./Clients');
-const ConfigTab = require('./Config');
-const MonitorTab = require('./Monitor');
+const ConfigAdoptionTab = require('./Config/Adoption');
+const ConfigMonitorTab = require('./Config/Monitor');
+const ConfigOtherTab = require('./Config/Other');
 const VizTab = require('./Viz');
 const WiFiTab = require('./WiFi');
 const CaptureTab = require('./Capture');
@@ -62,7 +62,7 @@ async function WS(ctx) {
       devices: new Page({ summary: new DevicesTab(send), ports: new PortsTab(send), radios: new WirelessTab(send) }),
       networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send), wifi: new WiFiTab(send), capture: new CaptureTab(send) }),
       clients: new Page({ all: new ClientsTab(send) }),
-      config: new Page({ defaults: new ConfigTab(send), monitor: new MonitorTab(send) })
+      config: new Page({ adoption: new ConfigAdoptionTab(send), monitor: new ConfigMonitorTab(send), other: new ConfigOtherTab(send) })
     },
     needCommit: false
   };

@@ -1,4 +1,5 @@
 const EventEmitter = require('events');
+const OS = require('os');
 const DB = require('./Database');
 const JSONPath = require('jsonpath-plus').JSONPath;
 const Log = require('debug')('config');
@@ -34,6 +35,9 @@ const DEFAULT_CONFIG = {
       autoroute: true,
       management: false,
       managementid: '1'
+    },
+    capture: {
+      device: ''
     }
   },
   monitor: {
@@ -53,6 +57,13 @@ class Config extends EventEmitter {
   constructor() {
     super();
     this.config = DEFAULT_CONFIG;
+    const ifaces = OS.networkInterfaces();
+    for (let device in ifaces) {
+      if (!ifaces[device][0].internal) {
+        this.config.network.capture.device = device;
+        break;
+      }
+    }
   }
 
   read(key) {

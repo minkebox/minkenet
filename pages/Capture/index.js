@@ -7,9 +7,10 @@ const Page = require('../Page');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const TopologyManager = require('../../TopologyManager');
 const ClientManager = require('../../ClientManager');
+const ConfigDB = require('../../Config');
 const Log = require('debug')('capture');
 
-const CAPTURE_DEVICES = [ 'eth0', 'br0' ];
+const CAPTURE_DEFAULT_DEVICE = 'eth0';
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
@@ -145,13 +146,7 @@ class Capture extends Page {
       selectedPortName: null
     };
     this.eaddr = [];
-    const ifaces = MacAddress.networkInterfaces();
-    for (let dev in CAPTURE_DEVICES) {
-      if (ifaces[dev]) {
-        this.device = dev;
-        break;
-      }
-    }
+    this.device = CAPTURE_DEFAULT_DEVICE;
     this.mirrors = [];
     this.restores = [];
 
@@ -161,6 +156,8 @@ class Capture extends Page {
 
   select() {
     super.select();
+
+    this.device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
 
     DeviceInstanceManager.on('add', this.onUpdate);
     DeviceInstanceManager.on('remove', this.onUpdate);

@@ -9,7 +9,7 @@
           <div class="list-group">
             <div class="device-ports-layout">
               {{#with selected}}
-              {{> PortsLayout properties=properties selected=@root.porthighlights}}
+              {{> PortsLayout properties=properties selected=@root.porthighlights }}
               {{/with}}
             </div>
             <form>
@@ -45,7 +45,7 @@
             <form>
               {{#if (isdefined selectedPort.statistics.rx.bytes)}}
               {{#each monitors}}
-              {{>MonitorOption id=id key=key type=type options=(array
+              {{> ConfigMonitorOption id=id key=key type=type options=(array
                 (array "None" "none")
                 (array "TX Bandwidth" "statistics.tx.bytes")
                 (array "RX Bandwidth" "statistics.rx.bytes")
@@ -54,7 +54,7 @@
               {{/each}}
               {{else}}
               {{#each monitors}}
-              {{>MonitorOption id=id key=key type=type options=(array
+              {{> ConfigMonitorOption id=id key=key type=type options=(array
                 (array "None" "none")
                 (array "TX Bandwidth" "statistics.tx.packets")
                 (array "RX Bandwidth" "statistics.rx.packets")

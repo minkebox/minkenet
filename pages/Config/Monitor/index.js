@@ -1,10 +1,10 @@
-const Template = require('../Template');
-const Page = require('../Page');
-const DeviceInstanceManager = require('../../DeviceInstanceManager');
-const ClientManager = require('../../ClientManager');
-const TopologyManager = require('../../TopologyManager');
-const MonitorManager = require('../../MonitorManager');
-const ConfigDB = require('../../Config');
+const Template = require('../../Template');
+const Page = require('../../Page');
+const DeviceInstanceManager = require('../../../DeviceInstanceManager');
+const ClientManager = require('../../../ClientManager');
+const TopologyManager = require('../../../TopologyManager');
+const MonitorManager = require('../../../MonitorManager');
+const ConfigDB = require('../../../Config');
 
 
 class Monitor extends Page {
@@ -26,7 +26,7 @@ class Monitor extends Page {
   select() {
     super.select();
     this.updateState();
-    this.html('main-container', Template.MonitorTab(this.state));
+    this.html('main-container', Template.ConfigMonitorTab(this.state));
   }
 
   updateState() {
@@ -83,7 +83,7 @@ class Monitor extends Page {
       this.state.selectedIndex = this.state.devices.indexOf(device);
       this.state.selectedPortNr = 0;
       this.updateState();
-      this.html('main-container', Template.MonitorTab(this.state));
+      this.html('main-container', Template.ConfigMonitorTab(this.state));
     }
   }
 
@@ -92,14 +92,14 @@ class Monitor extends Page {
     if (device) {
       MonitorManager.monitorDevice(device, msg.value.checked);
       this.updateState();
-      this.html('monitor-details-column', Template.MonitorSelected(this.state));
+      this.html('monitor-details-column', Template.ConfigMonitorSelected(this.state));
     }
   }
 
   async 'device.port.select' (msg) {
     this.state.selectedPortNr = parseInt(msg.value.port);
     this.updateState();
-    this.html('monitor-details-column', Template.MonitorSelected(this.state));
+    this.html('monitor-details-column', Template.ConfigMonitorSelected(this.state));
   }
 
   async 'monitor.port.key' (msg) {
@@ -180,7 +180,7 @@ class Monitor extends Page {
     );
     if (mon.type !== 'none' && mon.key !== 'none') {
       this.updateState();
-      this.html('monitor-details-column', Template.MonitorSelected(this.state));
+      this.html('monitor-details-column', Template.ConfigMonitorSelected(this.state));
     }
   }
 
