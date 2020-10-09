@@ -49,7 +49,7 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   getWiFiDevices() {
-    return this.getAllDevices().filter(device => device.readKV('network.wireless', { depth: 1 }));
+    return this.getAllDevices().filter(device => device._authenticated && device.readKV('network.wireless', { depth: 1 }));
   }
 
   getAuthenticatedDevices() {
