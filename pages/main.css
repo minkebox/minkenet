@@ -583,6 +583,10 @@ body.pending-changes .pending-changes-disabled {
   overflow-y: scroll;
 }
 
+#radio-radios .list-group + .list-group {
+  margin-top: 24px;
+}
+
 #capture-controls {
   margin: 20px;
   font-size: 14px;

@@ -29,6 +29,27 @@ class Radio extends Page {
   deselect() {
   }
 
+  async 'device.select' (msg) {
+    const device = DeviceInstanceManager.getDeviceById(msg.value);
+    if (!device || device === this.state.selectedDevice) {
+      return;
+    }
+    const last = this.state.selectedDevice;
+    this.state.selectedDevice = device;
+    this.updateCard(last);
+    this.updateCard(device);
+    this.html('radio-selected', Template.RadioSelected(this.state));
+  }
+
+  updateCard(device) {
+    if (device) {
+      this.html(`device-card-${device._id}`, Template.DeviceCard({
+        device: device,
+        selectedDevice: this.state.selectedDevice
+      }));
+    }
+  }
+
 }
 
 module.exports = Radio;

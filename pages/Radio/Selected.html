@@ -1,17 +1,54 @@
+{{#with selectedDevice.properties}}
 <div class="details-container tap-pane fade show active">
   <div class="accordion">
     <div class="card">
-      <div data-toggle="collapse" data-target="" class="card-header">
+      <div data-toggle="collapse" data-target="radio-overview" class="card-header">
         <div>Overview</div>
       </div>
       <div id="radio-overview" class="collapse show">
         <div class="card-body">
           <div class="list-group">
             <form>
+              {{> RO name="Name" value=system.name default="System name" }}
+              {{> RO name="Manufacturer" value=system.hardware.manufacturer }}
+              {{> RO name="Model" value=system.hardware.model }}
             </form>
           </div>
+        </div>
+      </div>
+      <div data-toggle="collapse" data-target="radio-radios" class="card-header">
+        <div>Radios</div>
+      </div>
+      <div id="radio-radios" class="collapse show">
+        <div class="card-body">
+          {{#each network.wireless.radio}}
+          <div class="list-group">
+            <form>
+              {{#if (eq band '2_4ghz')}}
+              {{> RO name="Band" value='2.4 GHz' }}
+              {{else if (eq band '5ghz')}}
+              {{> RO name="Band" value='5 GHz' }}
+              {{else}}
+              {{> RO name="Band" value=band }}
+              {{/if}}
+              {{#if (eq opmode 'ap')}}
+              {{> RO name='Mode' value='Access Point'}}
+              {{else}}
+              {{> RO name="Mode" value=opmode }}
+              {{/if}}
+              {{> RO name="Protocol" value=hwmode }}
+              {{> RO name="Bandwidth (MHz)" value=htmode }}
+              {{#if (eq txpower 0)}}
+              {{> RO name="Transmit Power (dBm)" value='Auto' }}
+              {{else}}
+              {{> RO name="Transmit Power (dBm)" value=txpower }}
+              {{/if}}
+            </form>
+          </div>
+          {{/each}}
         </div>
       </div>
     </div>
   </div>
 </div>
+{{/with}}
