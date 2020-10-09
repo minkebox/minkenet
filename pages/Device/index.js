@@ -2,6 +2,7 @@ const Template = require('../Template');
 const DB = require('../../Database');
 const DeviceManager = require('../../DeviceManager');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
+const MonitorManager = require('../../MonitorManager');
 const NetworkScanner = require('../../NetworkScanner');
 const Discovery = require('../../discovery');
 const Debounce = require('../../utils/Debounce');
@@ -201,6 +202,9 @@ class Devices extends Page {
 
     DeviceInstanceManager.authenticated(device);
 
+    // Monitor by default
+    MonitorManager.monitorDevice(device, true);
+
     this.send('modal.hide.all');
     this.html(`device-card-${device._id}`, Template.DeviceCard({
       device: device,
@@ -214,6 +218,7 @@ class Devices extends Page {
     if (this.state.selectedDevice) {
       this.deselect()
       this.state.selectedDevice.logout();
+      MonitorManager.monitorDevice(this.state.selectedDevice, false);
       DeviceInstanceManager.removeDevice(this.state.selectedDevice);
       DB.removeDevice(this.state.selectedDevice._id);
       this.state.selectedDevice = null;
