@@ -14,7 +14,18 @@ module.exports = {
               arg: '2_4ghz'
             },
             opmode: '#cbid\\.wireless\\.wifi0\\.opmode',
-            hwmode: '#cbid\\.wireless\\.wifi0\\.hwmode',
+            hwmode: {
+              $: 'selector',
+              arg: '#cbid\\.wireless\\.wifi0\\.hwmode',
+              map: {
+                '11b': '11b',
+                '11g': '11g',
+                '11bg': '11bg',
+                '11n': '11n',
+                '11ng': '11ng',
+                '11axg': '11axg'
+              }
+            },
             htmode: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi0\\.htmode',
@@ -27,7 +38,20 @@ module.exports = {
             txpower: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi0\\.txpower',
-              map: v => v ? v : 'auto'
+              map: {
+                0: 'auto',
+                11: 11,
+                12: 12,
+                13: 13,
+                14: 14,
+                15: 15,
+                16: 16,
+                17: 17,
+                18: 18,
+                19: 19,
+                20: 20,
+                21: 21
+              }
             }
           },
           1: {
@@ -36,7 +60,15 @@ module.exports = {
               arg: '5ghz'
             },
             opmode: '#cbid\\.wireless\\.wifi1\\.opmode',
-            hwmode: '#cbid\\.wireless\\.wifi1\\.hwmode',
+            hwmode: {
+              $: 'selector',
+              arg: '#cbid\\.wireless\\.wifi1\\.hwmode',
+              map: {
+                '11a': '11a',
+                '11ac': '11ac',
+                '11n': '11n'
+              }
+            },
             htmode: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi1\\.htmode',
@@ -49,7 +81,20 @@ module.exports = {
             txpower: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi1\\.txpower',
-              map: v => v ? v : 'auto'
+              map: {
+                0: 'auto',
+                11: 11,
+                12: 12,
+                13: 13,
+                14: 14,
+                15: 15,
+                16: 16,
+                17: 17,
+                18: 18,
+                19: 19,
+                20: 20,
+                21: 21
+              }
             }
           }
         },
