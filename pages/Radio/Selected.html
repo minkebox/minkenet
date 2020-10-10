@@ -24,25 +24,21 @@
           {{#each network.wireless.radio}}
           <div class="list-group">
             <form>
-              {{#if (eq band '2_4ghz')}}
+              {{#if (eq band.$ '2_4ghz')}}
               {{> RO name="Band" value='2.4 GHz' }}
-              {{else if (eq band '5ghz')}}
+              {{else if (eq band.$ '5ghz')}}
               {{> RO name="Band" value='5 GHz' }}
               {{else}}
               {{> RO name="Band" value=band }}
               {{/if}}
-              {{#if (eq opmode 'ap')}}
+              {{#if (eq opmode.$ 'ap')}}
               {{> RO name='Mode' value='Access Point'}}
               {{else}}
               {{> RO name="Mode" value=opmode }}
               {{/if}}
-              {{> RO name="Protocol" value=hwmode }}
-              {{> RO name="Bandwidth (MHz)" value=htmode }}
-              {{#if (eq txpower 0)}}
-              {{> RO name="Transmit Power (dBm)" value='Auto' }}
-              {{else}}
-              {{> RO name="Transmit Power (dBm)" value=txpower }}
-              {{/if}}
+              {{> RWSelect name="Protocol" value=hwmode kv=(concat "network.wireless.radio." @index ".hwmode") }}
+              {{> RWSelect name="Bandwidth (MHz)" value=htmode kv=(concat "network.wireless.radio." @index ".htmode") }}
+              {{> RWSelect name="Transmit Power (dBm)" value=txpower kv=(concat "network.wireless.radio." @index ".txpower") }}
             </form>
           </div>
           {{/each}}

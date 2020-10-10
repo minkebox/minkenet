@@ -12,6 +12,9 @@ class Radio extends Page {
       devices: null,
       selectedDevice: null
     };
+
+    this.onDeviceUpdate = Debounce(this.onDeviceUpdate, this);
+    this.onListUpdate = Debounce(this.onListUpdate, this);
   }
 
   select() {
@@ -20,13 +23,22 @@ class Radio extends Page {
     if (!this.state.selectedDevice && this.state.devices.length) {
       this.state.selectedDevice = this.state.devices[0];
     }
-    //this.state.selectedDevice.on('update', this.onDeviceUpdate);
-    //this.state.selectedDevice.on('updating', this.onDeviceUpdating);
-    //this.state.selectedDevice.watch();
+
+    DeviceInstanceManager.on('update', this.onListUpdate);
+    if (this.state.selectedDevice) {
+      this.state.selectedDevice.on('update', this.onDeviceUpdate);
+      this.state.selectedDevice.watch();
+    }
+
     this.html('main-container', Template.RadioTab(this.state));
   }
 
   deselect() {
+    if (this.state.selectedDevice) {
+      this.state.selectedDevice.unwatch();
+      this.state.selectedDevice.off('update', this.onDeviceUpdate);
+    }
+    DeviceInstanceManager.off('update', this.onListUpdate);
   }
 
   async 'device.select' (msg) {
@@ -36,9 +48,21 @@ class Radio extends Page {
     }
     const last = this.state.selectedDevice;
     this.state.selectedDevice = device;
+    if (last) {
+      last.unwatch();
+      last.off('update', this.onDeviceUpdate);
+    }
+    if (device) {
+      device.watch();
+      device.on('update', this.onDeviceUpdate);
+    }
     this.updateCard(last);
     this.updateCard(device);
     this.html('radio-selected', Template.RadioSelected(this.state));
+  }
+
+  async 'kv.update' (msg) {
+    this.state.selectedDevice.writeKV(msg.value.k, msg.value.v);
   }
 
   updateCard(device) {
@@ -48,6 +72,15 @@ class Radio extends Page {
         selectedDevice: this.state.selectedDevice
       }));
     }
+  }
+
+  onListUpdate() {
+    this.state.devices = DeviceInstanceManager.getWiFiDevices();
+    this.html('radio-list', Template.DeviceList(this.state));
+  }
+
+  onDeviceUpdate() {
+    this.html('radio-selected', Template.RadioSelected(this.state));
   }
 
 }
