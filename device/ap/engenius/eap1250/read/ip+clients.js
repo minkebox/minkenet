@@ -9,7 +9,14 @@ module.exports = {
     values: {
       system: {
         ipv4: {
-          mode: '$.wan.proto',
+          mode: {
+            $: 'jsonp',
+            arg: '$.wan.proto',
+            map: {
+              static: 'static',
+              dhcp: 'dhcp'
+            }
+          },
           address: '$.wan.ipaddr',
           netmask: '$.wan.netmask',
           gateway: '$.wan.gwaddr',

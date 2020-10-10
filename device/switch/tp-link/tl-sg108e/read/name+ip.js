@@ -26,11 +26,13 @@ module.exports = {
           $: 'navigate',
           arg: '/IpSettingRpm.htm',
           values: {
-            $: 'selector',
-            arg: '#check_dhcp',
-            map: {
-              enable: 'dhcp',
-              disable: 'static'
+            $mode: {
+              $: 'selector',
+              arg: '#check_dhcp',
+              map: {
+                enable: 'dhcp',
+                disable: 'static'
+              }
             }
           }
         }
