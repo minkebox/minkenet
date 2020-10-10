@@ -31,7 +31,7 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{> RWSelect name="Mode" value=security.mode }}
+              {{> RWSelect name="Mode" value=security.mode options=(array 'none' 'wpa2/psk + aes') }}
               {{> RW name="Passphrase" value=security.passphrase }}
             </form>
           </div>
@@ -59,7 +59,7 @@
             <form>
               {{> RWCheckbox name="Steering" value=steering.enable }}
               <div style="margin:0 6px">
-              {{> RWSelect name="5GHz" value=steering.preference }}
+              {{> RWSelect name="5GHz" value=steering.preference options=(array 'force' 'prefer' 'balance')}}
               {{> RW name="Minimum RSSI" value=steering.minrssi }}
               </div>
               {{> RWCheckbox name="Fast roaming" value=fastroaming.enable }}
