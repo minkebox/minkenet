@@ -17,9 +17,9 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RW name="Name (SSID)" value=ssid.name}}
-              {{>RWCheckbox name="Enable" value=ssid.enable}}
-              {{>RWCheckbox name="Hidden" value=ssid.hidden}}
+              {{> RW name="Name (SSID)" value=ssid.name }}
+              {{> RWCheckbox name="Enable" value=ssid.enable }}
+              {{> RWCheckbox name="Hidden" value=ssid.hidden }}
             </form>
           </div>
         </div>
@@ -31,8 +31,8 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RWSelect name="Mode" value=security.mode options=(array "none" "wpa2/psk + aes")}}
-              {{>RW name="Passphrase" value=security.passphrase}}
+              {{> RWSelect name="Mode" value=security.mode }}
+              {{> RW name="Passphrase" value=security.passphrase }}
             </form>
           </div>
         </div>
@@ -44,8 +44,8 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RW name="VLAN" value=vlan}}
-              {{>RWCheckbox name="Isolate clients" value=isolate.enable}}
+              {{> RW name="VLAN" value=vlan }}
+              {{> RWCheckbox name="Isolate clients" value=isolate.enable }}
             </form>
           </div>
         </div>
@@ -57,12 +57,12 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{>RWCheckbox name="Steering" value=steering.enable}}
+              {{> RWCheckbox name="Steering" value=steering.enable }}
               <div style="margin:0 6px">
-              {{>RWSelect name="5GHz" value=steering.preference options=(array "prefer" "force" "balance")}}
-              {{>RW name="Minimum RSSI" value=steering.minrssi}}
+              {{> RWSelect name="5GHz" value=steering.preference }}
+              {{> RW name="Minimum RSSI" value=steering.minrssi }}
               </div>
-              {{>RWCheckbox name="Fast roaming" value=fastroaming.enable}}
+              {{> RWCheckbox name="Fast roaming" value=fastroaming.enable }}
             </form>
           </div>
         </div>

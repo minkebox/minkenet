@@ -33,7 +33,7 @@
       <div class="card-body">
         <div class="list-group">
           <form>
-            {{>RWSelect name="Mode" value=system.ipv4.mode kv="system.ipv4.mode" options=(array "static" "dhcp") update="#device-details-address .card-body"}}
+            {{>RWSelect name="Mode" value=system.ipv4.mode kv="system.ipv4.mode" update="#device-details-address .card-body"}}
             {{#if (eq system.ipv4.mode 'static')}}
             {{>RW name="IP Address" value=system.ipv4.address kv="system.ipv4.address" default="0.0.0.0"}}
             {{>RW name="Subnet Mask" value=system.ipv4.netmask kv="system.ipv4.netmask"}}
