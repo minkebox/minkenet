@@ -86,6 +86,9 @@ body.pending-changes .pending-changes-disabled {
 .device-property-rwselect option {
   background-color: var(--main-background-color);
 }
+.config input[type=checkbox] {
+  min-width: auto;
+}
 
 .nav-link {
   padding-top: 6px;
