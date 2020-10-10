@@ -10,7 +10,7 @@
   <div class="port port-space-lg"></div>
   {{else}}
   {{#if (lookup ../../properties.network.physical.port this)}}
-  <div class="port selected-{{lookup ../../selected this}} {{#with (lookup ../../properties.network.physical.port this)}}{{status}}{{/with}}" onclick="send('device.port.select',{id:'{{../../_id}}',port:'{{this}}'})"><div class="inner-port"></div></div>
+  <div class="port selected-{{lookup ../../selected this}} {{#with (lookup ../../properties.network.physical.port this)}}{{status.$}}{{/with}}" onclick="send('device.port.select',{id:'{{../../_id}}',port:'{{this}}'})"><div class="inner-port"></div></div>
   {{else}}
   <div class="port selected-{{lookup ../../selected this}}"><div class="inner-port"></div></div>
   {{/if}}

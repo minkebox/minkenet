@@ -3,9 +3,15 @@
   <div class="col-sm-6">
   <select class="device-property-rwselect small"
     onchange="{{#if kv}}send('kv.update',{ k:'{{kv}}',v:event.target.value}){{/if}}{{#if cmd}}send('{{cmd}}',{k:'{{key}}',v:this.value}){{/if}}{{#if update}};send('device.details.summary.updaterequest','{{update}}'){{/if}}">
+      {{#if options}}
       {{#each options}}
-      <option {{#if (eq ../value this)}}selected{{/if}} value="{{this}}">{{this}}</option>
+      <option {{#if (or (eq ../value this) (eq ../value.$ this))}}selected{{/if}} value="{{this}}">{{this}}</option>
       {{/each}}
+      {{else}}
+      {{#each value.$s}}
+      <option {{#if (eq ../value.$ this)}}selected{{/if}} value="{{this}}">{{this}}</option>
+      {{/each}}
+      {{/if}}
     </select>
   </div>
 </div>

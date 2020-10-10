@@ -3,11 +3,11 @@
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
   <div class="col-sm-6 d-flex align-items-center">
     {{#if ro}}
-    <div class="device-property-ro small">{{value}}</div>
+    <div class="device-property-ro small">{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}</div>
     {{else}}
     <input id="fid-{{#if kv}}{{kv}}{{else if cmd}}{{cmd}}{{/if}}"
       class="device-property-rw small"
-      value="{{value}}"
+      value="{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}"
       spellcheck="off"
       autocapitalize="off"
       autocomplete="off"

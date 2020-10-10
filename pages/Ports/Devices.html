@@ -4,7 +4,7 @@
     <div class="entry active-{{lookup (lookup @root.ports @index) 'active'}}" {{#if ../selectdevicecmd}}onclick="send('{{../selectdevicecmd}}','{{@index}}')"{{/if}}>
       <div class="info">
         {{#with properties}}
-        <span>{{system.name}}</span>
+        <span>{{system.name.$}}</span>
         {{/with}}
       </div>
       <div class="device">

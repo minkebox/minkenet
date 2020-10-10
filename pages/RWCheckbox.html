@@ -2,7 +2,7 @@
 <div class="row">
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
   <div class="col-sm-6 d-flex align-items-center">
-    <input type="checkbox" class="device-property-rwcheckbox small" {{#if value}}checked{{/if}} value="1" onchange="send('kv.update',{ k:'{{kv}}',v:this.checked});{{#if update}}send('device.details.summary.updaterequest','{{update}}'){{/if}}">
+    <input type="checkbox" class="device-property-rwcheckbox small" {{#if (isdefined value.$)}}{{#if value.$}}checked{{/if}}{{else}}{{#if value}}checked{{/if}}{{/if}} value="1" onchange="send('kv.update',{ k:'{{kv}}',v:this.checked});{{#if update}}send('device.details.summary.updaterequest','{{update}}'){{/if}}">
   </div>
 </div>
 {{/if}}

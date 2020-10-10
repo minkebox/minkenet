@@ -2,7 +2,7 @@
 <div class="row">
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
   <div class="col-sm-6 d-flex align-items-center">
-    <div class="device-property-ro small">{{value}}</div>
+    <div class="device-property-ro small">{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}</div>
   </div>
 </div>
 {{else if (isdefined default)}}

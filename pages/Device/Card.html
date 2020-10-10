@@ -3,11 +3,11 @@
   <img src="{{description.image}}" class="card-img-top">
   <div class="card-body">
     {{#if properties.system.name}}
-    <h5 class="card-title">{{properties.system.name}}</h5>
+    <h5 class="card-title">{{properties.system.name.$}}</h5>
     {{else}}
     <h5 class="card-title">{{description.name}}</h5>
     {{/if}}
-    <a class="card-text" href="http://{{properties.system.ipv4.address}}" target="_blank">{{properties.system.ipv4.address}}</a>
+    <a class="card-text" href="http://{{properties.system.ipv4.address.$}}" target="_blank">{{properties.system.ipv4.address.$}}</a>
     {{#unless _authenticated}}
     <div class="d-flex buttons" style="justify-content: flex-end">
       <button type="button" class="btn btn-outline-primary btn-sm" onclick="$('#login-modal-{{_id}}').modal()">Authenticate</button>

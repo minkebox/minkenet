@@ -28,7 +28,7 @@ class DeviceInstance extends EventEmitter {
   }
 
   get properties() {
-    return this.readKV('$');
+    return this.state.state;
   }
 
   readKV(key, options) {
