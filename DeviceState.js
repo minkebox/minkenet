@@ -99,6 +99,9 @@ class DeviceStateInstance extends EventEmitter {
     if (options.value) {
       info.value = essential(kv0, options.depth);
     }
+    if (kv0.$s) {
+      info.selection = kv0.$s;
+    }
     Log('readkv info:', info);
     return info;
   }
@@ -394,7 +397,12 @@ class DeviceStateInstance extends EventEmitter {
   }
 
   _mergeDeviceState(target, src, key, parent, trim) {
-    const val = src[key];
+    let selection = null;
+    let val = src[key];
+    if (val && typeof val === 'object' && '$' in val) {
+      selection = val.selection;
+      val = val.$;
+    }
     if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
       if (!target[key]) {
         target[key] = { $: val };
@@ -417,6 +425,10 @@ class DeviceStateInstance extends EventEmitter {
           target[key].$ = val;
           this.emit('update', { op: 'merge', key: `${parent.substring(7)}.${key}`, value: val });
         }
+      }
+      // If value has a selection, bring the selection along too
+      if (selection) {
+        target[key].$s = selection;
       }
     }
     else {
@@ -455,6 +467,9 @@ class DeviceStateInstance extends EventEmitter {
         }
         if ('$l' in ctx) {
           v.$l = ctx.$l;
+        }
+        if ('$s' in ctx) {
+          v.$s = ctx.$s;
         }
         return v;
       }

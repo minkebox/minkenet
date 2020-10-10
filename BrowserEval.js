@@ -37,9 +37,16 @@ class Eval {
         if (idx !== -1) {
           key = key.slice(0, idx);
         }
-        const result = await this.eval(def$, value[k], context, `${path}${key ? '.' : ''}${key}`, device);
+        let result = await this.eval(def$, value[k], context, `${path}${key ? '.' : ''}${key}`, device);
         if (result === null || result === undefined) {
           return null;
+        }
+        // Include the selection if there is one
+        if (value[k].$ && typeof value[k].map === 'object') {
+          result = {
+            $: result,
+            selection: Object.values(value[k].map)
+          }
         }
         if (key === '_') {
           // Ignore
@@ -158,7 +165,7 @@ class Eval {
               }
             );
           });
-          Log('varbinds:', JSON.stringify(ncontext, null, 1));
+          //Log('varbinds:', JSON.stringify(ncontext, null, 1));
           return await this.eval('jsonp', value.values, ncontext, path, device);
         }
         else {
@@ -171,7 +178,7 @@ class Eval {
               resolve(varbinds[0]);
             });
           });
-          Log('varbind:', varbind);
+          //Log('varbind:', varbind);
           try {
             const result = this.map(value, this.convertFromVarbind(varbind));
             if (result !== null && result !== undefined) {
