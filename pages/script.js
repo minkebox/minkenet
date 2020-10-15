@@ -94,13 +94,6 @@ function deviceLogin(id) {
   send('device.authenticate', auth);
 }
 
-function createVlan() {
-  send('network.vlan.create', {
-    name: document.querySelector('.vlan-create-name').value,
-    id: document.querySelector('.vlan-create-id').value
-  });
-}
-
 let pendingModals = 0;
 let pendingHide = false;
 $(document).on('show.bs.modal', () => {

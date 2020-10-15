@@ -23,3 +23,11 @@
     </div>
   </div>
 </div>
+<script>
+  window.createVlan = function() {
+    send('network.vlan.create', {
+      name: document.querySelector('.vlan-create-name').value,
+      id: document.querySelector('.vlan-create-id').value
+    });
+  }
+</script>
