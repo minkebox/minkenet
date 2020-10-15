@@ -3,7 +3,6 @@
     {{#with (decode 'dns' payload.payload.payload.data 0)}}
     {{#if header.isResponse}}Response{{else}}Request{{/if}}
     {{#if qdcount}}
-    {{print this}}
     {{#with (lookup question.rrs 0)}}
     {{#if (eq type 1)}}A
     {{else if (eq type 2)}}NS
