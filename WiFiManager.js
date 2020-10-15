@@ -35,10 +35,15 @@ class WiFiManager extends EventEmitter {
         if (station.ssid) {
           const cstation = newstations[station.ssid];
           if (!cstation) {
-            if (!station.isolate) station.isolate = {};
-            if (!station.fastroaming) station.fastroaming = {};
-            if (!station.steering) station.steering = {};
-
+            if (!station.isolate) {
+              station.isolate = {};
+            }
+            if (!station.fastroaming) {
+              station.fastroaming = {};
+            }
+            if (!station.steering) {
+              station.steering = {};
+            }
             newstations[station.ssid] = {
               ssid: {
                 name: station.ssid,
@@ -82,34 +87,34 @@ class WiFiManager extends EventEmitter {
     return Object.values(this.stations);
   }
 
+  createStation(ssid) {
+    this.stations[ssid] = {
+      ssid: {
+        name: ssid,
+        enable: false,
+        hidden: false
+      },
+      instances: [],
+      bands: [],
+      security: {
+        mode: 'none',
+        passphrase: ''
+      },
+      vlan: 0,
+      isolate: {
+        enable: false,
+      },
+      fastroaming: {
+        enable: false
+      },
+      steering: {
+        enable: false,
+        preference: '',
+        minrssi: 0
+      }
+    };
+  }
+
 }
 
 module.exports = new WiFiManager();
-
-/*
-
-"0": {
-  browser:state      "ssid": {
-  browser:state       "$": "nomi-and-tim"
-  browser:state      },
-  browser:state      "enable": {
-  browser:state       "$": true
-  browser:state      },
-  browser:state      "bands": {
-  browser:state       "$": "0,1"
-  browser:state      },
-  browser:state      "security": {
-  browser:state       "mode": {
-  browser:state        "$": "wpa2/psk"
-  browser:state       },
-  browser:state       "encryption": {
-  browser:state        "$": "aes"
-  browser:state       }
-  browser:state      },
-  browser:state      "vlan": {
-  browser:state       "$": 0
-  browser:state      }
-  browser:state     },
-
-
-*/

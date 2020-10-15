@@ -63,6 +63,24 @@ class WiFi extends Page {
     }
     this.html('wifi-devices', Template.PortsDevices(this.state));
   }
+
+  async 'network.wifi.create' (msg) {
+    const ssid = msg.value;
+    const idx = this.state.station.findIndex(station => station.ssid.name == ssid);
+    if (idx !== -1) {
+      // Already exists - so just select it
+      this.state.selectedIdx = idx;
+      this.updateState();
+    }
+    else {
+      WiFiManager.createStation(ssid);
+      this.state.station = WiFiManager.getAllStations();
+      this.state.selectedIdx = this.state.station.findIndex(station => station.ssid.name == ssid);
+      this.updateState();
+      this.html('wifi-list', Template.WiFiList(this.state));
+    }
+    this.html('wifi-selected', Template.WiFiSelected(this.state));
+  }
 }
 
 module.exports = WiFi;

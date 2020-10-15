@@ -1,0 +1,26 @@
+<div class="modal fade" id="wifi-new-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Create a new WiFi network</h5>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="form-group">
+            <label for="name">Name (SSID)</label>
+            <input type="text" class="form-control wifi-create-name">
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="createWifi()">Create</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+  window.createWifi = function() {
+    send('network.wifi.create', document.querySelector('.wifi-create-name').value);
+  }
+</script>
