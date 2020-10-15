@@ -13,7 +13,7 @@ const ClientManager = require('./ClientManager');
 const Discovery = require('./discovery');
 const MonitorManager = require('./MonitorManager');
 const WiFiManager = require('./WiFiManager');
-const SpeedTest = require('./SpeedTest');
+const SpeedTest = require('./monitors/SpeedTest');
 
 // Extend path so we can find 'ping' and 'arp'
 process.env.PATH = `${process.env.PATH}:/usr/sbin:/sbin`;

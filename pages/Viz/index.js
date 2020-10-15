@@ -4,7 +4,7 @@ const MonitorManager = require('../../MonitorManager');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const DB = require('../../Database');
 const ClientManager = require('../../ClientManager');
-const SpeedTest = require('../../SpeedTest');
+const SpeedTest = require('../../monitors/SpeedTest');
 
 const REFRESH_TIMER = 60 * 1000; // 1 minute
 
