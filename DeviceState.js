@@ -19,7 +19,7 @@ class DeviceStateInstance extends EventEmitter {
   }
 
   readKV(key, options) {
-    options = Object.assign({ deleted: false, new: true, stable: true, original: false, info: false, value: true, depth: Number.MAX_SAFE_INTEGER }, options);
+    options = Object.assign({ deleted: false, new: true, stable: true, original: false, info: false, value: true, selection: true, depth: Number.MAX_SAFE_INTEGER }, options);
     Log('read:', key, JSON.stringify(options));
     const kv = JSONPath({ path: key, json: this.state });
     const kv0 = kv && kv[0];
@@ -99,7 +99,7 @@ class DeviceStateInstance extends EventEmitter {
     if (options.value) {
       info.value = essential(kv0, options.depth);
     }
-    if (kv0.$s) {
+    if (options.selection && kv0.$s) {
       info.selection = kv0.$s;
     }
     Log('readkv info:', info);
