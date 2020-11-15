@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const Debounce = require('./utils/Debounce');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
+const { stat } = require('fs');
 
 class WiFiManager extends EventEmitter {
 
@@ -28,54 +29,23 @@ class WiFiManager extends EventEmitter {
       if (!dev.description.properties.ap) {
         return;
       }
-      const radios = dev.readKV('network.wireless.radio');
+      const radios = dev.readKV('network.wireless.radio') || {};
       const stations = dev.readKV('network.wireless.station') || {};
       for (let idx in stations) {
         const station = stations[idx];
         if (station.ssid) {
-          const cstation = newstations[station.ssid];
-          if (!cstation) {
-            if (!station.isolate) {
-              station.isolate = {};
-            }
-            if (!station.fastroaming) {
-              station.fastroaming = {};
-            }
-            if (!station.steering) {
-              station.steering = {};
-            }
-            newstations[station.ssid] = {
-              ssid: {
-                name: station.ssid,
-                enable: station.enable,
-                hidden: station.hidden
-              },
-              instances: [{
-                device: dev,
-                station: station
-              }],
-              bands: station.bands.split(',').map(band => radios[band]),
-              security: station.security,
-              vlan: station.vlan,
-              isolate: {
-                enable: station.isolate.enable,
-              },
-              fastroaming: {
-                enable: station.fastroaming.enable
-              },
-              steering: {
-                enable: station.steering.enable,
-                preference: station.steering.preference,
-                minrssi: station.steering.minrssi
-              }
-            };
+          station.bands = station.bands.split(',').map(band => radios[band]);
+          const options = dev.readKV(`network.wireless.station.${idx}.security.mode`, { info: true, value: false, selection: true });
+          station.security.options = options.selection || [ 'none' ];
+          const steering = dev.readKV(`network.wireless.station.${idx}.steering.preference`, { info: true, value: false, selection: true });
+          if (steering) {
+            station.steering.options = steering.selection || [ 'balance' ];
           }
-          else {
-            cstation.instances.push({
-              device: dev,
-              station: station
-            });
-          }
+          const cstation = newstations[station.ssid] || (newstations[station.ssid] = { instances: [] });
+          cstation.instances.push({
+            device: dev,
+            station: station
+          });
         }
       }
     });
@@ -85,6 +55,136 @@ class WiFiManager extends EventEmitter {
 
   getAllStations() {
     return Object.values(this.stations);
+  }
+
+  addDeviceToStation(station, device) {
+    for (let i = 0; i < station.instances.length; i++) {
+      if (station.instances[i].device === device) {
+        return false;
+      }
+    }
+    station.instances.push({
+      device: device,
+      station: {
+        bands: [],
+        security: { options: [ 'none' ] },
+        steering: { options: [ 'balance' ] }
+      } // ... FIX ...
+    });
+    return true;
+  }
+
+  removeDeviceFromStation(station, device) {
+    for (let i = 0; i < station.instances.length; i++) {
+      if (station.instances[i].device === device) {
+        station.instances.splice(i, 1);
+        return true;
+      }
+    }
+    return false;
+  }
+
+  getStationConfig(station) {
+    const config = {
+      station: station
+    };
+
+    const primary = station.instances[0] && station.instances[0].station;
+    if (!primary) {
+      return config;
+    }
+
+    config.ssid = primary.ssid;
+    config.enable = primary.enable;
+    config.hidden = primary.hidden;
+
+    config.security = {
+      mode: primary.security.mode,
+      options: primary.security.options,
+      passphrase: primary.security.passphrase
+    };
+
+    if (primary.steering) {
+      config.steering = {
+        preference: primary.steering.preference,
+        options: primary.steering.options
+      };
+    }
+
+    config.vlan = primary.vlan;
+    config.isolate = primary.isolate;
+    config.bands = {};
+
+    for (let i = 0; i < station.instances.length; i++) {
+      const stat = station.instances[i].station;
+
+      // Make all bands available to station, even if all devices dont support them.
+      stat.bands.forEach(band => {
+        const name = band.band;
+        if (!config.bands[name]) {
+          config.bands[name] = {
+            band: name
+          };
+        }
+      });
+
+      // Only support security modes available on all devices
+      for (let i = config.security.options.length - 1; i >= 0; i--) {
+        if (stat.security.options.indexOf(config.security.options[i]) === -1) {
+          config.security.options.splice(i, 1);
+        }
+      }
+
+      // Only support vlan if all instances support vlan
+      if (!('vlan' in stat)) {
+        delete config.vlan;
+      }
+      // Same for isolate
+      if (!('isolate' in stat)) {
+        delete config.isolate;
+      }
+
+      // Support as much steering as possible
+      if ('steering' in stat) {
+        if (!config.steering) {
+          config.steering = {};
+        }
+        if ('enable' in stat.steering) {
+          config.steering.enable = stat.steering.enable;
+        }
+        if ('preference' in stat.steering) {
+          config.steering.preference = stat.steering.preference;
+        }
+        if ('minrssi' in stat.steering) {
+          config.steering.minrssi = stat.steering.minrssi
+        }
+        if ('options' in stat.steering) {
+          for (let i = config.steering.options.length - 1; i >= 0; i--) {
+            if (stat.steering.options.indexOf(config.steering.options[i]) === -1) {
+              config.steering.options.splice(i, 1);
+            }
+          }
+        }
+      }
+      // Same for fast roaming
+      if ('fastroaming' in stat) {
+        if (!config.fastroaming) {
+          config.fastroaming = {};
+        }
+        if ('enable' in stat.fastroaming) {
+          config.fastroaming.enable = stat.fastroaming.enable;
+        }
+      }
+    }
+
+    if (config.security.options.indexOf(config.security.mode) === -1) {
+      config.security.mode = 'none';
+    }
+    if (config.steering && config.steering.options.indexOf(config.steering.preference) === -1) {
+      config.steering.preference = 'balance';
+    }
+
+    return config;
   }
 
   createStation(ssid) {
