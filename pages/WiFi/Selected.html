@@ -1,7 +1,7 @@
 <div class="details-container tap-pane fade show active">
   <div class="accordion">
     <div class="card">
-      <div data-toggle="collapse" data-target="#bond-devices" class="card-header">
+      <div data-toggle="collapse" data-target="#wifi-devices" class="card-header">
         <div>Devices</div>
       </div>
       <div id="wifi-devices" class="collapse show">
@@ -10,34 +10,64 @@
     </div>
     {{#with selected}}
     <div class="card">
-      <div data-toggle="collapse" data-target="" class="card-header">
+      <div data-toggle="collapse" data-target="#wifi-overview" class="card-header">
         <div>WiFi</div>
       </div>
       <div id="wifi-overview" class="collapse show">
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{> RW name="Name (SSID)" value=ssid.name }}
-              {{> RWCheckbox name="Enable" value=ssid.enable }}
-              {{> RWCheckbox name="Hidden" value=ssid.hidden }}
+              {{> RW name="Name (SSID)" value=ssid }}
+              {{> RWCheckbox name="Enable" value=enable }}
+              {{> RWCheckbox name="Hidden" value=hidden }}
             </form>
           </div>
         </div>
       </div>
-      <div data-toggle="collapse" data-target="" class="card-header">
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#wifi-bands" class="card-header">
+        <div>Bands</div>
+      </div>
+      <div id="wifi-bands" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{#if bands.2_4ghz}}
+              {{> RWCheckbox name='2.4 GHz' value=1 }}
+              {{else}}
+              {{> RWCheckbox name='2.4 GHz' value=0 }}
+              {{/if}}
+              {{#if bands.5ghz}}
+              {{> RWCheckbox name='5 GHz' value=1 }}
+              {{else}}
+              {{> RWCheckbox name='5 GHz' value=0 }}
+              {{/if}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <div data-toggle="collapse" data-target="#wifi-security" class="card-header">
         <div>Security</div>
       </div>
       <div id="wifi-security" class="collapse show">
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{> RWSelect name="Mode" value=security.mode options=(array 'none' 'wpa2/psk + aes') }}
+              {{> RWSelect name="Mode" value=security.mode options=security.options }}
+              {{#if (ne security.mode 'none')}}
               {{> RW name="Passphrase" value=security.passphrase }}
+              {{/if}}
             </form>
           </div>
         </div>
       </div>
-      <div data-toggle="collapse" data-target="" class="card-header">
+    </div>
+    {{#if (or (isdefined vlan) (isdefined isolate.enable))}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#wifi-network" class="card-header">
         <div>Network</div>
       </div>
       <div id="wifi-network" class="collapse show">
@@ -50,7 +80,10 @@
           </div>
         </div>
       </div>
-      <div data-toggle="collapse" data-target="" class="card-header">
+    </div>
+    {{/if}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#wifi-options" class="card-header">
         <div>Sharing</div>
       </div>
       <div id="wifi-options" class="collapse show">
@@ -59,7 +92,7 @@
             <form>
               {{> RWCheckbox name="Steering" value=steering.enable }}
               <div style="margin:0 6px">
-              {{> RWSelect name="5GHz" value=steering.preference options=(array 'force' 'prefer' 'balance')}}
+              {{> RWSelect name="5GHz" value=steering.preference options=steering.options }}
               {{> RW name="Minimum RSSI" value=steering.minrssi }}
               </div>
               {{> RWCheckbox name="Fast roaming" value=fastroaming.enable }}

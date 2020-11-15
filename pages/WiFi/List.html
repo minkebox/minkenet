@@ -3,9 +3,11 @@
     <div class="col col-name"><div>Name (SSID)</div></div>
   </div>
   {{#each station}}
-  <a id="wifi-{{ssid.name}}" class="row {{#if (eq ../selected.ssid.name ssid.name)}}active{{/if}}" href="#" onclick="selectssid(event,'{{ssid.name}}')">
+  {{#with instances.0.station }}
+  <a id="wifi-{{ssid}}" class="row {{#if (eq ../selected.ssid ssid)}}active{{/if}}" href="#" onclick="selectssid(event,'{{ssid}}')">
     {{> WiFiSummary}}
   </a>
+  {{/with}}
   {{/each}}
   <script>
     window.selectssid = function(evt,id) {
