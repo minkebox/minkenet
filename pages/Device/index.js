@@ -299,7 +299,7 @@ class Devices extends Page {
     this.html('ipdiscovery-modal-primary', '');
     this.scanner = new NetworkScanner.createScanner({
       addresses: [ { type: 'net', ip: address[0], port: parseInt(address[1] || 80) } ],
-      pageTimeout: 5000
+      pageTimeout: 20000
     });
     this.scanner.on('status', this.discoverUpdate);
     this.scanner.start();
