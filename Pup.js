@@ -39,6 +39,7 @@ class Pup {
     const page = await this.newPage();
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36 Edg/83.0.478.37');
     await page.setViewport({ width: 1920, height: 1080 });
+    await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-us' });
     if (Log.enabled) {
       /*
       * NOTE: Enabling this code makes page loads significantly slower
