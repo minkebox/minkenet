@@ -53,16 +53,21 @@ class Pup {
         else {
           req.continue();
         }
-      });
+    });
       page.on('pageerror', err => Log('page error:', err.toString()));
       page.on('error', err => Log('error:', err.toString()));
       page.on('console', msg => Log('console:', msg.text()));
-      page.on('response', res => Log('response:', res.url()));
       page.on('requestfinished', req => Log('requestfinished:', req.url()));
       page.on('requestfailed', req => Log('requestfailed:', req.url()));
       page.on('domcontentloaded', () => Log('domcontentloaded'));
       page.on('load', () => Log('load'));
+      page.on('response', async res => {
+        const data = await res.buffer();
+        Log('response:', res.url());
+        Log(`  body: ${data.toString()}`);
+      });
     }
+
     // Dismiss dialogs to they dont block the browser.
     page.on('dialog', async dialog => {
       dialog.dismiss();
@@ -72,6 +77,7 @@ class Pup {
 
   disconnect(page) {
     page.close();
+    page.removeAllListeners();
     page.browserContext().close();
   }
 
