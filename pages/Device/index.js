@@ -249,7 +249,7 @@ class Devices extends Page {
         if (!this.scanner) {
           this.scanner = new NetworkScanner.createScanner({
             addresses: Discovery.getAddresses(),
-            pageTimeout: 5000
+            pageTimeout: 20000
           });
           this.scanner.on('status', this.scanUpdate);
           this.scanner.start();
