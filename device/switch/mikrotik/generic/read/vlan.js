@@ -3,19 +3,20 @@ module.exports = {
     vlans: {
       $: 'fetch',
       arg: '/fwd.b',
-      type: 'eval+r',
+      transform: v => `$P=${v}`,
+      type: 'eval',
       values: {
         pvid: {
           $: 'iterate',
           arg: itr => [{
-            pvid: `$R.dvid[${itr.index}]`
+            pvid: `$P.dvid[${itr.index}]`
           }]
         },
-        vlan$0: `(function(){$P=$R;return{}})()`, // Stash info for use by next fetch
-        vlan$1: {
+        vlan: {
           $: 'fetch',
           arg: '/vlan.b',
-          type: 'eval+r',
+          transform: v => `$R=${v}`,
+          type: 'eval',
           values: {
             $: 'iterate',
             arg: itr => [ `$R[${itr.index}].vid`, {

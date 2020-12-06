@@ -4,7 +4,8 @@ module.exports = {
       0: {
         $: 'fetch',
         arg: '/fwd.b',
-        type: 'eval+r',
+        transform: v => `$R=${v}`,
+        type: 'eval',
         values: {
           enable: { $: 'literal', arg: true },
           target: '$R.mrto - 1',

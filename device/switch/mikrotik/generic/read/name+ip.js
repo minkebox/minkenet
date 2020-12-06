@@ -20,7 +20,8 @@ module.exports = {
   $1: {
     $: 'fetch',
     arg: '/sys.b',
-    type: 'eval+r',
+    transform: v => `$R=${v}`,
+    type: 'eval',
     values: {
       system: {
         name: { $: 'eval', arg: '$R.id', map: str },

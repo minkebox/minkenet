@@ -4,7 +4,8 @@ module.exports = {
       port: {
         $: 'fetch',
         arg: '/!stats.b',
-        type: 'eval+r',
+        transform: v => `$R=${v}`,
+        type: 'eval',
         values: {
           $: 'iterate',
           arg: itr => [{

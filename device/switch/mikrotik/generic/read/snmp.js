@@ -6,7 +6,8 @@ module.exports = {
   system: {
     $: 'fetch',
     arg: '/snmp.b',
-    type: 'eval+r',
+    transform: v => `$R=${v}`,
+    type: 'eval',
     values: {
       snmp: {
         enable: `!!$R.en`

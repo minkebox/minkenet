@@ -7,7 +7,8 @@ module.exports = {
     clients: {
       $: 'fetch',
       arg: '/!dhost.b',
-      type: 'eval+r',
+      transform: v => `$R=${v}`,
+      type: 'eval',
       values: {
         $: 'iterate',
         arg: itr => [{

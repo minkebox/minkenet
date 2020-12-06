@@ -19,7 +19,8 @@ const Device = {
       loggedIn: {
         $: 'fetch',
         arg: '/sys.b',
-        type: 'eval+r',
+        transform: v => `$R=${v}`,
+        type: 'eval',
         values: {
           $: 'eval',
           arg: '$R.brd',

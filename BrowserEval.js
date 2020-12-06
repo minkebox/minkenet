@@ -578,6 +578,7 @@ class Eval {
           return true;
         }
         let type = value.type;
+        let ncontext = frame;
         if (!type) {
           switch (Path.extname((new URL(url)).pathname)) {
             case '.json':
@@ -593,14 +594,13 @@ class Eval {
               break;
           }
         }
-        let ncontext = frame;
+        if (value.transform) {
+          const tvalue = await value.transform.call(callContext, nvalue);
+          nvalue = typeof tvalue === 'string' ? tvalue : JSON.stringify(tvalue);
+        }
         switch (type) {
           case 'jsonp':
             ncontext = JSON.parse(nvalue);
-            break;
-          case 'eval+r':
-            await ncontext.evaluate(`$R=${nvalue}`);
-            type = 'eval';
             break;
           case 'eval':
             await ncontext.evaluate(nvalue);

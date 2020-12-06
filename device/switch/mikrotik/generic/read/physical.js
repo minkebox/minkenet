@@ -8,7 +8,8 @@ module.exports = {
       port: {
         $: 'fetch',
         arg: '/link.b',
-        type: 'eval+r',
+        transform: v => `$R=${v}`,
+        type: 'eval',
         values: {
           $: 'iterate',
           arg: itr => [{
