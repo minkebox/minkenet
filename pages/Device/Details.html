@@ -15,7 +15,11 @@
         <div class="list-group">
           <form>
             {{>RO name="Mac Address" value=(lookup system.macAddress 0)}}
+            {{#if system.fixedname}}
+            {{>RO name="Name" value=system.fixedname}}
+            {{else}}
             {{>RW name="Name" value=system.name default="System name" kv="system.name"}}
+            {{/if}}
             {{>RO name="Manufacturer" value=system.hardware.manufacturer}}
             {{>RO name="Model" value=system.hardware.model}}
             {{>RO name="Version" value=system.hardware.version}}

@@ -9,7 +9,11 @@
         <div class="card-body">
           <div class="list-group">
             <form>
-              {{> RO name="Name" value=system.name default="System name" }}
+              {{#if system.fixedname}}
+              {{> RO name="Name" value=system.fixedname}}
+              {{else}}
+              {{> RO name="Name" value=system.name }}
+              {{/if}}
               {{> RO name="Manufacturer" value=system.hardware.manufacturer }}
               {{> RO name="Model" value=system.hardware.model }}
             </form>

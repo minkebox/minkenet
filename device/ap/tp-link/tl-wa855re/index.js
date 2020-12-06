@@ -40,6 +40,7 @@ const Device = {
 
   constants: {
     system: {
+      fixedname: 'TL-WA855RE',
       hardware: {
         manufacturer: 'TP-Link',
         model: 'TL-WA855RE'
