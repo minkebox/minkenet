@@ -1,5 +1,3 @@
-const { valHooks } = require("jquery");
-
 module.exports = {
   system: {
     $: 'fetch',
