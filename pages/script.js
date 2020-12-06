@@ -70,7 +70,7 @@ onMessage['html.update'] = msg => {
     node.innerHTML = msg.value.html;
     if (active && active.id) {
       const elem = document.getElementById(active.id);
-      if (elem && elem != active) {
+      if (elem && elem != active && (active.nodeName === 'INPUT' || active.nodeName === 'SELECT' || active.nodeName === 'TEXTAREA')) {
         elem.replaceWith(active);
         active.focus();
       }
