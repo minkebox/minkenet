@@ -81,6 +81,7 @@ const Device = {
   },
 
   read: {
+    $1: require('./read/ip')
   },
   write: {
   },
