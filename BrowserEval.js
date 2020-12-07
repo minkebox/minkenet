@@ -676,6 +676,9 @@ class Eval {
         result = await value.map(result);
       }
       else {
+        if (!(result in value.map)) {
+          Log('map: missing map:', result, value.map);
+        }
         result = value.map[result];
       }
     }
