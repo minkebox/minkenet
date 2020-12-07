@@ -169,11 +169,20 @@ class Devices extends Page {
     this.html(`login-modal-status-${device._id}`, 'Login success. Adopting ...');
 
     // Adopt the newly authenticated device.
-    const adoption = new Adopt(device);
-    const status = await adoption.configure({
-      username: msg.value.username,
-      password: msg.value.password
-    });
+    let status = null;
+    try {
+      const adoption = new Adopt(device);
+      status = await adoption.configure({
+        username: msg.value.username,
+        password: msg.value.password
+      });
+    }
+    catch (_) {
+      this.authenticating = false;
+      device.detach();
+      this.html(`login-modal-status-${device._id}`, 'Adoption failed.');
+      return;
+    }
 
     this.html(`login-modal-status-${device._id}`, 'Configuring device ...');
 
