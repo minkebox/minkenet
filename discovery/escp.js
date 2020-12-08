@@ -88,6 +88,7 @@ class ESCP extends EventEmitter {
     if (ip) {
       if (!this.found[ip]) {
         this.found[ip] = { type: 'escp', ip: ip, port: 80, txt: { model: model } };
+        Log('found:', this.found[ip]);
         this.emit('update');
       }
       else {
