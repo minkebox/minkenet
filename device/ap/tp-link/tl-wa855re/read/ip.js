@@ -33,7 +33,11 @@ module.exports = {
     type: 'jsonp',
     values: {
       macAddress: {
-        0: 'mac_0'
+        0: {
+          $: 'jsonp',
+          arg: 'mac_0',
+          map: mac => mac.replace(/-/g,':').toLowerCase()
+        }
       },
       ipv4: {
         mode: {
