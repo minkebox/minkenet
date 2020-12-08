@@ -206,6 +206,9 @@ class Eval {
         const text = await this.map(value, nvalue);
         Log('set text', text);
         await frame.$eval(value.arg, (elem, text) => elem.value = text, text);
+        if (value.wait) {
+          await new Promise(resolve => setTimeout(resolve, value.wait * 1000));
+        }
         return true;
       }
       case 'type':
@@ -223,6 +226,9 @@ class Eval {
         // Remove the INPUT value before we 'type' in the new text.
         await frame.$eval(value.arg, elem => elem.value = '');
         await frame.type(value.arg, text);
+        if (value.wait) {
+          await new Promise(resolve => setTimeout(resolve, value.wait * 1000));
+        }
         return true;
       }
       case 'oid+set':
