@@ -31,8 +31,9 @@ const Device = {
   login: {
     path: '/',
     password: {
-      $: 'set',
-      arg: '.password-text.password-hidden'
+      $: 'type',
+      arg: '.password-text.password-hidden',
+      wait: 0.5
     },
     activate: 'a[title="LOG IN"]',
     valid: '#navigator'
