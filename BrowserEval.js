@@ -258,7 +258,11 @@ class Eval {
       }
       case 'click':
       {
-        return await (await this.getEvalFrame(context, value)).click(value.arg);
+        const r = await (await this.getEvalFrame(context, value)).click(value.arg);
+        if (value.wait) {
+          await new Promise(resolve => setTimeout(resolve, value.wait * 1000));
+        }
+        return r;
       }
       case 'select':
       {
