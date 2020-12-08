@@ -494,6 +494,7 @@ class DeviceState {
   constructor() {
     // Well-known keys
     this.KEY_SYSTEM_NAME = 'system.name';
+    this.KEY_SYSTEM_FIXEDNAME = 'system.fixedname';
     this.KEY_SYSTEM_MACADDRESS = 'system.macAddress';
     this.KEY_SYSTEM_IPV4 = 'system.ipv4';
     this.KEY_SYSTEM_IPV4_MODE = 'system.ipv4.mode';

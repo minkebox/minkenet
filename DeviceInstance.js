@@ -24,7 +24,7 @@ class DeviceInstance extends EventEmitter {
   }
 
   get name() {
-    return this.readKV(DeviceState.KEY_SYSTEM_NAME) || '-';
+    return this.readKV(DeviceState.KEY_SYSTEM_NAME) || this.readKV(DeviceState.KEY_SYSTEM_FIXEDNAME) || '-';
   }
 
   get properties() {
