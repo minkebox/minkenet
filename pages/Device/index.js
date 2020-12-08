@@ -137,6 +137,7 @@ class Devices extends Page {
     const success = await device.login(msg.value.username, msg.value.password);
     if (!success) {
       this.authenticating = false;
+      device.detach();
       this.html(`login-modal-status-${device._id}`, 'Login failed.');
       return;
     }
@@ -157,7 +158,7 @@ class Devices extends Page {
       }
       if (!ndevice) {
         this.authenticating = false;
-        device.detach();
+        device.logout(true);
         this.html(`login-modal-status-${device._id}`, 'Login failed.');
         return;
       }
@@ -179,7 +180,7 @@ class Devices extends Page {
     }
     catch (_) {
       this.authenticating = false;
-      device.detach();
+      device.logout(true);
       this.html(`login-modal-status-${device._id}`, 'Adoption failed.');
       return;
     }

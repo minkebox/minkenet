@@ -144,8 +144,11 @@ class BrowserDeviceInstance extends DeviceInstance {
     return false;
   }
 
-  logout() {
+  logout(unauth) {
     this._validated = false;
+    if (unauth) {
+      this._authenticated = false;
+    }
     this.detach();
   }
 
