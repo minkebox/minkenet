@@ -6,11 +6,7 @@ module.exports = {
     location: { $: 'oid', arg: OID.system.location },
     contact: { $: 'oid', arg: OID.system.contact },
     macAddress: {
-      0: {
-        $: 'oid',
-        arg: '1.3.6.1.2.1.2.2.1.6.2',
-        map: OID.toMacAddress
-      }
+      0: { $: 'oid', arg: '1.3.6.1.2.1.2.2.1.6.2', map: OID.toMacAddress }
     },
     ipv4: {
       $: 'oid',
