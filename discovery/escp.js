@@ -7,7 +7,7 @@ const Log = require('debug')('discovery');
 const PORT_LISTEN = 29809;
 const PORT_SEND = 29808;
 const BCAST_ADDRESS = '255.255.255.255';
-const PING_INTERVAL = 60;
+const PING_INTERVAL = 30;
 const KEY = 'Ei2HNryt8ysSdRRI54XNQHBEbOIRqNjQgYxsTmuW3srSVRVFyLh8mwvhBLPFQph3ecDMLnDtjDUdrUwt7oTsJuYl72hXESNiD6jFIQCtQN1unsmn3JXjeYwGJ55pqTkVyN2OOm3vekF6G1LM4t3kiiG4lGwbxG4CG1s5Sli7gcINFBOLXQnPpsQNWDmPbOm74mE7eyR3L7tk8tUhI17FLKm11hrrd1ck74bMw3VYSK3X5RrDgXelewMU6o1tJ3iX';
 
 //

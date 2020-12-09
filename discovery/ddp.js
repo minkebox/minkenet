@@ -5,7 +5,7 @@ const Log = require('debug')('discovery');
 const PORT_LISTEN = 62992;
 const PORT_SEND = 62976;
 const BCAST_ADDRESS = '255.255.255.255';
-const PING_INTERVAL = 60;
+const PING_INTERVAL = 30;
 
 //
 // Protocol documentation: https://chrome.google.com/webstore/detail/d-link-network-assistant/eoenegoacckkpkijhfhijfechhhpkbmp

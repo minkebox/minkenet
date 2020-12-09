@@ -6,7 +6,7 @@ const Log = require('debug')('discovery');
 const MCAST_ADDRESS = '224.0.0.251';
 const PORT = 5353;
 const DEFAULT_TTL = 120; // 2 minutes
-const PING_INTERVAL = 60; // 1 minute
+const PING_INTERVAL = 30; // 30 seconds
 
 class MDNS extends EventEmitter {
 

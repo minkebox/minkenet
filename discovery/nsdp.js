@@ -6,7 +6,7 @@ const Log = require('debug')('discovery');
 const PORT_LISTEN = [ 63321, 63323 ];
 const PORT_SEND = [ 63322, 63324 ];
 const BCAST_ADDRESS = '255.255.255.255';
-const PING_INTERVAL = 60;
+const PING_INTERVAL = 30;
 
 //
 // Netgear Switch Discovery Protocol
