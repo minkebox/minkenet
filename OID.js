@@ -33,5 +33,32 @@ module.exports = {
         }
       }
     }
+  },
+
+  getValues: function(v, fn) {
+    if (!fn) {
+      fn = v => v;
+    }
+    const l = [];
+    function _f(v) {
+      if (typeof v === 'object') {
+        for (let k in v) {
+          _f(v[k]);
+        }
+      }
+      else {
+        l.push(fn(v));
+      }
+    }
+    _f(v);
+    return l;
+  },
+
+  toIPAddress: function(v) {
+    return new Uint8Array(Buffer.from(v, 'latin1')).join('.');
+  },
+
+  toMacAddress: function(v) {
+    return Buffer.from(v, 'latin1').toString('hex').replace(/(..)(?!$)/g,'$1:');
   }
 };
