@@ -1,5 +1,3 @@
-const BASE = '';
-
 module.exports = {
   network: {
     clients: {
