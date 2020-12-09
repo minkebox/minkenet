@@ -10,6 +10,7 @@ const NSDP = require('./nsdp');
 const MNDP = require('./mndp');
 const ARP = require('./arp');
 const DDP = require('./ddp');
+const Omada = require('./omada');
 
 class Discovery extends EventEmitter {
 
@@ -60,6 +61,10 @@ class Discovery extends EventEmitter {
             break;
           case 'ddp':
             this.agents.ddp = DDP.getInstance();
+            found = true;
+            break;
+          case 'omada':
+            this.agents.omada = Omada.getInstance();
             found = true;
             break;
           case 'http':

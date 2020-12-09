@@ -25,6 +25,11 @@ const Device = {
         arg: `#devname`,
         equals: `EAP225`
       }
+    },
+    omada: {
+      txt: {
+        model: 'EAP225'
+      }
     }
   },
 
