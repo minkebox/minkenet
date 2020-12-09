@@ -47,6 +47,11 @@ const Device = {
     valid: '#device_name'
   },
 
+  snmp: {
+    version: '2c',
+    community: 'private'
+  },
+
   constants: {
     system: {
       hardware: {
@@ -92,10 +97,11 @@ const Device = {
   },
 
   read: {
-    $1: require('./read/name+ip'),
-    $2: require('./read/ip')
+    $1: require('./read/hardware'),
+    $2: require('./read/name+ip')
   },
   write: {
+    $1: require('./write/snmp'),
   },
   commit: null
 
