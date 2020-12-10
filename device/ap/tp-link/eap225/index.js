@@ -98,8 +98,11 @@ const Device = {
 
   read: {
     $1: require('./read/hardware'),
-    $2: require('./read/name+ip'),
+    $2: require('./read/name'),
+    $3: require('./read/ip'),
+    $4: require('./read/physical'),
     $statistics: require('./read/statistics'),
+    $5: require('./read/clients')
   },
   write: {
     $1: require('./write/snmp'),
