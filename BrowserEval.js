@@ -42,11 +42,11 @@ class Eval {
           return null;
         }
         // Include the selection if there is one
-        if (value[k].$ && typeof value[k].map === 'object') {
+        if (typeof value[k] === 'object' && '$' in value[k] && typeof value[k].map === 'object') {
           result = {
             $: result,
             selection: Object.values(value[k].map)
-          }
+          };
         }
         if (key === '_') {
           // Ignore
@@ -90,7 +90,7 @@ class Eval {
     };
 
     // Otherwise we evaluate it in some way
-    switch (value.$) {
+    switch (value.$ || def$) {
       case 'literal':
         return value.arg;
       case 'eval':
@@ -641,7 +641,7 @@ class Eval {
         return true;
       }
       default:
-        Log('Unknown $ directive', value.$);
+        Log('Unknown $ directive', value.$, def$);
         Log(new Error());
         break;
     }
