@@ -24,6 +24,9 @@ module.exports = {
       }
     },
     ipv4$2: {
+      gateway: { $: 'oid', arg: '1.3.6.1.2.1.4.21.1.7.0.0.0.0' }
+    },
+    ipv4$3: {
       $: 'fetch',
       arg: '/data/lan.json',
       type: 'jsonp',
@@ -35,8 +38,7 @@ module.exports = {
             dynamic: 'dhcp',
             static: 'static'
           }
-        },
-        gateway: { $: null, arg: 'data.fallbackGateway', fallback: '' }
+        }
       }
     }
   }
