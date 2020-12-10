@@ -54,6 +54,25 @@ module.exports = {
     return l;
   },
 
+  getKeyValues: function(k, v, fn) {
+    if (!fn) {
+      fn = (_, v) => v;
+    }
+    const l = {};
+    function _f(k, v) {
+      if (typeof v === 'object') {
+        for (let c in v) {
+          _f(`${k}.${c}`, v[c]);
+        }
+      }
+      else {
+        l[k] = fn(k, v);
+      }
+    }
+    _f(k, v);
+    return l;
+  },
+
   toIPAddress: function(v) {
     return new Uint8Array(Buffer.from(v, 'latin1')).join('.');
   },

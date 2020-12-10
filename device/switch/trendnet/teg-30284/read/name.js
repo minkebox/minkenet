@@ -12,7 +12,7 @@ module.exports = {
       0: {
         $: 'oid',
         arg: '1.3.6.1.4.1.28866.3.1.16.2.1.0',
-        map: v => Buffer.from(v, 'latin1').toString('hex').replace(/(..)(?!$)/g,'$1:')
+        map: OID.toMacAddress
       }
     }
   }

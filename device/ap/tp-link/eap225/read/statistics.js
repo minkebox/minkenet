@@ -1,8 +1,8 @@
-const BASE = '1.3.6.1.2.1.2.2';
+const OID = require("../../../../../OID");
 
 module.exports = {
   $: 'oid',
-  arg: BASE,
+  arg: OID.network.physical.$,
   values: {
     network: {
       physical: {
@@ -10,19 +10,19 @@ module.exports = {
           '0': {
             statistics: {
               rx: {
-                bytes: `${BASE}.1.10.2`,
-                unicast: `${BASE}.1.11.2`,
-                multicast: `${BASE}.1.12.2`,
-                discarded: `${BASE}.1.13.2`,
-                errors: `${BASE}.1.14.2`,
-                unknown: `${BASE}.1.15.2`
+                bytes: `${OID.network.physical.statistics.rx.bytes}.2`,
+                unicast: `${OID.network.physical.statistics.rx.unicast}.2`,
+                multicast: `${OID.network.physical.statistics.rx.multicast}.2`,
+                discarded: `${OID.network.physical.statistics.rx.discarded}.2`,
+                errors: `${OID.network.physical.statistics.rx.errors}.2`,
+                unknownprotos: `${OID.network.physical.statistics.rx.unknownprotos}.2`
               },
               tx: {
-                bytes: `${BASE}.1.16.2`,
-                unicast: `${BASE}.1.17.2`,
-                multicast: `${BASE}.1.18.2`,
-                discarded: `${BASE}.1.19.2`,
-                errors: `${BASE}.1.20.2`
+                bytes: `${OID.network.physical.statistics.tx.bytes}.2`,
+                unicast: `${OID.network.physical.statistics.tx.unicast}.2`,
+                multicast: `${OID.network.physical.statistics.tx.multicast}.2`,
+                discarded: `${OID.network.physical.statistics.tx.discarded}.2`,
+                errors: `${OID.network.physical.statistics.tx.errors}.2`
               }
             }
           }
