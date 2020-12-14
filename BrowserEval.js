@@ -420,7 +420,7 @@ class Eval {
       case 'fn':
       {
         try {
-          return await value.arg.call(callContext, callContext);
+          return this.map(value, await value.arg.call(callContext, callContext));
         }
         catch (e) {
           Log(e);
