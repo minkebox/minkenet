@@ -34,9 +34,9 @@ class WiFiManager extends EventEmitter {
       for (let idx in stations) {
         const station = stations[idx];
         if (station.ssid) {
-          station.bands = station.bands.split(',').map(band => radios[band]);
+          station.bands = String(station.bands).split(',').map(band => radios[band]);
           const options = dev.readKV(`network.wireless.station.${idx}.security.mode`, { info: true, value: false, selection: true });
-          station.security.options = options.selection || [ 'none' ];
+          station.security.options = options && options.selection || [ 'none' ];
           const steering = dev.readKV(`network.wireless.station.${idx}.steering.preference`, { info: true, value: false, selection: true });
           if (steering) {
             station.steering.options = steering.selection || [ 'balance' ];
