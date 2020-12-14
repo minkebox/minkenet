@@ -86,10 +86,10 @@ const Device = {
         },
         stations: {
           nr: {
-            total: 8,
-            '2_4ghz': 0,
-            '5ghz': 0,
-            '2_4ghz+5ghz': 8
+            total: 16,
+            '2_4ghz': 8,
+            '5ghz': 8,
+            '2_4ghz+5ghz': 0
           }
         }
       }
@@ -102,7 +102,9 @@ const Device = {
     $3: require('./read/ip'),
     $4: require('./read/physical'),
     $statistics: require('./read/statistics'),
-    $5: require('./read/clients')
+    $5: require('./read/radios'),
+    $6: require('./read/wifi'),
+    $7: require('./read/clients')
   },
   write: {
     $1: require('./write/snmp'),
