@@ -89,13 +89,13 @@ const Device = {
   },
 
   read: {
-    $0: require('./read/wifi'),
     $1: require('./read/name+version'),
     $2: require('./read/mac+physical'),
     $3: require('./read/ip+clients'),
     $4: require('./read/lag'),
     $statistics: require('./read/statistics'),
-    $5: require('./read/radios')
+    $5: require('./read/radios'),
+    $6: require('./read/wifi')
   },
   write: {
     $1: require('./write/name'),

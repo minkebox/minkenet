@@ -14,19 +14,18 @@ module.exports = {
               arg: '2_4ghz'
             },
             opmode: '#cbid\\.wireless\\.wifi0\\.opmode',
-            hwmode: {
+            mode: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi0\\.hwmode',
               map: {
                 '11b': '11b',
                 '11g': '11g',
-                '11bg': '11bg',
+                '11bg': '11b/g',
                 '11n': '11n',
-                '11ng': '11ng',
-                '11axg': '11axg'
+                '11ng': '11b/g/n'
               }
             },
-            htmode: {
+            width: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi0\\.htmode',
               map: {
@@ -62,16 +61,16 @@ module.exports = {
               arg: '5ghz'
             },
             opmode: '#cbid\\.wireless\\.wifi1\\.opmode',
-            hwmode: {
+            mode: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi1\\.hwmode',
               map: {
                 '11a': '11a',
-                '11ac': '11ac',
-                '11n': '11n'
+                '11n': '11n',
+                '11ac': '11a/n/ac'
               }
             },
-            htmode: {
+            width: {
               $: 'selector',
               arg: '#cbid\\.wireless\\.wifi1\\.htmode',
               map: {
