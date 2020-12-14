@@ -33,15 +33,17 @@
               {{else if (eq band.$ '5ghz')}}
               {{> RO name="Band" value='5 GHz' }}
               {{else}}
-              {{> RO name="Band" value=band }}
+              {{> RO name="Band" value=band.$ }}
               {{/if}}
               {{#if (eq opmode.$ 'ap')}}
-              {{> RO name='Mode' value='Access Point'}}
+              {{> RO name='Type' value='Access Point'}}
+              {{else if (eq opmode.$ 'ext')}}
+              {{> RO name='Type' value='Extender'}}
               {{else}}
-              {{> RO name="Mode" value=opmode }}
+              {{> RO name="Type" value=opmode.$ }}
               {{/if}}
-              {{> RWSelect name="Protocol" value=hwmode kv=(concat "network.wireless.radio." @index ".hwmode") }}
-              {{> RWSelect name="Bandwidth (MHz)" value=htmode kv=(concat "network.wireless.radio." @index ".htmode") }}
+              {{> RWSelect name="Mode" value=mode kv=(concat "network.wireless.radio." @index ".mode") }}
+              {{> RWSelect name="Bandwidth (MHz)" value=width kv=(concat "network.wireless.radio." @index ".width") }}
               {{> RWSelect name="Transmit Power (dBm)" value=txpower kv=(concat "network.wireless.radio." @index ".txpower") }}
             </form>
           </div>
