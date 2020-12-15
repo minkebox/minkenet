@@ -44,7 +44,15 @@ module.exports = {
                 2: "40"
               }
             },
-            //txpower: {},
+            txpower: {
+              $: null,
+              arg: 'uPower',
+              map: {
+                3: '12',
+                2: '16',
+                1: '20'
+              }
+            }
           }
         },
         station: {
