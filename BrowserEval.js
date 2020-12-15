@@ -618,6 +618,9 @@ class Eval {
           case 'selector':
             await ncontext.setContent(nvalue, { timeout: TIMEOUT.frameNavigation, waitUntil: 'networkidle2' });
             break;
+          case 'literal':
+            ncontext = nvalue;
+            break;
           default:
             break;
         }
