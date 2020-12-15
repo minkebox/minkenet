@@ -84,7 +84,8 @@ const Device = {
 
   read: {
     $1: require('./read/ip'),
-    $2: require('./read/radios')
+    $2: require('./read/radios'),
+    $3: require('./read/clients')
   },
   write: {
   },
