@@ -439,7 +439,7 @@ class TopologyManager extends EventEmitter {
         // We can have either rx/tx or just an rx. In the first case, the traffic should
         // be similar. If tx is must less than rx then we eliminate it and assume this device
         // is just receiving.
-        if (maxtx.tx < maxrx.rx * 0.6) {
+        if (maxtx.tx < maxrx.rx * 0.75) {
           maxtx.p = -1;
         }
         // Stash the best rx/tx ports
@@ -609,7 +609,7 @@ class TopologyManager extends EventEmitter {
     }).filter(node => node.rx.length || node.tx.length);
   }
 
-  _snapDevices(devices) {
+  _snapDevicesALT(devices) {
     return devices.map(dev => {
       const keys = dev.readKV('network.physical.port', { depth: 1 });
       if (dev.readKV(`network.physical.port.0.statistics.rx.bytes`) !== null) {
@@ -636,6 +636,42 @@ class TopologyManager extends EventEmitter {
               r.push({
                 rx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
                 tx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
+              });
+            }
+            return r;
+          }
+        ];
+      }
+    });
+  }
+
+  _snapDevices(devices) {
+    return devices.map(dev => {
+      const keys = dev.readKV('network.physical.port', { depth: 1 });
+      if (dev.readKV(`network.physical.port.0.statistics.rx.packets`) !== null) {
+        return [
+          async () => await dev.statistics(),
+          () => {
+            const r = [];
+            for (let key in keys) {
+              r.push({
+                rx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
+                tx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
+              });
+            }
+            return r;
+          }
+        ];
+      }
+      else {
+        return [
+          async () => await dev.statistics(),
+          () => {
+            const r = [];
+            for (let key in keys) {
+              r.push({
+                rx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.bytes`)),
+                tx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.bytes`))
               });
             }
             return r;
