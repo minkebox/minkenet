@@ -609,7 +609,7 @@ class TopologyManager extends EventEmitter {
     }).filter(node => node.rx.length || node.tx.length);
   }
 
-  _snapDevicesALT(devices) {
+  _snapDevices(devices) {
     return devices.map(dev => {
       const keys = dev.readKV('network.physical.port', { depth: 1 });
       if (dev.readKV(`network.physical.port.0.statistics.rx.bytes`) !== null) {
@@ -645,7 +645,7 @@ class TopologyManager extends EventEmitter {
     });
   }
 
-  _snapDevices(devices) {
+  _snapDevicesALT(devices) {
     return devices.map(dev => {
       const keys = dev.readKV('network.physical.port', { depth: 1 });
       if (dev.readKV(`network.physical.port.0.statistics.rx.packets`) !== null) {
