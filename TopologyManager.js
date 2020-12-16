@@ -251,7 +251,7 @@ class TopologyManager extends EventEmitter {
         dev2portmap[device._id] = portmap;
       }
     });
-    Log('portmap:', JSON.stringify(dev2portmap, null, 1));
+    //Log('portmap:', JSON.stringify(dev2portmap, null, 1));
     return dev2portmap;
   }
 
