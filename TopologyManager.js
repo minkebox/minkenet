@@ -439,7 +439,7 @@ class TopologyManager extends EventEmitter {
         // We can have either rx/tx or just an rx. In the first case, the traffic should
         // be similar. If tx is must less than rx then we eliminate it and assume this device
         // is just receiving.
-        if (maxtx.tx < maxrx.rx * 0.75) {
+        if (maxtx.tx < maxrx.rx * 0.6) {
           maxtx.p = -1;
         }
         // Stash the best rx/tx ports
