@@ -44,6 +44,11 @@ const Device = {
     valid: 'div[myid=logout]'
   },
 
+  statistics: {
+    prefer: 'bytes',
+    scale: 1.8
+  },
+
   constants: {
     system: {
       hardware: {
@@ -56,7 +61,7 @@ const Device = {
       },
       ipv4: {
         address: '',
-        port :80
+        port: 80
       }
     },
     network: {

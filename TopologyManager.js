@@ -274,7 +274,7 @@ class TopologyManager extends EventEmitter {
     }
 
     // Measure only devices we can read statistics from
-    measureDevices = measureDevices.filter(dev => dev.hasStatistics());
+    measureDevices = measureDevices.filter(dev => !!dev.statisticsInfo());
 
     // Build a table which will flag all the ports we activiate by probing a device.
     const probes = probeDevices.map(device => {
@@ -612,15 +612,17 @@ class TopologyManager extends EventEmitter {
   _snapDevices(devices) {
     return devices.map(dev => {
       const keys = dev.readKV('network.physical.port', { depth: 1 });
-      if (dev.readKV(`network.physical.port.0.statistics.rx.bytes`) !== null) {
+      const info = dev.statisticsInfo();
+      if (info.prefer !== 'packets' && dev.readKV(`network.physical.port.0.statistics.rx.bytes`) !== null) {
+        const scale = info.scale;
         return [
           async () => await dev.statistics(),
           () => {
             const r = [];
             for (let key in keys) {
               r.push({
-                rx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.bytes`)),
-                tx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.bytes`))
+                rx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.bytes`)),
+                tx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.bytes`))
               });
             }
             return r;
@@ -628,50 +630,15 @@ class TopologyManager extends EventEmitter {
         ];
       }
       else {
+        const scale = PROBE_PAYLOAD_RAW_SIZE * info.scale;
         return [
           async () => await dev.statistics(),
           () => {
             const r = [];
             for (let key in keys) {
               r.push({
-                rx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
-                tx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
-              });
-            }
-            return r;
-          }
-        ];
-      }
-    });
-  }
-
-  _snapDevicesALT(devices) {
-    return devices.map(dev => {
-      const keys = dev.readKV('network.physical.port', { depth: 1 });
-      if (dev.readKV(`network.physical.port.0.statistics.rx.packets`) !== null) {
-        return [
-          async () => await dev.statistics(),
-          () => {
-            const r = [];
-            for (let key in keys) {
-              r.push({
-                rx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
-                tx: PROBE_PAYLOAD_RAW_SIZE * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
-              });
-            }
-            return r;
-          }
-        ];
-      }
-      else {
-        return [
-          async () => await dev.statistics(),
-          () => {
-            const r = [];
-            for (let key in keys) {
-              r.push({
-                rx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.bytes`)),
-                tx: parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.bytes`))
+                rx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
+                tx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
               });
             }
             return r;

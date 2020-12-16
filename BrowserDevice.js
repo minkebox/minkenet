@@ -348,8 +348,17 @@ class BrowserDeviceInstance extends DeviceInstance {
     });
   }
 
-  hasStatistics() {
-    return !!this.description.read.$statistics;
+  statisticsInfo() {
+    if (!this.description.read.$statistics) {
+      return null;
+    }
+    if (this.description.statistics) {
+      return this.description.statistics;
+    }
+    return {
+      prefer: null,
+      scale: 1
+    };
   }
 
   async statistics() {
