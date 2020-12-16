@@ -348,6 +348,10 @@ class BrowserDeviceInstance extends DeviceInstance {
     });
   }
 
+  hasStatistics() {
+    return !!this.description.read.$statistics;
+  }
+
   async statistics() {
     if (!this._validated) {
       throw new Error(`Unauthenticated: ${this.name}`);

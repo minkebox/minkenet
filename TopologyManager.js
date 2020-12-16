@@ -273,6 +273,9 @@ class TopologyManager extends EventEmitter {
       probeDevices = probeDevices.filter(dev => !(link[0].device === dev || link[1].device === dev));
     }
 
+    // Measure only devices we can read statistics from
+    measureDevices = measureDevices.filter(dev => dev.hasStatistics());
+
     // Build a table which will flag all the ports we activiate by probing a device.
     const probes = probeDevices.map(device => {
       return {
@@ -576,6 +579,15 @@ class TopologyManager extends EventEmitter {
           i = 0;
           continue;
         }
+      }
+      // If we have a single TX port, then we're connected to something we can't measure.
+      // It will be either the probed device (or if we're really unlucky, a chain of unmeasured
+      // devices with the probed device at the end).
+      // The safest thing to do is to exclude it from the topology.
+      if (probes[i].rx.length === 0 && probes[i].tx.length === 1) {
+        probes = this._filterProbes(probes, {}, probes[i].tx[0]);
+        i = 0;
+        continue;
       }
 
       i++;
