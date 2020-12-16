@@ -292,7 +292,10 @@ class TopologyManager extends EventEmitter {
     try {
       Log('connecting');
       this.emit('status', { op: 'connecting' });
-      const connections = await Promise.all(measureDevices.map(dev => dev.connect()));
+      const connections = [].concat(
+        await Promise.all(measureDevices.map(dev => dev.connect())),
+        await Promise.all(probeDevices.map(dev => dev.connect()))
+      );
       if (!this.running) {
         this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
         return;
@@ -441,10 +444,10 @@ class TopologyManager extends EventEmitter {
         }
         // Stash the best rx/tx ports
         if (maxrx.p !== -1) {
-          probes[i-2].rx.push({ device: probes[d].device, port: maxrx.p, lag: timings[i][d][maxrx.p].lag });
+          probes[i-2].rx.push({ device: measureDevices[d], port: maxrx.p, lag: timings[i][d][maxrx.p].lag });
         }
         if (maxtx.p !== -1) {
-          probes[i-2].tx.push({ device: probes[d].device, port: maxtx.p, lag: timings[i][d][maxtx.p].lag });
+          probes[i-2].tx.push({ device: measureDevices[d], port: maxtx.p, lag: timings[i][d][maxtx.p].lag });
         }
       }
     }
