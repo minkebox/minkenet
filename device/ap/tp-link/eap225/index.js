@@ -108,6 +108,7 @@ const Device = {
   },
   write: {
     $1: require('./write/snmp'),
+    $2: require('./write/name')
   },
   commit: null
 

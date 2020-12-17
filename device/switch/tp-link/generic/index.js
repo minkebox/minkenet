@@ -1,6 +1,6 @@
 const Device = {
 
-  name: 'Unidentified TP-Link',
+  name: 'Unknown TP-Link',
   id: 'tplink/unknown',
   image: require('./image'),
   generic: true,

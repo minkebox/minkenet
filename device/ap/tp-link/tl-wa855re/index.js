@@ -83,11 +83,12 @@ const Device = {
   },
 
   read: {
-    $1: require('./read/ip'),
+    $1: require('./read/name+ip'),
     $2: require('./read/radios'),
     $3: require('./read/clients')
   },
   write: {
+    $1: require('./write/name')
   },
   commit: null
 
