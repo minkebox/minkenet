@@ -88,7 +88,7 @@ body.pending-changes .pending-changes-disabled {
   padding-left: 5px;
 }
 .device-property-rw:invalid {
-  border-color:  var(--error-border-color);
+  border-color: var(--error-border-color) !important;
 }
 .device-property-rwselect option {
   background-color: var(--main-background-color);
@@ -612,6 +612,8 @@ body.pending-changes .pending-changes-disabled {
   color: var(--main-text-color);
   background-color: var(--info-background-color);
   border: 1px solid var(--minor-background-color);
+}
+#capture-controls .form-group select {
   -webkit-appearance: none;
 }
 #capture-controls .form-group select:invalid {
