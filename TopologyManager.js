@@ -273,8 +273,9 @@ class TopologyManager extends EventEmitter {
       probeDevices = probeDevices.filter(dev => !(link[0].device === dev || link[1].device === dev));
     }
 
-    // Measure only devices we can read statistics from
+    // Measure and probe only devices we can read statistics from
     measureDevices = measureDevices.filter(dev => !!dev.statisticsInfo());
+    probeDevices = probeDevices.filter(dev => !!dev.statisticsInfo());
 
     // Build a table which will flag all the ports we activiate by probing a device.
     const probes = probeDevices.map(device => {
@@ -417,21 +418,34 @@ class TopologyManager extends EventEmitter {
     // Calculate the traffic differences between each tests.
     // Only keep the rx and tx with the greatest traffic.
     for (let i = 2; i < timings.length; i++) {
+      // Calculate the traffic on each port
       for (let d = 0; d < timings[i].length; d++) {
-        let maxrx = { rx: counts[i] / 3, p: -1 };
-        let maxtx = { tx: counts[i] / 3, p: -1 };
         for (let p = 0; p < timings[i][d].length; p++) {
           // '>>>0' forces the answer to be unsigned 32-bits, so we handle wrapping counters
           // Deduct the baseline after the 32-bit wrap. It can go negative now but that's okay.
-          const rx = ((timings[i][d][p].rx - timings[i - 1][d][p].rx)>>>0) - timings[0][d][p].rx;
-          timings[i - 1][d][p].rx = rx;
-          if (rx > maxrx.rx) {
+          timings[i - 1][d][p].rx = ((timings[i][d][p].rx - timings[i - 1][d][p].rx)>>>0) - timings[0][d][p].rx;
+          timings[i - 1][d][p].tx = ((timings[i][d][p].tx - timings[i - 1][d][p].tx)>>>0) - timings[0][d][p].tx;
+        }
+      }
+      // For the target, find the largest rx traffic. We use this as a limit and assume all nodes
+      // feeding to this target must have at least this measurable traffic.
+      const target = probes[i - 2].device;
+      const di = measureDevices.indexOf(target);
+      let traffic = 0;
+      for (let p = 0; p < timings[i][di].length; p++) {
+        traffic = Math.max(traffic, Math.max(timings[i - 1][di][p].rx, timings[i - 1][di][p].tx));
+      }
+      for (let d = 0; d < timings[i].length; d++) {
+        let maxrx = { rx: traffic, p: -1 };
+        let maxtx = { tx: traffic, p: -1 };
+        for (let p = 0; p < timings[i][d].length; p++) {
+          const rx = timings[i - 1][d][p].rx;
+          if (rx >= maxrx.rx) {
             maxrx.rx = rx;
             maxrx.p = p;
           }
-          const tx = ((timings[i][d][p].tx - timings[i - 1][d][p].tx)>>>0) - timings[0][d][p].tx;
-          timings[i - 1][d][p].tx = tx;
-          if (tx > maxtx.tx) {
+          const tx = timings[i - 1][d][p].tx;
+          if (tx >= maxtx.tx) {
             maxtx.tx = tx;
             maxtx.p = p;
           }
