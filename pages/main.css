@@ -83,6 +83,9 @@ body.pending-changes .pending-changes-disabled {
   max-width: 100%;
   min-width: 100px;
 }
+.device-property-rw:invalid {
+  border-color:  var(--error-border-color);
+}
 .device-property-rwselect option {
   background-color: var(--main-background-color);
 }

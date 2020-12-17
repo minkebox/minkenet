@@ -12,8 +12,9 @@
       autocapitalize="off"
       autocomplete="off"
       {{#if default}}placeholder="{{default}}"{{/if}}
-      {{#if kv}}oninput="send('kv.update',{k:'{{kv}}',v:this.value},0.5)"{{/if}}
-      {{#if cmd}}oninput="send('{{cmd}}',{k:'{{key}}',v:this.value},0.5)"{{/if}}
+      {{#if kv}}oninput="this.validity.patternMismatch || send('kv.update',{k:'{{kv}}',v:this.value},0.5)"{{/if}}
+      {{#if cmd}}oninput="this.validity.patternMismatch || send('{{cmd}}',{k:'{{key}}',v:this.value},0.5)"{{/if}}
+      {{#if pattern}}pattern="{{pattern}}"{{/if}}
     >
     {{/if}}
   </div>
@@ -31,7 +32,9 @@
       autocapitalize="off"
       autocomplete="off"
       placeholder="{{default}}"
-      oninput="send('kv.update',{ k:'{{kv}}',v:this.value},0.5)">
+      oninput="this.validity.patternMismatch || send('kv.update',{ k:'{{kv}}',v:this.value},0.5)"
+      {{#if pattern}}pattern="{{pattern}}"{{/if}}
+    >
     {{/if}}
   </div>
 </div>
