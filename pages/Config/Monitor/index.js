@@ -32,6 +32,7 @@ class Monitor extends Page {
   updateState() {
     this.state.devices = DeviceInstanceManager.getAuthenticatedDevices();
     this.state.deviceportsmonitored = [];
+    this.state.canMonitor = false;
     if (this.state.devices.length) {
       this.state.devices.forEach(device => {
         const ports = {};
@@ -65,14 +66,17 @@ class Monitor extends Page {
         }
       }
       this.state.monitors = [];
-      const monitors = MonitorManager.getDeviceMonitors(this.state.selected);
-      for (let i = 0; i < monitors.length; i++) {
-        const mon = monitors[i];
-        if (mon.keys[0].key.indexOf(portRoot) === 0) {
-          this.state.monitors.push({ id: mon.id, key: mon.keys.map(k => k.key.substring(portRoot.length + 1)).join(','), type: mon.type });
+      if (this.state.selected.statisticsInfo()) {
+        this.state.canMonitor = true;
+        const monitors = MonitorManager.getDeviceMonitors(this.state.selected);
+        for (let i = 0; i < monitors.length; i++) {
+          const mon = monitors[i];
+          if (mon.keys[0].key.indexOf(portRoot) === 0) {
+            this.state.monitors.push({ id: mon.id, key: mon.keys.map(k => k.key.substring(portRoot.length + 1)).join(','), type: mon.type });
+          }
         }
+        this.state.monitors.push({ id: MonitorManager.newMonitorId(), key: 'none', type: 'none' });
       }
-      this.state.monitors.push({ id: MonitorManager.newMonitorId(), key: 'none', type: 'none' });
     }
     this.state.config = ConfigDB.readAll();
   }
