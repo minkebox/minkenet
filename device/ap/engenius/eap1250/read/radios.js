@@ -111,7 +111,12 @@ module.exports = {
             ssid: {
               $: 'selector',
               arg: `input[name="cbid.wireless.wifix_ssid_${itr.index + 1}.ssid"]`,
-              map: v => v.indexOf('EnGenius') === 0 ? '' : v
+              map: async v => {
+                if (await this.eval('eval', `document.querySelector('input[name="cbid.wireless.wifix_ssid_${itr.index + 1}.ssid"]').disabled`)) {
+                  return '';
+                }
+                return v;
+              }
             },
             bands: {
               $: 'fn',
