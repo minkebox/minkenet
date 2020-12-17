@@ -433,11 +433,11 @@ class TopologyManager extends EventEmitter {
       const di = measureDevices.indexOf(target);
       let traffic = 0;
       for (let p = 0; p < timings[i][di].length; p++) {
-        traffic = Math.max(traffic, Math.max(timings[i - 1][di][p].rx, timings[i - 1][di][p].tx));
+        traffic = Math.max(traffic, timings[i - 1][di][p].rx);
       }
       for (let d = 0; d < timings[i].length; d++) {
-        let maxrx = { rx: traffic, p: -1 };
-        let maxtx = { tx: traffic, p: -1 };
+        let maxrx = { rx: traffic * 0.9, p: -1 };
+        let maxtx = { tx: traffic * 0.9, p: -1 };
         for (let p = 0; p < timings[i][d].length; p++) {
           const rx = timings[i - 1][d][p].rx;
           if (rx >= maxrx.rx) {
