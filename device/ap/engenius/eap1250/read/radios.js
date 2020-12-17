@@ -134,7 +134,10 @@ module.exports = {
                 arg: `#cbi-wireless-wifix_ssid_${itr.index + 1}-encryption_view`,
                 map: {
                   'None': 'none',
-                  'WPA2/PSK AES': 'wpa2/psk + aes'
+                  'WPA2-Personal': 'wpa2/psk/aes',
+                  'WPA3-Personal': 'wpa3/psk/aes',
+                  'WPA2/WPA3-Personal': 'wpa2/wpa3/psk/aes',
+                  'WPA2/PSK AES': 'wpa2/psk/aes'
                 }
               }
             },

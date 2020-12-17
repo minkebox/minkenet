@@ -77,7 +77,7 @@ module.exports = {
                 },
                 map: {
                   0: 'none',
-                  1: 'wpa/wpa2/psk + tkip/aes'
+                  1: 'wpa/wpa2/psk/tkip/aes'
                 }
               },
               passphrase: 'cPskSecret'
