@@ -286,7 +286,6 @@ class TopologyManager extends EventEmitter {
       };
     });
     const timings = Array(probes.length + 2);
-    const counts = Array(probes.length + 2);
     let snapDevices;
 
     // Setup connetions to all devices
@@ -343,7 +342,7 @@ class TopologyManager extends EventEmitter {
       // Then probe each devices and snap the traffic
       for (let i = 0; i < probes.length && this.running; i++) {
         this.emit('status', { op: 'probe', device: probes[i].device });
-        counts[i + 2] = await this._probe(probes[i].device);
+        await this._probe(probes[i].device);
         timings[i + 2] = await this._snap(snapDevices);
       }
       if (!this.running) {
@@ -395,7 +394,6 @@ class TopologyManager extends EventEmitter {
     if (LogTimings.enabled) {
       const f = (v) => ('               ' + v).substr(-15);
       LogTimings('Original timings:');
-      LogTimings(` Count: ${counts}`);
       for (let i = 1; i < timings.length; i++) {
         LogTimings(`Timing ${i-1} to ${i}${i === 1 ? ' (baseline)' : ' (probe ' + probes[i-2].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) + ')'}:`);
         for (let d = 0; d < timings[i].length; d++) {
@@ -470,7 +468,7 @@ class TopologyManager extends EventEmitter {
       LogTimings('Calculated timing differences');
       const f = (v) => ('               ' + v).substr(-15);
       for (let i = 0; i < timings.length - 1; i++) {
-        LogTimings(`Timing ${i}${i === 0 ? ' (baseline)' : ' (probe ' + probes[i-1].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) + ')'} (count ${counts[i+1]}):`);
+        LogTimings(`Timing ${i}${i === 0 ? ' (baseline)' : ' (probe ' + probes[i-1].device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) + ')'}:`);
         for (let d = 0; d < timings[i].length; d++) {
           LogTimings(` Device ${measureDevices[d].readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}:`)
           for (let p = 0; p < timings[i][d].length; p++) {
@@ -478,21 +476,6 @@ class TopologyManager extends EventEmitter {
           }
         }
       }
-    }
-
-    // Calculate the maximum baseline traffic we saw. If this is in the same ballpark as the probe traffic
-    // the network is too busy for this to work.
-    const maxtraffic = timings[0].reduce((acc, dev) => {
-      return Math.max(acc, dev.reduce((acc, port) => {
-        return Math.max(acc, port.rx, port.tx);
-      }, 0));
-    }, 0);
-    const mincount = counts.reduce((acc, count) => Math.min(acc, count), Number.MAX_SAFE_INTEGER);
-    Log('maxtraffic', maxtraffic.toLocaleString(), 'mincount', mincount.toLocaleString());
-    if (maxtraffic > mincount / 2) {
-      Log('Network too busy to determine topology');
-      this.emit('status', { op: 'complete', success: false, reason: 'busy' });
-      return false;
     }
 
     let nprobes = probes;
