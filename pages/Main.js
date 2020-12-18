@@ -140,6 +140,7 @@ async function WS(ctx) {
     if (tab !== State.current) {
       await State.current.deselect();
       State.current = tab;
+      send('page.change', msg.value);
       await State.current.select(msg.arg);
     }
     else {

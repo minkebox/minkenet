@@ -170,6 +170,10 @@ function collectDx(id, fn) {
   }
 }
 
+onMessage['page.change'] = msg => {
+  location.hash = msg.value;
+}
+
 window.addEventListener('pageshow', runMessageManager);
 window.addEventListener('hashchange', evt => {
   const tab = location.hash.split('#')[1];
