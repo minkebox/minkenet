@@ -9,8 +9,8 @@ const Log = require('debug')('ui');
 
 class Networks extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       vid: 1,
       device: null,

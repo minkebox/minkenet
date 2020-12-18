@@ -136,8 +136,8 @@ Handlebars.registerHelper({
 
 class Capture extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       devices: null,
       topologyValid: false,

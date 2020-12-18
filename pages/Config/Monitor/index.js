@@ -9,8 +9,8 @@ const ConfigDB = require('../../../Config');
 
 class Monitor extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       devices: null,
       deviceportsmonitored: null,

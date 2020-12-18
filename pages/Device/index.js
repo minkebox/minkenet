@@ -11,8 +11,8 @@ const Page = require('../Page');
 
 class Devices extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.authenticating = false;
     this.state = {
       devices: null,

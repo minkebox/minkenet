@@ -6,8 +6,8 @@ const DeviceInstanceManager = require('../../DeviceInstanceManager');
 
 class WiFi extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       selectdevicecmd: 'device.toggle',
       devices: [],

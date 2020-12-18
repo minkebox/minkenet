@@ -11,8 +11,8 @@ const REFRESH_TIMER = 60 * 1000; // 1 minute
 
 class Viz extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       monitor: []
     };

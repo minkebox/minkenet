@@ -26,8 +26,6 @@ async function HTML(ctx) {
 
 async function WS(ctx) {
 
-  const onMessage = {
-  };
   const q = [];
 
   function send(cmd, value) {
@@ -56,15 +54,17 @@ async function WS(ctx) {
   }
 
   const State = {
+    send: send,
     current: null,
-    tabs: {
-      overview: new VizTab(send),
-      devices: new Page({ summary: new DevicesTab(send), ports: new PortsTab(send), radios: new WirelessTab(send) }),
-      networks: new Page({ vlans: new NetworksTab(send), links: new LinksTab(send), wifi: new WiFiTab(send), capture: new CaptureTab(send) }),
-      clients: new Page({ all: new ClientsTab(send) }),
-      config: new Page({ adoption: new ConfigAdoptionTab(send), monitor: new ConfigMonitorTab(send), other: new ConfigOtherTab(send) })
-    },
-    needCommit: false
+    needCommit: false,
+    onMessage: {}
+  };
+  State.tabs = {
+    overview: new VizTab(State),
+    devices: new Page(State, { summary: new DevicesTab(State), ports: new PortsTab(State), radios: new WirelessTab(State) }),
+    networks: new Page(State, { vlans: new NetworksTab(State), links: new LinksTab(State), wifi: new WiFiTab(State), capture: new CaptureTab(State) }),
+    clients: new Page(State, { all: new ClientsTab(State) }),
+    config: new Page(State, { adoption: new ConfigAdoptionTab(State), monitor: new ConfigMonitorTab(State), other: new ConfigOtherTab(State) })
   };
   State.current = State.tabs.overview,
   State.current.select();
@@ -100,7 +100,7 @@ async function WS(ctx) {
     try {
       const msg = JSON.parse(data);
       let ctx = null;
-      let fn = onMessage[msg.cmd];
+      let fn = State.onMessage[msg.cmd];
       if (!fn) {
         ctx = State.current;
         fn = ctx && (ctx[msg.cmd] || ctx.defaultMsg);
@@ -128,7 +128,7 @@ async function WS(ctx) {
     }
   });
 
-  onMessage['tab.select'] = async msg => {
+  State.onMessage['tab.select'] = async msg => {
     if (!msg.value) {
       return;
     }
@@ -140,17 +140,17 @@ async function WS(ctx) {
     if (tab !== State.current) {
       await State.current.deselect();
       State.current = tab;
-      await State.current.select();
+      await State.current.select(msg.arg);
     }
     else {
-      await State.current.reselect();
+      await State.current.reselect(msg.arg);
     }
     if (tabset[1]) {
-      State.current.tabSelect(tabset.slice(1).join('.'));
+      State.current.tabSelect(tabset.slice(1).join('.'), msg.arg);
     }
   }
 
-  onMessage['changes.commit'] = async msg => {
+  State.onMessage['changes.commit'] = async msg => {
     if (msg.value === 'start') {
       DeviceInstanceManager.commit(arg => html('commit-changes-update', arg.op === 'connect' ? `Connecting to ${arg.ip}` : `Updating ${arg.ip}`)).then(() => {
         html('commit-changes-update', 'Done');
@@ -164,7 +164,7 @@ async function WS(ctx) {
     }
   }
 
-  onMessage['changes.revert'] = async msg => {
+  State.onMessage['changes.revert'] = async msg => {
     DeviceInstanceManager.revert();
   }
 }

@@ -1,14 +1,10 @@
 class Page {
 
-  constructor(sendOrTabs) {
-    if (typeof sendOrTabs === 'function') {
-      this.send = sendOrTabs;
-      this.pending = {};
-      this.tabs = {};
-    }
-    else {
-      this.tabs = sendOrTabs;
-    }
+  constructor(root, tabs) {
+    this.root = root;
+    this.send = root.send;
+    this.pending = {};
+    this.tabs = tabs || {};
     this.currentTab = null;
   }
 
@@ -44,7 +40,7 @@ class Page {
     }
   }
 
-  tabSelect(tab) {
+  tabSelect(tab, arg) {
     if (this.currentTab === this.tabs[tab] || !this.tabs[tab]) {
       return;
     }
@@ -52,7 +48,7 @@ class Page {
       this.currentTab.deselect();
     }
     this.currentTab = this.tabs[tab];
-    this.currentTab.select();
+    this.currentTab.select(arg);
   }
 
   async defaultMsg(msg) {
@@ -62,6 +58,10 @@ class Page {
         await fn.call(this.currentTab, msg);
       }
     }
+  }
+
+  switchPage(pageName, arg) {
+    this.root.onMessage['tab.select']({ value: pageName, arg: arg });
   }
 }
 

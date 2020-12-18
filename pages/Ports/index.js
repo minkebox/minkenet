@@ -8,8 +8,8 @@ const Debounce = require('../../utils/Debounce');
 
 class Ports extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       devices: null,
       selectedDevice: null,

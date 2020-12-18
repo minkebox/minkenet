@@ -9,8 +9,8 @@ const Log = require('debug')('links');
 
 class Links extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       devices: null,
       links: null,
