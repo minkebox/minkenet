@@ -1,75 +1,68 @@
 const FS = require('fs');
 const Path = require('path');
 
-const CACHE_MAXAGE = 24 * 60 * 60; // 24 hours
-const DEBUG = true;
+const CACHE_MAXAGE = 0;// 24 * 60 * 60; // 24 hours
 
+const Main = require('./Main');
 const Pages = {
-  '/':                require('./Main')
-};
-
-const JSPages = {
-  '/js/script.js':      `${__dirname}/script.js`,
-  '/js/jquery.js':      `${__dirname}/../node_modules/jquery/dist/jquery.js`,
-  '/js/bootstrap.js':   `${__dirname}/../node_modules/bootstrap/dist/js/bootstrap.bundle.js`,
-  '/js/sortable.js':    `${__dirname}/../node_modules/sortablejs/dist/sortable.umd.js`,
-  '/js/dx.all.js':      `${__dirname}/../node_modules/devextreme/dist/js/dx.all.js`
-};
-
-const CSSPages = {
-  '/css/main.css':      `${__dirname}/main.css`,
-  '/css/bootstrap.css': `${__dirname}/../node_modules/bootstrap/dist/css/bootstrap.css`,
-  '/css/dx.common.css': `${__dirname}/../node_modules/devextreme/dist/css/dx.common.css`,
-  '/css/dx.dark.css':   `${__dirname}/../node_modules/devextreme/dist/css/dx.dark.css`
+  '/':                  { fn: Main.HTML },
+  '/ws':                { fn: Main.WS },
+  '/js/script.js':      { path: `${__dirname}/script.js`, type: 'text/javascript' },
+  '/js/jquery.js':      { path: `${__dirname}/../node_modules/jquery/dist/jquery.js`, type: 'text/javascript' },
+  '/js/bootstrap.js':   { path: `${__dirname}/../node_modules/bootstrap/dist/js/bootstrap.bundle.js`, type: 'text/javascript' },
+  '/js/sortable.js':    { path: `${__dirname}/../node_modules/sortablejs/dist/sortable.umd.js`, type: 'text/javascript' },
+  '/js/dx.all.js':      { path: `${__dirname}/../node_modules/devextreme/dist/js/dx.all.js`, type: 'text/javascript' },
+  '/css/main.css':      { path: `${__dirname}/main.css`, type: 'text/css' },
+  '/css/bootstrap.css': { path: `${__dirname}/../node_modules/bootstrap/dist/css/bootstrap.css`, type: 'text/css' },
+  '/css/dx.common.css': { path: `${__dirname}/../node_modules/devextreme/dist/css/dx.common.css`, type: 'text/css' },
+  '/css/dx.dark.css':   { path: `${__dirname}/../node_modules/devextreme/dist/css/dx.dark.css`, type: 'text/css' }
 };
 
 
 function Register(root, wsroot) {
 
-  for (let key in JSPages) {
-    const file = JSPages[key];
-    if (DEBUG && file.indexOf('node_modules') === -1) {
-      JSPages[key] = () => { return { body: FS.readFileSync(file, { encoding: 'utf8' }) } };
-    }
-    else {
-      const contents = FS.readFileSync(file, { encoding: 'utf8' });
-      JSPages[key] = () => { return { body: contents, cacheControl: { maxAge: CACHE_MAXAGE } } };
-    }
-    root.get(key, async ctx => {
-      const result = JSPages[key]();
-      for (let key in result) {
-        ctx[key] = result[key];
+  if (!process.env.DEBUG) {
+    for (let name in Pages) {
+      const page = Pages[name];
+      if (page.fn) {
+        page.get = page.fn;
       }
-      ctx.type = 'text/javascript';
-    });
+      else {
+        const data = FS.readFileSync(page.path, { encoding: page.encoding || 'utf8' });
+        page.get = async ctx => {
+          ctx.body = data;
+          ctx.type = page.type;
+          if (CACHE_MAXAGE) {
+            ctx.cacheControl = { maxAge: CACHE_MAXAGE };
+          }
+        }
+      }
+    }
+  }
+  else {
+    for (let name in Pages) {
+      const page = Pages[name];
+      if (page.fn) {
+        page.get = page.fn;
+      }
+      else {
+        page.get = async ctx => {
+          ctx.body = FS.readFileSync(page.path, { encoding: page.encoding || 'utf8' });
+          ctx.type = page.type;
+        }
+      }
+    }
   }
 
-  for (let key in CSSPages) {
-    const file = CSSPages[key];
-    if (DEBUG && file.indexOf('node_modules') === -1) {
-      CSSPages[key] = () => { return { body: FS.readFileSync(file, { encoding: 'utf8' }) } };
+  for (let name in Pages) {
+    if (name.endsWith('/ws')) {
+      wsroot.get(name, Pages[name].get);
     }
     else {
-      const contents = FS.readFileSync(file, { encoding: 'utf8' });
-      CSSPages[key] = () => { return { body: contents, cacheControl: { maxAge: CACHE_MAXAGE } } };
+      root.get(name, Pages[name].get);
     }
-    root.get(key, async ctx => {
-      const result = CSSPages[key]();
-      for (let key in result) {
-        ctx[key] = result[key];
-      }
-      ctx.type = 'text/css';
-    });
   }
 
-  for (let key in Pages) {
-    if (Pages[key].HTML) {
-      root.get(Path.normalize(key), Pages[key].HTML);
-    }
-    if (Pages[key].WS) {
-      wsroot.get(Path.normalize(`${key}/ws`), Pages[key].WS);
-    }
-  }
 }
 
 module.exports = Register;
