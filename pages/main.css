@@ -149,8 +149,9 @@ body.pending-changes .pending-changes-disabled {
   padding-top: 5px;
 }
 
-.device-forget-button {
-  margin: 20px 0;
+.device-forget-button,
+.device-capture-button {
+  margin: 20px 0 20px 8px;
   float: right;
 }
 
