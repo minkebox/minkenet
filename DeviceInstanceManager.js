@@ -5,6 +5,8 @@ const DeviceManager = require('./DeviceManager');
 const DeviceState = require('./DeviceState');
 const Log = require('debug')('device');
 
+const RETRY_COMMIT = 3;
+
 class DeviceInstanceManager extends EventEmitter {
 
   constructor() {
@@ -109,30 +111,36 @@ class DeviceInstanceManager extends EventEmitter {
   }
 
   async commit(updateCallback) {
+    const todo = [];
     for (let id in this.devices) {
       const device = this.devices[id];
       if (device.needCommit()) {
-        if (updateCallback) {
-          updateCallback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
-        }
-        try {
-          await device.connect();
-        }
-        catch (_) {
-          // We give connect a couple of tries before we fail.
-          await device.connect();
-        }
+        todo.push(device);
       }
     }
-    for (let id in this.devices) {
-      const device = this.devices[id];
-      if (device.needCommit()) {
+    for (let i = todo.length - 1; i >= 0; i--) {
+      const device = todo[i];
+      if (updateCallback) {
+        updateCallback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+      }
+      try {
+        await device.connect();
+      }
+      catch (_) {
+        // We give connect a couple of tries before we fail.
+        await device.connect();
+      }
+    }
+    for (let retry = RETRY_COMMIT; todo.length && retry > 0; retry--) {
+      for (let i = todo.length - 1; i >= 0; i--) {
+        const device = todo[i];
         if (updateCallback) {
           updateCallback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
         }
         try {
           await device.write();
           await device.commit();
+          todo.splice(i, 1);
         }
         catch (e) {
           Log(e);
