@@ -330,12 +330,15 @@ class Capture extends Page {
       this.send('modal.hide.all');
       this.state.capture = msg.value;
       this.startCapture();
+      Log('capture started');
     });
   }
 
   async 'capture.stop' (msg) {
     this.stopCapture();
-    this.deactivateMirrors();
+    this.deactivateMirrors().then(() => {
+      Log('capture stopped');
+    });
   }
 
   async 'select.packet' (msg) {
