@@ -18,11 +18,6 @@ class DeviceInstance extends EventEmitter {
     });
   }
 
-  get id() {
-    console.log(new Error());
-    return this._id;
-  }
-
   get name() {
     return this.readKV(DeviceState.KEY_SYSTEM_NAME) || this.readKV(DeviceState.KEY_SYSTEM_FIXEDNAME) || '-';
   }
