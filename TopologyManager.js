@@ -41,6 +41,38 @@ class TopologyManager extends EventEmitter {
     return this._entry;
   }
 
+  getCaptureDevices() {
+    if (!this._entry) {
+      return [];
+    }
+    // Get a list of all devices capable of capture
+    const devices = DeviceInstanceManager.getAllDevices();
+    const caps = {};
+    devices.forEach(device => {
+      if (device.readKV('network.mirror.0', { depth: 1 })) {
+        caps[device._id] = device;
+      }
+    });
+    // Make sure there's a capturable path from the attachment point to each device.
+    for (let id in caps) {
+      const path = this.findPath(this._entry.device, caps[id]);
+      if (!path) {
+        delete caps[id];
+      }
+      else {
+        for (let i = 0; i < path.length; i++) {
+          const link = path[i];
+          if (!caps[link[0].device._id] || !caps[link[1].device._id]) {
+            delete caps[id];
+            break;
+          }
+        }
+      }
+    }
+    // Return only devices we can capture from.
+    return Object.values(caps);
+  }
+
   // Find the path (a set of device/port to device/port links) between two devices.
   findPath(fromDevice, toDevice) {
     // Handle the empty path first.

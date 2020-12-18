@@ -143,7 +143,12 @@ class Capture extends Page {
       topologyValid: false,
       selectedDevice: null,
       selectedPortNr: null,
-      selectedPortName: null
+      selectedPortName: null,
+      capture: {
+        ignoreBroadcast: true,
+        ignoreMulticast: true,
+        ignoreHost: true
+      }
     };
     this.eaddr = [];
     this.device = CAPTURE_DEFAULT_DEVICE;
@@ -154,14 +159,20 @@ class Capture extends Page {
     this.onPacket = this.onPacket.bind(this);
   }
 
-  select() {
-    super.select();
+  select(arg) {
+    super.select(arg);
 
     this.device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
 
     DeviceInstanceManager.on('add', this.onUpdate);
     DeviceInstanceManager.on('remove', this.onUpdate);
     TopologyManager.on('update', this.onUpdate);
+
+    if (arg) {
+      this.state.selectedDevice = arg.device;
+      this.state.selectedPortNr = arg.portnr;
+      this.state.capture = arg.capture;
+    }
 
     this.state.devices = null;
     this.updateState(this.state.selectedDevice, this.state.selectedPortNr);
@@ -178,12 +189,12 @@ class Capture extends Page {
     this.deactivateMirrors();
   }
 
-  async startCapture(config) {
+  async startCapture() {
     if (this.session) {
       this.stopCapture();
     }
     const snapsize = parseInt(this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
-    const filter = await this.buildFilter(config);
+    const filter = await this.buildFilter(this.state.capture);
     Log('startCapture: filter: ', filter);
     this.session = PCap.createSession(this.device, {
       filter: filter,
@@ -208,13 +219,13 @@ class Capture extends Page {
     const filter = [];
     await this._getMacAddress();
 
-    if (config.options.ignoreBroadcast) {
+    if (config.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
     }
-    if (config.options.ignoreMulticast) {
+    if (config.ignoreMulticast) {
       filter.push('(not ether multicast)');
     }
-    if (config.options.ignoreHost) {
+    if (config.ignoreHost) {
       this.eaddr.forEach(mac => {
         filter.push(`(not ether host ${mac})`);
       });
@@ -275,8 +286,8 @@ class Capture extends Page {
         }
     }
 
-    if (config.freeFormQuery) {
-      filter.push(`(${config.freeFormQuery})`);
+    if (config.freeform) {
+      filter.push(`(${config.freeform})`);
     }
 
     // Filter traffic from this application
@@ -317,7 +328,8 @@ class Capture extends Page {
   async 'capture.start' (msg) {
     this.activateMirrors().then(() => {
       this.send('modal.hide.all');
-      this.startCapture(msg.value);
+      this.state.capture = msg.value;
+      this.startCapture();
     });
   }
 
@@ -350,7 +362,7 @@ class Capture extends Page {
     this.state.selectedPortNr = portnr;
 
     if (!this.state.devices) {
-      this.state.devices = this.getCaptureDevices();
+      this.state.devices = TopologyManager.getCaptureDevices();
       if (this.state.devices.indexOf(this.state.selectedDevice) === -1) {
         this.state.selectedDevice = null;
       }
@@ -492,39 +504,6 @@ class Capture extends Page {
         });
       });
     }
-  }
-
-  getCaptureDevices() {
-    const attach = TopologyManager.getAttachmentPoint();
-    if (!attach) {
-      return [];
-    }
-    // Get a list of all devices capable of capture
-    const devices = DeviceInstanceManager.getAllDevices();
-    const caps = {};
-    devices.forEach(device => {
-      if (device.readKV('network.mirror.0', { depth: 1 })) {
-        caps[device._id] = device;
-      }
-    });
-    // Make sure there's a capturable path from the attachment point to each device.
-    for (let id in caps) {
-      const path = TopologyManager.findPath(attach.device, caps[id]);
-      if (!path) {
-        delete caps[id];
-      }
-      else {
-        for (let i = 0; i < path.length; i++) {
-          const link = path[i];
-          if (!caps[link[0].device._id] || !caps[link[1].device._id]) {
-            delete caps[id];
-            break;
-          }
-        }
-      }
-    }
-    // Return only devices we can capture from.
-    return Object.values(caps);
   }
 
 }

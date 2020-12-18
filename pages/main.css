@@ -149,10 +149,13 @@ body.pending-changes .pending-changes-disabled {
   padding-top: 5px;
 }
 
-.device-forget-button,
-.device-capture-button {
-  margin: 20px 0 20px 8px;
+.device-forget-button {
+  margin: 20px 0;
   float: right;
+}
+.device-capture-button {
+  margin: 20px 0;
+  float: left;
 }
 
 .devices-column {
@@ -605,12 +608,13 @@ body.pending-changes .pending-changes-disabled {
 #capture-controls {
   margin: 20px;
   font-size: 14px;
+  color: var(--minor-text-color);
 }
 #capture-controls .form-group select,
 #capture-controls .form-group input {
   margin: 2px 0;
   padding: 0 10px;
-  color: var(--main-text-color);
+  color: var(--minor-text-color);
   background-color: var(--info-background-color);
   border: 1px solid var(--minor-background-color);
 }

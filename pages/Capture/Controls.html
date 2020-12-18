@@ -2,46 +2,46 @@
   <div class="form-group">
     <div class="row">
       <select class="col-sm-6" id="capture-host-type">
-        <option value="SD" >Source or Destination IP</option>
-        <option value="S" >Source IP</option>
-        <option value="D">Destination IP</option>
+        <option {{#if (eq capture.hostType "SD")}}selected{{/if}} value="SD">Source or Destination IP</option>
+        <option {{#if (eq capture.hostType "S")}}selected{{/if}} value="S">Source IP</option>
+        <option {{#if (eq capture.hostType "D")}}selected{{/if}} value="D">Destination IP</option>
       </select>
       <div class="col-sm-1"></div>
-      <input class="col-sm-5" id="capture-host" type="text" placeholder="Any" size="15" autocomplete="off">
+      <input class="col-sm-5" id="capture-host" type="text" placeholder="Any" size="15" autocomplete="off" value="{{capture.host}}">
     </div>
     <div class="row">
       <div class="col-sm-7">Protocol</div>
       <select required class="col-sm-5" style="padding-left: 6px"id="capture-protocol">
         <option value="">Any</option>
-        <option>TCP</option>
-        <option>UDP</option>
-        <option>ICMP</option>
-        <option>ARP</option>
+        <option {{#if (eq capture.proto "TCP")}}selected{{/if}}>TCP</option>
+        <option {{#if (eq capture.proto "UDP")}}selected{{/if}}>UDP</option>
+        <option {{#if (eq capture.proto "ICMP")}}selected{{/if}}>ICMP</option>
+        <option {{#if (eq capture.proto "ARP")}}selected{{/if}}>ARP</option>
       </select>
     </div>
     <div class="row">
       <select class="col-sm-6" id="capture-port-type">
-        <option value="SD" >Source or Destination Port</option>
-        <option value="S" >Source Port</option>
-        <option value="D">Destination Port</option>
+        <option {{#if (eq capture.portType "SD")}}selected{{/if}} value="SD">Source or Destination Port</option>
+        <option {{#if (eq capture.portType "S")}}selected{{/if}}value="S">Source Port</option>
+        <option {{#if (eq capture.portType "D")}}selected{{/if}}value="D">Destination Port</option>
       </select>
       <div class="col-sm-1"></div>
-      <input class="col-sm-5" id="capture-port-nr" type="text" placeholder="Any" size="5" autocomplete="off">
+      <input class="col-sm-5" id="capture-port-nr" type="text" placeholder="Any" size="5" autocomplete="off" value="{{capture.port}}">
     </div>
     <div class="row">
-      <input class="col-sm" style="padding-left:14px" id="capture-query" type="text" placeholder="Freeform pcap filter query" autocomplete="off">
+      <input class="col-sm" style="padding-left:14px" id="capture-query" type="text" placeholder="Freeform pcap filter query" autocomplete="off" value="{{capture.freeform}}">
     </div>
     <div class="row">
       <div class="col-sm-7">Ignore broadcast packets</div>
-      <input id="capture-o-broadcast" type="checkbox" checked>
+      <input id="capture-o-broadcast" type="checkbox" {{#if capture.ignoreBroadcast}}checked{{/if}}>
     </div>
     <div class="row">
       <div class="col-sm-7">Ignore multicast packets</div>
-      <input id="capture-o-multicast" type="checkbox" checked>
+      <input id="capture-o-multicast" type="checkbox" {{#if capture.ignoreMulticast}}checked{{/if}}>
     </div>
     <div class="row">
       <div class="col-sm-7">Ignore packets to or from me</div>
-      <input id="capture-o-host" type="checkbox" checked>
+      <input id="capture-o-host" type="checkbox" {{#if capture.ignoreHost}}checked{{/if}}>
     </div>
   </div>
   <div class="form-group">
@@ -57,12 +57,10 @@
           proto: document.getElementById('capture-protocol').value,
           portType: document.getElementById('capture-port-type').value,
           port: document.getElementById('capture-port-nr').value,
-          freeFormQuery: document.getElementById('capture-query').value,
-          options: {
-            ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
-            ignoreMulticast: document.getElementById('capture-o-multicast').checked,
-            ignoreHost: document.getElementById('capture-o-host').checked
-          }
+          freeform: document.getElementById('capture-query').value,
+          ignoreBroadcast: document.getElementById('capture-o-broadcast').checked,
+          ignoreMulticast: document.getElementById('capture-o-multicast').checked,
+          ignoreHost: document.getElementById('capture-o-host').checked
         };
         $('#capture-network-update').modal('show');
         send('capture.start', config);

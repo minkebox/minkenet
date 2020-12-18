@@ -70,6 +70,9 @@
               {{>RO name="Last seen" value=(date selected.lastSeen)}}
             </form>
           </div>
+          {{#if capture}}
+          <button type="button" class="device-capture-button btn btn-sm btn-outline-secondary" onclick="send('client.capture','{{selected.mac}}')">Capture</button>
+          {{/if}}
           <button type="button" class="device-forget-button btn btn-sm btn-outline-secondary" onclick="send('client.forget','{{selected.mac}}')">Forget</button>
         </div>
       </div>

@@ -2,15 +2,17 @@ const Template = require('../Template');
 const ClientManager = require('../../ClientManager');
 const TopologyManager = require('../../TopologyManager');
 const Page = require('../Page');
+const Log = require('debug')('clients');
 
 class Clients extends Page {
 
-  constructor(send) {
-    super(send);
+  constructor(root) {
+    super(root);
     this.state = {
       clients: null,
       selected: null,
-      yesterday: null
+      yesterday: null,
+      capture: null
     };
 
     this.onUpdateClient = this.onUpdateClient.bind(this);
@@ -23,7 +25,7 @@ class Clients extends Page {
       this.selectMac(mac);
       break;
     }
-    this.state.yesterday =  Date.now() - 24 * 60 * 60 * 1000;
+    this.state.yesterday = Date.now() - 24 * 60 * 60 * 1000;
 
     this.state.topologyValid = TopologyManager.valid;
     ClientManager.on('update.client', this.onUpdateClient);
@@ -58,6 +60,7 @@ class Clients extends Page {
       this.state.portnamekv = null;
       this.state.porthighlights = [];
     }
+    this.state.capture = this.getCapture(mac);
   }
 
   async 'select.client' (msg) {
@@ -82,6 +85,78 @@ class Clients extends Page {
       break;
     }
     this.html('clients-list', Template.ClientsList(this.state));
+  }
+
+  async 'client.capture' (msg) {
+    if (this.state.capture) {
+      this.switchPage('networks.capture', this.state.capture);
+    }
+  }
+
+  getCapture(mac) {
+    Log('getCapture:', mac);
+    const selected = this.state.clients[mac];
+    if (!selected.connected) {
+      Log('getCapture: no connection');
+      return null;
+    }
+    const device = selected.connected.device;
+    // If client is connected directly to a port, then it's easy to capture traffic to/from it
+    if (typeof selected.connected.portnr === 'number') {
+      Log('getCapture: direct connection');
+      return {
+        device: device,
+        portnr: selected.connected.portnr,
+        capture: {
+          freeform: `ether host ${mac}`,
+          ignoreBroadcast: true,
+          ignoreMulticast: true,
+          ignoreHost: true
+        }
+      };
+    }
+    // If not, if client is connected to an AP, we may be able to capture trafic to/from the AP either directly
+    // or on the switch connected to the AP.
+    if (!device.description.properties.ap) {
+      Log('getCapture: not ap', device.description.properties);
+      return null;
+    }
+    // AP must have a single port to capture from
+    if (device.readKV('network.physical.ports.nr.total') != 1) {
+      Log('getCapture: too many ports');
+      return null;
+    }
+    const captures = TopologyManager.getCaptureDevices();
+    if (captures.indexOf(device) !== -1) {
+      Log('getCapture: on ap');
+      return {
+        device: device,
+        portnr: 0,
+        capture: {
+          freeform: `ether host ${mac}`,
+          ignoreBroadcast: true,
+          ignoreMulticast: true,
+          ignoreHost: true
+        }
+      };
+    }
+    // Cant capture on the AP, but maybe on the switch it's connected to.
+    const link = TopologyManager.findLink(device, 0);
+    if (link && captures.indexOf(link[1].device) !== -1) {
+      Log('getCapture: on switch');
+      return {
+        device: link[1].device,
+        portnr: link[1].port,
+        capture: {
+          freeform: `ether host ${mac}`,
+          ignoreBroadcast: true,
+          ignoreMulticast: true,
+          ignoreHost: true
+        }
+      };
+    }
+    // No capture possible
+    return null;
   }
 
 }

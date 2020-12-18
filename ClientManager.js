@@ -6,7 +6,7 @@ const TopologyManager = require('./TopologyManager');
 const DB = require('./Database');
 const ARP = require('./discovery/arp');
 const Debounce = require('./utils/Debounce');
-const Log = require('debug')('clients');
+const Log = require('debug')('clientmanager');
 
 const SCRUB_TIMER = 10 * 60 * 1000; // 10 minutes
 
