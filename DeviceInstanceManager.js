@@ -131,8 +131,10 @@ class DeviceInstanceManager extends EventEmitter {
         await device.connect();
       }
     }
-    for (let retry = RETRY_COMMIT; todo.length && retry > 0; retry--) {
-      for (let i = todo.length - 1; i >= 0; i--) {
+    let slen;
+    for (let retry = RETRY_COMMIT; todo.length && retry > 0; retry = (slen === todo.length ? retry - 1 : RETRY_COMMIT)) {
+      slen = todo.length;
+      for (let i = slen - 1; i >= 0; i--) {
         const device = todo[i];
         if (updateCallback) {
           updateCallback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
