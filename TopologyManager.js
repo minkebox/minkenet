@@ -23,6 +23,7 @@ class TopologyManager extends EventEmitter {
     super();
     this._entry = null;
     this._topology = [];
+    this._order = [];
     this.valid = false;
     this.running = false;
 
@@ -249,6 +250,33 @@ class TopologyManager extends EventEmitter {
     if (update) {
       this.emit('update');
     }
+  }
+
+  //
+  // Build an order for each node in the topology, with the entry node being the 0th.
+  //
+  buildOrder() {
+    const order = [];
+    const devices = DeviceInstanceManager.getAuthenticatedDevices();
+    devices.forEach(device => {
+      const path = this.findPath(this._entry.device, device);
+      order.push({ order: path ? path.length : Number.MAX_SAFE_INTEGER, device: device });
+    });
+    order.sort((a,  b) => a.order - b.order);
+    this._order = order.map(value => value.device);
+  }
+
+  order(devices, direction) {
+    const ndevices = this._order.filter(dev => devices.indexOf(dev) !== -1);
+    switch (direction) {
+      case 'far-to-near':
+        ndevices.reverse();
+        break;
+      case 'near-to-far':
+      default:
+        break;
+    }
+    return ndevices;
   }
 
   //
@@ -573,6 +601,7 @@ class TopologyManager extends EventEmitter {
     }
     else {
       this._topology = this._topology.concat(topology);
+      this.buildOrder();
       DB.updateTopology(this.toDB());
       this.emit('status', { op: 'complete', success: true, topology: this._topology });
       this.emit('update');
@@ -756,6 +785,7 @@ class TopologyManager extends EventEmitter {
   async start() {
     this.fromDB(await DB.getTopology());
     this.buildLinkLags();
+    this.buildOrder();
     this._invalid = () => {
       this.valid = false;
       DB.updateTopology(this.toDB());
