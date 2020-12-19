@@ -330,14 +330,19 @@ class Capture extends Page {
       this.send('modal.hide.all');
       this.state.capture = msg.value;
       this.startCapture();
-      Log('capture started');
+      Log('capture started:');
+    }).catch(() => {
+      this.send('modal.hide.all');
+      this.deactivateMirrors().then(() => {
+        Log('capture aborted:');
+      });
     });
   }
 
   async 'capture.stop' (msg) {
     this.stopCapture();
     this.deactivateMirrors().then(() => {
-      Log('capture stopped');
+      Log('capture stopped:');
     });
   }
 
@@ -426,6 +431,7 @@ class Capture extends Page {
     }
 
     this.mirrors = mirrors;
+    Log('mirrors:', this.mirrors);
   }
 
   async activateMirrors() {
@@ -434,7 +440,7 @@ class Capture extends Page {
     for (let i = 0; i < this.mirrors.length; i++) {
       const mirror = this.mirrors[i];
       const current = mirror.device.readKV(`network.mirror.0`);
-      this.restores.push({ device: mirror.device, mirror: current });
+      this.restores.unshift({ device: mirror.device, mirror: current });
       mirror.device.writeKV('network.mirror.0',
       {
         enable: true,
@@ -444,14 +450,20 @@ class Capture extends Page {
         }
       }, { replace: true });
     }
-    await DeviceInstanceManager.commit();
+    // Activate mirrors from furthest to nearest. Some devices might become difficult to access when mirroring
+    // is happening on nodes between outselves and them (I'm not sure that it should, as tcp should deal with duplicate
+    // packets but some switches clearly have issues with this).
+    await DeviceInstanceManager.commit({ direction: 'far-to-near', preconnect: true });
   }
 
   async deactivateMirrors() {
-    this.restores.forEach(restore => {
+    for (let i = 0; i < this.restores.length; i++) {
+      const restore = this.restores[i];
       restore.device.writeKV('network.mirror.0', restore.mirror, { replace: true });
-    });
-    await DeviceInstanceManager.commit();
+    }
+    // Tear down mirrors starting with the nearest first. We don't preconnect because mirrors can
+    // effect our ability to contact some switches (I'm not sure why).
+    await DeviceInstanceManager.commit({ direction: 'near-to-far', preconnect: false });
   }
 
   _render(style, raw) {
