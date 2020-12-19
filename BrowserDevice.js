@@ -390,12 +390,12 @@ class BrowserDeviceInstance extends DeviceInstance {
       throw new Error(`Unauthenticated: ${this.name}`);
     }
     await this.q(async (page) => {
-      Log('commit:');
+      Log('commit:', this.name);
       if (this.description.commit) {
         await this.eval('literal', this.description.commit, page.mainFrame());
       }
       await super.commit();
-      Log('committed:');
+      Log('committed:', this.name);
     });
   }
 
@@ -454,8 +454,37 @@ class BrowserDeviceInstance extends DeviceInstance {
         return true;
       }
     }
-    catch (_) {
-      Log(_);
+    catch (e) {
+      Log(e);
+      Log('error during updateStatistics');
+      this._validated = false;
+      this.detach();
+    }
+    return false;
+  }
+
+  async verify() {
+    Log('verify connection:', this.name);
+    try {
+      if (await this.connect()) {
+        if (this.description.read.$verify) {
+          await this.q(async (page) => {
+            Log('verify:');
+            await this.eval('literal', this.description.read.$verify, page.mainFrame());
+            Log('verified:');
+          });
+        }
+        else {
+          Log('no verify available:');
+        }
+        return true;
+      }
+    }
+    catch (e) {
+      Log(e);
+      Log('error during verify:', this.name);
+      this._validated = false;
+      this.detach();
     }
     return false;
   }
