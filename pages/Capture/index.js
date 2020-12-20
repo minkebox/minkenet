@@ -364,7 +364,6 @@ class Capture extends Page {
     this.html('capture-port', Template.CapturePort(this.state));
   }
 
-
   updateState(device, portnr) {
     this.state.selectedDevice = device;
     this.state.selectedPortNr = portnr;
@@ -377,8 +376,6 @@ class Capture extends Page {
     }
     this.state.topologyValid = TopologyManager.valid;
 
-    const porthighlights = [];
-
     if (!this.state.selectedDevice) {
       this.state.selectedPortNr = null;
       this.state.selectedPortName = null;
@@ -388,14 +385,15 @@ class Capture extends Page {
         this.state.selectedPortNr = attach.port;
       }
     }
-    if (this.state.selectedDevice) {
-      this.calcMirrors();
-      porthighlights[this.state.selectedPortNr] = 'A';
-      this.state.selectedPortName = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.name`);
-    }
 
     this.state.ports = Array(this.state.devices.length);
-    this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = porthighlights;
+    if (this.state.selectedDevice) {
+      this.calcMirrors();
+      const ports = [];
+      ports[this.state.selectedPortNr] = 'A';
+      this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = ports;
+      this.state.selectedPortName = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.name`);
+    }
   }
 
   calcMirrors() {
@@ -425,10 +423,7 @@ class Capture extends Page {
       Log(`bad link to attach: ${current.device._id} - ${attach.device._id}`);
       return;
     }
-    // Dont need this if the attachment port the last port in the mirror list (e.g. we're monitoring ourself).
-    if (current.port !== attach.port) {
-      mirrors.push({ device: attach.device, source: current.port, target: attach.port });
-    }
+    mirrors.push({ device: attach.device, source: current.port, target: attach.port });
 
     this.mirrors = mirrors;
     Log('mirrors:', this.mirrors);
@@ -437,18 +432,22 @@ class Capture extends Page {
   async activateMirrors() {
     // Create chain of mirrors, keeping a record of what the there before so we can restore it later
     this.restores = [];
+    let first = true;
     for (let i = 0; i < this.mirrors.length; i++) {
       const mirror = this.mirrors[i];
-      const current = mirror.device.readKV(`network.mirror.0`);
-      this.restores.unshift({ device: mirror.device, mirror: current });
-      mirror.device.writeKV('network.mirror.0',
-      {
-        enable: true,
-        target: mirror.target,
-        port: {
-          [mirror.source]: (mirror === this.mirrors[0] ? { egress: true, ingress: true } : { ingress: true })
-        }
-      }, { replace: true });
+      if (mirror.source !== mirror.target) {
+        const current = mirror.device.readKV(`network.mirror.0`);
+        this.restores.push({ device: mirror.device, mirror: current });
+        mirror.device.writeKV('network.mirror.0',
+        {
+          enable: true,
+          target: mirror.target,
+          port: {
+            [mirror.source]: first ? { egress: true, ingress: true } : { ingress: true }
+          }
+        }, { replace: true });
+        first = false;
+      }
     }
     // Activate mirrors from furthest to nearest. Some devices might become difficult to access when mirroring
     // is happening on nodes between outselves and them (I'm not sure that it should, as tcp should deal with duplicate
