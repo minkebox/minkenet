@@ -28,7 +28,7 @@ module.exports = {
             $: 'foreach',
             arg: itr => [{
               $: 'fetch',
-              arg: '/PortMirrorRpm.htm',
+              arg: '/mirrored_port_set.cgi',
               params: {
                 mirroredport: itr.key + 1,
                 ingressState: {
