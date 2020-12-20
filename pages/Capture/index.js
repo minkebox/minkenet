@@ -151,18 +151,18 @@ class Capture extends Page {
       }
     };
     this.eaddr = [];
-    this.device = CAPTURE_DEFAULT_DEVICE;
+    this.attach = null;
     this.mirrors = [];
     this.restores = [];
 
     this.onUpdate = this.onUpdate.bind(this);
     this.onPacket = this.onPacket.bind(this);
+
+    this._getMacAddress();
   }
 
   select(arg) {
     super.select(arg);
-
-    this.device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
 
     DeviceInstanceManager.on('add', this.onUpdate);
     DeviceInstanceManager.on('remove', this.onUpdate);
@@ -189,14 +189,14 @@ class Capture extends Page {
     this.deactivateMirrors();
   }
 
-  async startCapture() {
+  startCapture() {
     if (this.session) {
       this.stopCapture();
     }
     const snapsize = parseInt(this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
-    const filter = await this.buildFilter(this.state.capture);
+    const filter = this.buildFilter(this.state.capture);
     Log('startCapture: filter: ', filter);
-    this.session = PCap.createSession(this.device, {
+    this.session = PCap.createSession(this.attach.captureDevice, {
       filter: filter,
       promiscuous: true,
       monitor: false,
@@ -215,9 +215,8 @@ class Capture extends Page {
     }
   }
 
-  async buildFilter(config) {
+  buildFilter(config) {
     const filter = [];
-    await this._getMacAddress();
 
     if (config.ignoreBroadcast) {
       filter.push('(not ether broadcast)');
@@ -226,8 +225,8 @@ class Capture extends Page {
       filter.push('(not ether multicast)');
     }
     if (config.ignoreHost) {
-      this.eaddr.forEach(mac => {
-        filter.push(`(not ether host ${mac})`);
+      this.eaddr.forEach(entry => {
+        filter.push(`(not ether host ${entry.mac})`);
       });
     }
 
@@ -291,8 +290,8 @@ class Capture extends Page {
     }
 
     // Filter traffic from this application
-    this.eaddr.forEach(mac => {
-      filter.push(`(not (ether host ${mac} and ip proto \\tcp and port ${global.WEBPORT}))`);
+    this.eaddr.forEach(entry => {
+      filter.push(`(not (ether host ${entry.mac} and ip proto \\tcp and port ${global.WEBPORT}))`);
     });
 
     return filter.join(' and ');
@@ -326,17 +325,22 @@ class Capture extends Page {
   }
 
   async 'capture.start' (msg) {
-    this.activateMirrors().then(() => {
-      this.send('modal.hide.all');
-      this.state.capture = msg.value;
-      this.startCapture();
-      Log('capture started:');
-    }).catch(() => {
-      this.send('modal.hide.all');
-      this.deactivateMirrors().then(() => {
-        Log('capture aborted:');
-      });
-    });
+    (async () => {
+      try {
+        await this.findCapturePoint();
+        this.calcMirrors();
+        await this.activateMirrors();
+        this.send('modal.hide.all');
+        this.state.capture = msg.value;
+        this.startCapture();
+      }
+      catch (_) {
+        console.log(_);
+        this.html('capture-controls', Template.CaptureControls(this.state));
+        this.send('modal.hide.all');
+        await this.deactivateMirrors();
+      }
+    })();
   }
 
   async 'capture.stop' (msg) {
@@ -388,7 +392,6 @@ class Capture extends Page {
 
     this.state.ports = Array(this.state.devices.length);
     if (this.state.selectedDevice) {
-      this.calcMirrors();
       const ports = [];
       ports[this.state.selectedPortNr] = 'A';
       this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = ports;
@@ -397,14 +400,13 @@ class Capture extends Page {
   }
 
   calcMirrors() {
-    const attach = TopologyManager.getAttachmentPoint();
-    if (!attach) {
+    if (!this.attach) {
       Log('no attachment port:');
       return;
     }
 
     // Find the path between the attachment point and the port we want to capture.
-    const path = TopologyManager.findPath(this.state.selectedDevice, attach.device);
+    const path = TopologyManager.findPath(this.state.selectedDevice, this.attach.entryDevice);
 
     // Convert path into a set of mirrors
     const mirrors = [];
@@ -419,14 +421,14 @@ class Capture extends Page {
       mirrors.push({ device: current.device, source: current.port, target: exit.port });
       current = link[1];
     }
-    if (current.device != attach.device) {
-      Log(`bad link to attach: ${current.device._id} - ${attach.device._id}`);
+    if (current.device != this.attach.entryDevice) {
+      Log(`bad link to attach: ${current.device.name} - ${this.attach.entryDevice.name}`);
       return;
     }
-    mirrors.push({ device: attach.device, source: current.port, target: attach.port });
+    mirrors.push({ device: this.attach.entryDevice, source: current.port, target: this.attach.entryPortnr });
 
     this.mirrors = mirrors;
-    Log('mirrors:', this.mirrors);
+    Log('mirrors:', this.mirrors.map(m => [{ device: m.device.name, source: m.source, target: m.target }][0]));
   }
 
   async activateMirrors() {
@@ -456,10 +458,14 @@ class Capture extends Page {
   }
 
   async deactivateMirrors() {
+    if (!this.restores.length) {
+      return;
+    }
     for (let i = 0; i < this.restores.length; i++) {
       const restore = this.restores[i];
       restore.device.writeKV('network.mirror.0', restore.mirror, { replace: true });
     }
+    this.restores = [];
     // Tear down mirrors starting with the nearest first. We don't preconnect because mirrors can
     // effect our ability to contact some switches (I'm not sure why).
     await DeviceInstanceManager.commit({ direction: 'near-to-far', preconnect: false });
@@ -510,7 +516,7 @@ class Capture extends Page {
             for (let name in ifaces) {
               const mac = ifaces[name].mac;
               if (mac) {
-                this.eaddr.push(mac);
+                this.eaddr.push({ name: name, mac: mac });
               }
             }
           }
@@ -518,6 +524,28 @@ class Capture extends Page {
         });
       });
     }
+  }
+
+  async findCapturePoint() {
+    Log('findCapturePoint:');
+    this.attach = null;
+    await this._getMacAddress();
+    const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
+    const entry = this.eaddr.find(entry => entry.name === device);
+    if (entry) {
+      const client = ClientManager.getClientByMac(entry.mac);
+      if (client && client.connected && client.connected.portnr !== null) {
+        this.attach = {
+          captureDevice: device,
+          entryDevice: client.connected.device,
+          entryPortnr: client.connected.portnr
+        };
+        Log('findCapturePoint: attach:', this.attach.captureDevice, this.attach.entryDevice.name, this.attach.entryPortnr);
+        return;
+      }
+    }
+    Log('findCapturePoint: no capture point:');
+    throw new Error('no capture point');
   }
 
 }
