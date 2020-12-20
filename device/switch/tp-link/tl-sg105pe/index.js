@@ -59,7 +59,7 @@ const Device = {
   },
 
   read: {
-    $1: require('../tl-sg108e/read/name+ip'),
+    $verify: require('../tl-sg108e/read/name+ip'),
     $2: require('../tl-sg108e/read/physical'),
     $3: require('../tl-sg108e/read/igmp'),
     $4: require('../tl-sg108e/read/vlan'),

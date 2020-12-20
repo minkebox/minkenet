@@ -83,7 +83,7 @@ const Device = {
   },
 
   read: {
-    $1: require('./read/name+ip'),
+    $verify: require('./read/name+ip'),
     $2: require('./read/radios'),
     $3: require('./read/clients')
   },

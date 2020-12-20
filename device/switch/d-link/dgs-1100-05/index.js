@@ -74,7 +74,7 @@ const Device = {
   },
 
   read: {
-    $1: require('./read/name+ip'),
+    $verify: require('./read/name+ip'),
     $2: require('./read/physical'),
     $3: require('./read/vlan'),
     $4: require('./read/igmp'),

@@ -94,7 +94,7 @@ const Device = {
   },
 
   read: {
-    $1: require('./read/name+version'),
+    $verify: require('./read/name+version'),
     $2: require('./read/mac+physical'),
     $3: require('./read/ip+clients'),
     $4: require('./read/lag'),
