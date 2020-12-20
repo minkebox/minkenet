@@ -1,4 +1,4 @@
-<div class="card-body" style="padding: 0 15px 0 0">
+<div class="card-body" style="padding: 0 15px 0 0" _forceredraw={{now}}>
   <div class="form-group">
     <div class="row">
       <select class="col-sm-6" id="capture-host-type">
@@ -62,7 +62,6 @@
           ignoreMulticast: document.getElementById('capture-o-multicast').checked,
           ignoreHost: document.getElementById('capture-o-host').checked
         };
-        $('#capture-network-update').modal('show');
         send('capture.start', config);
         button.innerText = 'Stop';
         captureRunning = true;
@@ -70,9 +69,8 @@
       else {
         captureRunning = false;
         send('capture.stop');
-        button.innerText = 'Start';
+        button.innerText = 'Stopping ...';
       }
     }
   </script>
-  {{> CaptureUModal }}
 </div>

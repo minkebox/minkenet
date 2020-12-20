@@ -2,6 +2,7 @@
 :root {
   --main-background-color: #1e1e1e;
   --main-text-color: #f0f0f0;
+  --error-text-color: #c03d25;
   --highlight-text-color: #ffffff;
   --edge-background-color: #2e2e2e;
   --info-background-color: #2e2e2e;
@@ -692,6 +693,12 @@ body.pending-changes .pending-changes-disabled {
 .packet .info {
   display: inline-block;
   overflow: hidden;
+}
+.packet .message {
+  color: var(--highlight-text-color);
+}
+.packet .message.error {
+  color: var(--error-text-color);
 }
 
 #capture-packet .card {

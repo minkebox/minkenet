@@ -318,6 +318,10 @@ class Capture extends Page {
     }
   }
 
+  message(text) {
+    this.send('capture.packet', { html: text, force: true });
+  }
+
   inspect(text) {
     if (text) {
       this.html('capture-packet', text);
@@ -325,28 +329,39 @@ class Capture extends Page {
   }
 
   async 'capture.start' (msg) {
+    if (this.session) {
+      return;
+    }
+    this.message(Template.CaptureMsgStarting());
     (async () => {
       try {
+        this.state.capture = msg.value;
         await this.findCapturePoint();
         this.calcMirrors();
         await this.activateMirrors();
-        this.send('modal.hide.all');
-        this.state.capture = msg.value;
         this.startCapture();
+        this.message(Template.CaptureMsgStarted());
       }
       catch (_) {
         console.log(_);
-        this.html('capture-controls', Template.CaptureControls(this.state));
-        this.send('modal.hide.all');
+        this.message(Template.CaptureMsgStopping());
         await this.deactivateMirrors();
+        this.html('capture-controls', Template.CaptureControls(this.state));
+        this.message(Template.CaptureMsgFail());
       }
     })();
   }
 
   async 'capture.stop' (msg) {
+    if (!this.session) {
+      return;
+    }
+    this.message(Template.CaptureMsgStopping());
     this.stopCapture();
     this.deactivateMirrors().then(() => {
       Log('capture stopped:');
+      this.html('capture-controls', Template.CaptureControls(this.state));
+      this.message(Template.CaptureMsgStopped());
     });
   }
 
@@ -378,38 +393,37 @@ class Capture extends Page {
         this.state.selectedDevice = null;
       }
     }
+    this.state.ports = Array(this.state.devices.length);
     this.state.topologyValid = TopologyManager.valid;
 
-    if (!this.state.selectedDevice) {
-      this.state.selectedPortNr = null;
-      this.state.selectedPortName = null;
-      const attach = TopologyManager.getAttachmentPoint();
-      if (attach) {
-        this.state.selectedDevice = attach.device;
-        this.state.selectedPortNr = attach.port;
-      }
-    }
-
-    this.state.ports = Array(this.state.devices.length);
-    if (this.state.selectedDevice) {
+    if (this.state.selectedDevice && this.state.selectedPortNr !== null) {
       const ports = [];
       ports[this.state.selectedPortNr] = 'A';
       this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = ports;
       this.state.selectedPortName = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.name`);
     }
+    else {
+      this.state.selectedPortNr = null;
+      this.state.selectedPortName = null;
+    }
   }
 
   calcMirrors() {
+    this.mirrors = [];
+
     if (!this.attach) {
       Log('no attachment port:');
-      return;
+      throw new Error('no attachment port');
+    }
+    if (!this.state.selectedDevice) {
+      Log('no selected device/port');
+      throw new Error('no device');
     }
 
     // Find the path between the attachment point and the port we want to capture.
     const path = TopologyManager.findPath(this.state.selectedDevice, this.attach.entryDevice);
 
     // Convert path into a set of mirrors
-    const mirrors = [];
     let current = { device: this.state.selectedDevice, port: this.state.selectedPortNr };
     for (let i = 0; i < path.length; i++) {
       const link = path[i];
@@ -418,16 +432,15 @@ class Capture extends Page {
         Log(`bad link: ${current.device._id} - ${exit.device._id}`);
         return;
       }
-      mirrors.push({ device: current.device, source: current.port, target: exit.port });
+      this.mirrors.push({ device: current.device, source: current.port, target: exit.port });
       current = link[1];
     }
     if (current.device != this.attach.entryDevice) {
       Log(`bad link to attach: ${current.device.name} - ${this.attach.entryDevice.name}`);
       return;
     }
-    mirrors.push({ device: this.attach.entryDevice, source: current.port, target: this.attach.entryPortnr });
+    this.mirrors.push({ device: this.attach.entryDevice, source: current.port, target: this.attach.entryPortnr });
 
-    this.mirrors = mirrors;
     Log('mirrors:', this.mirrors.map(m => [{ device: m.device.name, source: m.source, target: m.target }][0]));
   }
 

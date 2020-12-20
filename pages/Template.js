@@ -77,6 +77,9 @@ Handlebars.registerHelper({
   },
   date: function(d) {
     return new Date(d).toDateString()
+  },
+  now: function() {
+    return Date.now();
   }
 });
 

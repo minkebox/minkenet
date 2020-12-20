@@ -137,22 +137,21 @@ const MAX_CAPTURE_PACKETS = 500;
 let pendingCaptureScroll = null;
 let captureRunning = false;
 onMessage['capture.packet'] = msg => {
-  if (!captureRunning) {
-    return false;
-  }
-  const win = document.getElementById('capture-window-content');
-  if (win) {
-    const builder = document.createElement('tbody');
-    builder.innerHTML = msg.value.html;
-    builder.firstElementChild.raw = msg.value.raw;
-    win.appendChild(builder.firstElementChild);
-    if (win.childElementCount > MAX_CAPTURE_PACKETS) {
-      win.firstElementChild.nextElementSibling.remove();
+  if (captureRunning || msg.value.force) {
+    const win = document.getElementById('capture-window-content');
+    if (win) {
+      const builder = document.createElement('tbody');
+      builder.innerHTML = msg.value.html;
+      builder.firstElementChild.raw = msg.value.raw;
+      win.appendChild(builder.firstElementChild);
+      if (win.childElementCount > MAX_CAPTURE_PACKETS) {
+        win.firstElementChild.nextElementSibling.remove();
+      }
+      clearTimeout(pendingCaptureScroll);
+      pendingCaptureScroll = setTimeout(() => {
+        win.scrollTo(0, win.scrollHeight);
+      });
     }
-    clearTimeout(pendingCaptureScroll);
-    pendingCaptureScroll = setTimeout(() => {
-      win.scrollTo(0, win.scrollHeight);
-    });
   }
 }
 
