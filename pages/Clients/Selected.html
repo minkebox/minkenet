@@ -1,5 +1,4 @@
 <div class="clients-details-container tap-pane fade show active">
-  {{#if selected}}
   <div class="accordion">
     <div class="card">
       <div data-toggle="collapse" data-target="#clients-filter" class="card-header">
@@ -15,6 +14,7 @@
         </div>
       </div>
     </div>
+    {{#if selected}}
     {{#if selected.connected}}
     <div class="card">
       <div data-toggle="collapse" data-target="#clients-hardware" class="card-header">
@@ -91,6 +91,6 @@
         </div>
       </div>
     </div>
+    {{/if}}
   </div>
-  {{/if}}
 </div>

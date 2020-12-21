@@ -12,7 +12,8 @@ class Clients extends Page {
       clients: null,
       selected: null,
       yesterday: null,
-      capture: null
+      capture: null,
+      filter: ''
     };
 
     this.onUpdateClient = this.onUpdateClient.bind(this);
@@ -20,14 +21,11 @@ class Clients extends Page {
 
   select() {
     super.select();
-    this.state.clients = ClientManager.getAllClients();
-    for (const mac in this.state.clients) {
-      this.selectMac(mac);
-      break;
-    }
-    this.state.yesterday = Date.now() - 24 * 60 * 60 * 1000;
 
+    this.updateClients();
+    this.state.yesterday = Date.now() - 24 * 60 * 60 * 1000;
     this.state.topologyValid = TopologyManager.valid;
+
     ClientManager.on('update.client', this.onUpdateClient);
 
     this.html('main-container', Template.ClientsTab(this.state));
@@ -79,6 +77,27 @@ class Clients extends Page {
 
   async 'client.filter' (msg) {
     this.state.filter = msg.value.v;
+    this.updateClients();
+    if (!this.state.selected) {
+      this.html('clients-selected', Template.ClientsSelected(this.state));
+    }
+    this.html('clients-list', Template.ClientsList(this.state));
+  }
+
+  async 'client.forget' (msg) {
+    await ClientManager.forgetClient(msg.value);
+    this.updateClients();
+    this.html('clients-list', Template.ClientsList(this.state));
+    this.html('clients-selected', Template.ClientsSelected(this.state));
+  }
+
+  async 'client.capture' (msg) {
+    if (this.state.capture) {
+      this.switchPage('networks.capture', this.state.capture);
+    }
+  }
+
+  updateClients() {
     const filter = this.state.filter.toLowerCase();
     if (!filter) {
       this.state.clients = ClientManager.getAllClients();
@@ -94,30 +113,8 @@ class Clients extends Page {
         connection: filter
       });
     }
-    if (!this.state.clients[this.state.selected.mac]) {
-      for (const mac in this.state.clients) {
-        this.selectMac(mac);
-        break;
-      }
-      this.html('clients-selected', Template.ClientsSelected(this.state));
-    }
-    this.html('clients-list', Template.ClientsList(this.state));
-  }
-
-  async 'client.forget' (msg) {
-    await ClientManager.forgetClient(msg.value);
-    this.state.clients = ClientManager.getAllClients();
-    for (const mac in this.state.clients) {
-      this.selectMac(mac);
-      break;
-    }
-    this.html('clients-list', Template.ClientsList(this.state));
-    this.html('clients-selected', Template.ClientsSelected(this.state));
-  }
-
-  async 'client.capture' (msg) {
-    if (this.state.capture) {
-      this.switchPage('networks.capture', this.state.capture);
+    if (this.state.selected && !this.state.clients[this.state.selected.mac]) {
+      this.state.selected = null;
     }
   }
 
