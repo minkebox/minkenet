@@ -73,7 +73,6 @@ async function WS(ctx) {
   const updateCommitUI = Debounce(() => {
     const need = DeviceInstanceManager.needCommit();
     const active = DeviceInstanceManager.inCommit();
-    console.log('updateCommitUI', need, active);
     if (need !== State.needCommit || active !== State.inCommit) {
       State.needCommit = need;
       State.inCommit = active;
