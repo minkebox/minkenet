@@ -123,6 +123,10 @@ class Clients extends Page {
 
   getCapture(mac) {
     Log('getCapture:', mac);
+    if (this.root.needCommit) {
+      Log('getCapture: pending commit');
+      return null;
+    }
     const selected = this.state.clients[mac];
     if (!selected.connected) {
       Log('getCapture: no connection');
