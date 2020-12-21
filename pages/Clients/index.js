@@ -77,6 +77,33 @@ class Clients extends Page {
     this.html(`mac-${msg.value.k.replace(/:/g, '-')}`, Template.ClientsSummary(this.state.selected));
   }
 
+  async 'client.filter' (msg) {
+    this.state.filter = msg.value.v;
+    const filter = this.state.filter.toLowerCase();
+    if (!filter) {
+      this.state.clients = ClientManager.getAllClients();
+    }
+    else {
+      this.state.clients = ClientManager.getFilteredClients({
+        mac: filter,
+        ip: filter,
+        hostname: filter,
+        name: filter,
+        ssid: filter,
+        oui: filter,
+        connection: filter
+      });
+    }
+    if (!this.state.clients[this.state.selected.mac]) {
+      for (const mac in this.state.clients) {
+        this.selectMac(mac);
+        break;
+      }
+      this.html('clients-selected', Template.ClientsSelected(this.state));
+    }
+    this.html('clients-list', Template.ClientsList(this.state));
+  }
+
   async 'client.forget' (msg) {
     await ClientManager.forgetClient(msg.value);
     this.state.clients = ClientManager.getAllClients();
@@ -85,6 +112,7 @@ class Clients extends Page {
       break;
     }
     this.html('clients-list', Template.ClientsList(this.state));
+    this.html('clients-selected', Template.ClientsSelected(this.state));
   }
 
   async 'client.capture' (msg) {

@@ -290,15 +290,27 @@ class ClientManager extends EventEmitter {
     return null;
   }
 
-  getAllClients(filter) {
-    const dmacs = filter === 'clients' ? this._getDeviceMacs() : {};
-    const macs = {}
+  getAllClients() {
+    return this.mac;
+  }
+
+  getFilteredClients(filter) {
+    const clients = {};
     for (let m in this.mac) {
-      if (!dmacs[m]) {
-        macs[m] = this.mac[m];
+      const client = this.mac[m];
+      if (
+        (filter.mac && client.mac.includes(filter.mac)) ||
+        (filter.ip && client.ip && client.ip.includes(filter.ip)) ||
+        (filter.hostname && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||
+        (filter.name && client.name.toLowerCase().includes(filter.name)) ||
+        (filter.ssid && client.ssid.toLowerCase().includes(filter.ssid)) ||
+        (filter.oui && client.oui && client.oui.toLowerCase().includes(filter.oui)) ||
+        (filter.connection && client.connected && client.connected.device.name.toLowerCase().includes(filter.connection))
+      ) {
+        clients[m] = client;
       }
     }
-    return macs;
+    return clients;
   }
 
   _getDeviceMacs() {
