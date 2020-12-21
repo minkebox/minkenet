@@ -1,9 +1,9 @@
-{{#if (isdefined value)}}
+{{#if (or (isdefined value) (isdefined default))}}
 <div class="row">
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
   <div class="col-sm-6 d-flex align-items-center">
     {{#if ro}}
-    <div class="device-property-ro small">{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}</div>
+    <div class="device-property-ro small">{{#if (isdefined value)}}{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}{{else}}{{default}}{{/if}}</div>
     {{else}}
     <input id="fid-{{#if kv}}{{kv}}{{else if cmd}}{{cmd}}{{/if}}"
       class="device-property-rw small"
@@ -14,25 +14,6 @@
       {{#if default}}placeholder="{{default}}"{{/if}}
       {{#if kv}}oninput="this.validity.patternMismatch || send('kv.update',{k:'{{kv}}',v:this.value},0.5)"{{/if}}
       {{#if cmd}}oninput="this.validity.patternMismatch || send('{{cmd}}',{k:'{{key}}',v:this.value},0.5)"{{/if}}
-      {{#if pattern}}pattern="{{pattern}}"{{/if}}
-    >
-    {{/if}}
-  </div>
-</div>
-{{else if (isdefined default)}}
-<div class="row">
-  <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
-  <div class="col-sm-6 d-flex align-items-center">
-    {{#if ro}}
-    <div class="device-property-ro small">{{default}}</div>
-    {{else}}
-    <input id="fid-{{kv}}"
-      class="device-property-rw small"
-      spellcheck="false"
-      autocapitalize="off"
-      autocomplete="off"
-      placeholder="{{default}}"
-      oninput="this.validity.patternMismatch || send('kv.update',{ k:'{{kv}}',v:this.value},0.5)"
       {{#if pattern}}pattern="{{pattern}}"{{/if}}
     >
     {{/if}}
