@@ -7,6 +7,7 @@
   --edge-background-color: #2e2e2e;
   --info-background-color: #2e2e2e;
   --highlight-background-color: #3e3e3e;
+  --select-background-color: #3a3844;
   --modal-background-color: #2e2e2e;
   --alt-list-background-color: #2e2e2e;
   --button-disabled-color: #808080;
@@ -353,7 +354,7 @@ body.pending-changes .pending-changes-disabled {
 .bonds-container .row.active,
 .monitor-container .row.active,
 .clients-container .row.active {
-  background-color: var(--highlight-background-color) !important;
+  background-color: var(--select-background-color) !important;
 }
 .list-container .row:hover,
 .networks-container .row:hover,
