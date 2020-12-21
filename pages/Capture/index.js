@@ -389,8 +389,16 @@ class Capture extends Page {
 
     if (!this.state.devices) {
       this.state.devices = TopologyManager.getCaptureDevices();
+      // Sync the state of all the capture devices (in case we're not doing this already).
+      setTimeout(() => {
+        this.state.devices.forEach(dev => {
+          dev.watch();
+          dev.unwatch();
+        });
+      }, 0);
       if (this.state.devices.indexOf(this.state.selectedDevice) === -1) {
         this.state.selectedDevice = null;
+        this.state.selectedPortNr = null;
       }
     }
     this.state.ports = Array(this.state.devices.length);
