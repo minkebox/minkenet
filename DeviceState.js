@@ -458,10 +458,16 @@ class DeviceStateInstance extends EventEmitter {
     }
   }
 
+  //
+  // Generate a savable version of the state. This does *not* contain any pending changes.
+  //
   toDB() {
     function walk(ctx) {
       if ('$' in ctx) {
         const v = { $: ctx.$ };
+        if ('$o' in ctx && ctx.$o !== DELETED_VALUE) {
+          v.$ = ctx.$o;
+        }
         if ('$ro' in ctx) {
           v.$ro = ctx.$ro;
         }
@@ -476,7 +482,7 @@ class DeviceStateInstance extends EventEmitter {
       else {
         const o = {};
         for (let k in ctx) {
-          if (k[0] !== '$') {
+          if (k[0] !== '$' && ctx[k].$o !== NEW_VALUE) {
             o[k] = walk(ctx[k]);
           }
         }
