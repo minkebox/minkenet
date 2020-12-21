@@ -13,6 +13,7 @@ class DeviceInstanceManager extends EventEmitter {
   constructor() {
     super();
     this.devices = {};
+    this.activeCommit = false;
 
     this.onDeviceUpdate = this.onDeviceUpdate.bind(this);
   }
@@ -42,6 +43,7 @@ class DeviceInstanceManager extends EventEmitter {
     if (reason !== 'statistics') {
       this.emit('update');
     }
+    this.emit('commit');
   }
 
   getAllDevices() {
@@ -111,68 +113,83 @@ class DeviceInstanceManager extends EventEmitter {
     return false;
   }
 
+  inCommit() {
+    return this.activeCommit;
+  }
+
   async commit(config) {
-    config = Object.assign({ direction: 'near-to-far', preconnect: true, retry: 3, callback: null }, config);
-    if (!TopologyManager) {
-      TopologyManager = require('./TopologyManager');
+    if (this.activeCommit) {
+      throw new Error('Commit already active');
     }
-    // Build a commit-ordered list of devices we need to update
-    const devices = TopologyManager.order(Object.values(this.devices).filter(device => device.needCommit()), config.direction);
-    // Most commits will pre-connect to all devices before making any changes to limit potential partial-commit problems if
-    // a device as failed. Not full proof as a device could fail later.
-    let slen = 0;
-    if (config.preconnect) {
-      const connect = [].concat(devices);
-      for (let retry = config.retry; connect.length && retry > 0; retry = (slen === connect.length ? retry - 1 : config.retry)) {
-        slen = connect.length;
-        for (let i = 0; i < connect.length; ) {
-          const device = connect[i];
-          if (config.callback) {
-            config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+    this.activeCommit = true;
+    this.emit('commit');
+    try {
+      config = Object.assign({ direction: 'near-to-far', preconnect: true, retry: 3, callback: null }, config);
+      if (!TopologyManager) {
+        TopologyManager = require('./TopologyManager');
+      }
+      // Build a commit-ordered list of devices we need to update
+      const devices = TopologyManager.order(Object.values(this.devices).filter(device => device.needCommit()), config.direction);
+      // Most commits will pre-connect to all devices before making any changes to limit potential partial-commit problems if
+      // a device as failed. Not full proof as a device could fail later.
+      let slen = 0;
+      if (config.preconnect) {
+        const connect = [].concat(devices);
+        for (let retry = config.retry; connect.length && retry > 0; retry = (slen === connect.length ? retry - 1 : config.retry)) {
+          slen = connect.length;
+          for (let i = 0; i < connect.length; ) {
+            const device = connect[i];
+            if (config.callback) {
+              config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+            }
+            if (await device.verify()) {
+              connect.splice(i, 1);
+            }
+            else {
+              i++;
+            }
           }
-          if (await device.verify()) {
-            connect.splice(i, 1);
+        }
+        if (connect.length) {
+          throw new Error('Failed to connect');
+        }
+      }
+      for (let retry = config.retry; devices.length && retry > 0; retry = (slen === devices.length ? retry - 1 : config.retry)) {
+        slen = devices.length;
+        for (let i = 0; i < devices.length; ) {
+          const device = devices[i];
+          try {
+            if (!config.preconnect) {
+              if (config.callback) {
+                config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+              }
+              if (!await device.verify()) {
+                break;
+              }
+            }
+            if (config.callback) {
+              config.callback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
+            }
+            await device.write();
+            await device.commit();
+            devices.splice(i, 1);
           }
-          else {
+          catch (e) {
+            Log(e);
+            if (!config.preconnect) {
+              break;
+            }
             i++;
           }
         }
       }
-      if (connect.length) {
-        throw new Error('Failed to connect');
+      if (devices.length) {
+        throw new Error('Failed to commit');
       }
     }
-    for (let retry = config.retry; devices.length && retry > 0; retry = (slen === devices.length ? retry - 1 : config.retry)) {
-      slen = devices.length;
-      for (let i = 0; i < devices.length; ) {
-        const device = devices[i];
-        try {
-          if (!config.preconnect) {
-            if (config.callback) {
-              config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
-            }
-            if (!await device.verify()) {
-              break;
-            }
-          }
-          if (config.callback) {
-            config.callback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
-          }
-          await device.write();
-          await device.commit();
-          devices.splice(i, 1);
-        }
-        catch (e) {
-          Log(e);
-          if (!config.preconnect) {
-            break;
-          }
-          i++;
-        }
-      }
-    }
-    if (devices.length) {
-      throw new Error('Failed to commit');
+    finally {
+      this.activeCommit = false;
+      this.emit('commit');
     }
   }
 

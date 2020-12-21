@@ -57,6 +57,7 @@ async function WS(ctx) {
     send: send,
     current: null,
     needCommit: false,
+    inCommit: false,
     onMessage: {}
   };
   State.tabs = {
@@ -69,27 +70,27 @@ async function WS(ctx) {
   State.current = State.tabs.overview,
   State.current.select();
 
-  const onDevicesUpdate = Debounce(() => {
+  const updateCommitUI = Debounce(() => {
     const need = DeviceInstanceManager.needCommit();
-    if (need !== State.needCommit) {
+    const active = DeviceInstanceManager.inCommit();
+    console.log('updateCommitUI', need, active);
+    if (need !== State.needCommit || active !== State.inCommit) {
       State.needCommit = need;
+      State.inCommit = active;
       html('commit-revert-buttons', Template.CRButtons({
-        changes: State.needCommit
+        changes: State.needCommit,
+        active: State.inCommit
       }));
     }
   });
-  State.needCommit = DeviceInstanceManager.needCommit();
-  html('commit-revert-buttons', Template.CRButtons({
-    changes: State.needCommit
-  }));
-
-  DeviceInstanceManager.on('update', onDevicesUpdate);
+  DeviceInstanceManager.on('commit', updateCommitUI);
+  updateCommitUI();
 
   ctx.websocket.on('close', () => {
     if (State.current) {
       State.current.deselect();
     }
-    DeviceInstanceManager.off('update', onDevicesUpdate);
+    DeviceInstanceManager.off('commit', updateCommitUI);
   });
 
   ctx.websocket.on('error', () => {
