@@ -56,8 +56,7 @@ async function WS(ctx) {
   const State = {
     send: send,
     current: null,
-    needCommit: false,
-    inCommit: false,
+    commitState: null,
     onMessage: {}
   };
   State.tabs = {
@@ -71,14 +70,11 @@ async function WS(ctx) {
   State.current.select();
 
   const updateCommitUI = Debounce(() => {
-    const need = DeviceInstanceManager.needCommit();
-    const active = DeviceInstanceManager.inCommit();
-    if (need !== State.needCommit || active !== State.inCommit) {
-      State.needCommit = need;
-      State.inCommit = active;
+    const cstate = DeviceInstanceManager.commitState();
+    if (cstate !== State.commitState) {
+      State.commitState = cstate;
       html('commit-revert-buttons', Template.CRButtons({
-        changes: State.needCommit,
-        active: State.inCommit
+        changes: State.commitState
       }));
     }
   });

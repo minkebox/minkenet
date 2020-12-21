@@ -14,6 +14,7 @@ class DeviceInstanceManager extends EventEmitter {
     super();
     this.devices = {};
     this.activeCommit = false;
+    this.pendingCommit = false;
 
     this.onDeviceUpdate = this.onDeviceUpdate.bind(this);
   }
@@ -43,7 +44,17 @@ class DeviceInstanceManager extends EventEmitter {
     if (reason !== 'statistics') {
       this.emit('update');
     }
-    this.emit('commit');
+    let commit = false;
+    for (let id in this.devices) {
+      if (this.devices[id].needCommit()) {
+        commit = true;
+        break;
+      }
+    }
+    if (commit !== this.pendingCommit) {
+      this.pendingCommit = commit;
+      this.emit('commit');
+    }
   }
 
   getAllDevices() {
@@ -104,17 +115,16 @@ class DeviceInstanceManager extends EventEmitter {
     await DB.updateDeviceState(device._id, device.state.toDB());
   }
 
-  needCommit() {
-    for (let id in this.devices) {
-      if (this.devices[id].needCommit()) {
-        return true;
-      }
+  commitState() {
+    if (this.activeCommit) {
+      return 'active';
     }
-    return false;
-  }
-
-  inCommit() {
-    return this.activeCommit;
+    else if (this.pendingCommit) {
+      return 'pending';
+    }
+    else {
+      return null;
+    }
   }
 
   async commit(config) {
