@@ -48,6 +48,9 @@ Handlebars.registerHelper({
   or: function () {
     return Array.prototype.slice.call(arguments, 0, -1).some(Boolean);
   },
+  not: function(v) {
+    return !v;
+  },
   add: function(v1, v2) {
     return v1 + v2;
   },
