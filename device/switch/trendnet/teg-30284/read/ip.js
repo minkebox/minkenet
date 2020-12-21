@@ -23,7 +23,7 @@ module.exports = {
       dns: {
         $: 'oid',
         arg: '1.3.6.1.4.1.28866.3.1.28.1.1.0',
-        map: OID.toMacAddress
+        map: OID.toIPAddress
       }
     }
   }
