@@ -552,7 +552,9 @@ class Capture extends Page {
     this.attach = null;
     await this._getMacAddress();
     const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
+    Log('findCapturePort: device:', device);
     const entry = this.eaddr.find(entry => entry.name === device);
+    Log('findCapturePort: entry:', entry);
     if (entry) {
       const client = ClientManager.getClientByMac(entry.mac);
       if (client && client.connected && client.connected.portnr !== null) {
