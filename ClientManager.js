@@ -15,13 +15,13 @@ class ClientManager extends EventEmitter {
   constructor() {
     super();
     this.mac = {};
-    this.dev2mac = {};
   }
 
   async start() {
 
-    const info = await DB.getAllMacs() || [];
-    info.forEach(data => this.updateEntry(data._id, { name: data.name, firstSeen: data.firstSeen, lastSeen: data.lastSeen }));
+    ((await DB.getAllMacs()) || []).forEach(data => {
+      this.updateEntry(data._id, { name: data.name, firstSeen: data.firstSeen, lastSeen: data.lastSeen });
+    });
 
     DeviceInstanceManager.on('update', Debounce(() => {
       this.updateDeviceClients();
@@ -29,24 +29,21 @@ class ClientManager extends EventEmitter {
 
     TopologyManager.on('update', () => {
       // Topology has changed, so we need to recalculate all the connection points.
-      const devices = DeviceInstanceManager.getAuthenticatedDevices();
-      for (let mac in this.mac) {
-        this.mac[mac].connected = this.updateConnectionPoint(mac, devices);
-        Log('update topology mac:', mac);
-        this.emit('update.client', { mac: mac });
-      }
+      this.updateDeviceClients();
     });
 
     this.arp = ARP.getInstance();
     this.arp.on('update', () => {
       this.updateArpClients();
     });
-
     this.arp.start();
-    this.updateDeviceClients();
 
-    this.scrubEntries = this.scrubEntries.bind(this);
-    this._scrubTimer = setInterval(this.scrubEntries, SCRUB_TIMER);
+    this._scrubTimer = setInterval(() => {
+      this.updateDeviceClients();
+      this.scrubEntries();
+    }, SCRUB_TIMER);
+
+    this.updateDeviceClients();
     this.scrubEntries();
   }
 
@@ -62,81 +59,61 @@ class ClientManager extends EventEmitter {
     }
     await DB.removeMac(this.toDB(mac));
     delete this.mac[mac];
-    for (let devid in this.dev2mac) {
-      const dev2mac = this.dev2mac[devid];
-      if (dev2mac[mac]) {
-        delete dev2mac[mac];
-      }
-    }
     this.emit('update');
     return true;
   }
 
   async updateDeviceClients() {
     Log('update clients:');
+    let change = false;
+    // Build a map of device:portnr to quickly identify clients which
+    // are just connected to other parts of the network.
+    const net = {};
+    TopologyManager.getTopology().forEach(link => {
+      net[`${link[0].device._id}:${link[0].port}`] = true;
+      net[`${link[1].device._id}:${link[1].port}`] = true;
+    });
     const devices = DeviceInstanceManager.getAuthenticatedDevices();
     for (let i = 0; i < devices.length; i++) {
-      if (!this.dev2mac[devices[i]._id]) {
-        this.dev2mac[devices[i]._id] = {};
-      }
-    }
-
-    let change = false;
-    for (let i = 0; i < devices.length; i++) {
-      const dev = devices[i];
-      const macs = dev.readKV('network.clients');
-      const ndev2mac = {};
-      const odev2mac = this.dev2mac[dev._id] || {};
-      this.dev2mac[dev._id] = ndev2mac;
-      for (let key in macs) {
-        const info = macs[key];
-        const mac = info.mac;
-        const update = {};
-        if (info.ssid) {
-          update.ssid = info.ssid;
-        }
-        if (info.ip) {
-          update.ip = info.ip;
-        }
-        change |= this.updateEntry(mac, update);
-        if (ndev2mac[mac]) {
-          // Ignore mac on multiple ports for now
+      const device = devices[i];
+      const clients = device.readKV('network.clients');
+      for (let id in clients) {
+        const client = clients[id];
+        let portnr = client.portnr;
+        if (String(portnr).indexOf('lag') === 0) {
+          // Some devices report lags as being a port and so macs can appear on these virtual ports.
+          // We map these to the base port on the lag itself which is how we track things.
+          const link = TopologyManager.findLinkLag(device, parseInt(portnr.substring(3)));
+          if (!link) {
+            continue;
+          }
+          portnr = link[0].port;
         }
         else {
-          let portnr = info.portnr;
-          if (String(portnr).indexOf('lag') === 0) {
-            // Some devices report lags as being a port and so macs can appear on these virtual ports.
-            // We map these to the base port on the lag itself which is how we track things.
-            const link = TopologyManager.findLinkLag(dev, parseInt(portnr.substring(3)));
-            if (!link) {
-              continue;
-            }
+          // Othewise, just map the port to the base port of the lag (if there is one)
+          const link = TopologyManager.findLink(device, portnr);
+          if (link) {
             portnr = link[0].port;
           }
-          else {
-            // Othewise, just map the port to the base port of the lag (if there is one)
-            const link = TopologyManager.findLink(dev, portnr);
-            if (link) {
-              portnr = link[0].port;
-            }
-          }
-          ndev2mac[mac] = { portnr: portnr };
-          if (odev2mac[mac] && odev2mac[mac].portnr == ndev2mac[mac].portnr) {
-            odev2mac[mac].keep = true;
-          }
-          else {
-            change |= this.updateEntry(mac, { connected: this.updateConnectionPoint(mac, devices) });
-            Log('update mac:', mac, portnr);
-            this.emit('update.client', { mac: mac });
-          }
         }
-      }
-      if (!change) {
-        for (let key in odev2mac) {
-          if (!odev2mac[key].keep) {
-            change = true;
-            break;
-          }
+        const update = {};
+        if (client.ip) {
+          update.ip = client.ip;
+        }
+        if (client.hostname) {
+          update.hostname = client.hostname;
+        }
+        if (client.ssid) {
+          update.ssid = client.ssid;
+          update.connected = { device: device, portnr: client.ssid };
+        }
+        else if (!net[`${device._id}:${portnr}`]) {
+          update.connected = { device: device, portnr: portnr };
+        }
+        const changed = this.updateEntry(client.mac, update);
+        if (changed) {
+          change = true;
+          this.emit('update.client', { mac: client.mac });
         }
       }
     }
@@ -201,51 +178,7 @@ class ClientManager extends EventEmitter {
     return change;
   }
 
-  updateConnectionPoint(mac, devices) {
-    Log('updateconnectionpoint:', mac);
-
-    // Work out the most likely port this mac is attached to.
-    // Quickly look through all the places we've been seen. If we find an instance which
-    // isn't associated with a peer then this must be our port.
-    for (let i = 0; i < devices.length; i++) {
-      const device = devices[i];
-      const instance = (this.dev2mac[device._id] || {})[mac];
-      if (instance) {
-        const peer = TopologyManager.findLink(device, instance.portnr);
-        if (!peer) {
-          // Mac detected on a device/port without a peer - so this is the port it connects to
-          // (or via a device we dont know).
-          return { device: device, portnr: instance.portnr };
-        }
-      }
-    }
-
-    // The quick look didn't work, which means we have incomplete information. This is often the case where
-    // not all devices in a network report the clients they know. We will have to make our best guess.
-    for (let i = 0; i < devices.length; i++) {
-      // Dont check device we've been seen on (we know it wont be those otherwise the peer test would have found it)
-      if (!(this.dev2mac[devices[i]._id] || {})[mac]) {
-        let valid = true;
-        for (let j = 0; j < devices.length && valid; j++) {
-          const instance = (this.dev2mac[devices[j]._id] || {})[mac];
-          if (instance) {
-            const path = TopologyManager.findPath(devices[j], devices[i]);
-            if (!path || path[0][0].port != instance.portnr) {
-              valid = false;
-            }
-          }
-        }
-        if (valid) {
-          return { device: devices[i], portnr: null };
-        }
-      }
-    }
-    return null;
-  }
-
   scrubEntries() {
-    // Update entries before we scrub
-    this.updateDeviceClients();
     let anychange = false;
     const before = Date.now() - 60 * 60 * 1000;
     for (let addr in this.mac) {
@@ -274,11 +207,10 @@ class ClientManager extends EventEmitter {
 
   getClientsForDeviceAndPort(device, portnr) {
     const clients = [];
-    const macs = this.dev2mac[device._id] || {};
-    for (let addr in macs) {
-      const client = macs[addr];
-      if (client.portnr == portnr) {
-        clients.push(this.mac[addr]);
+    for (let mac in this.mac) {
+      const client = this.mac[mac];
+      if (client.connected && client.connected.device === device && client.connected.portnr === portnr) {
+        clients.push(client);
       }
     }
     return clients;
