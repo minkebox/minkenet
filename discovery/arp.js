@@ -17,8 +17,8 @@ class Arp extends EventEmitter {
       const run = async () => {
         let update = false;
         update |= this._update(await LocalDevices());
-        await new Promise(resolve => setTimeout(resolve, DEFAULT_WAIT_INTERVAL));
-        update |= this._update(await LocalDevices());
+        //await new Promise(resolve => setTimeout(resolve, DEFAULT_WAIT_INTERVAL));
+        //update |= this._update(await LocalDevices());
         if (update) {
           this.emit('update');
         }
