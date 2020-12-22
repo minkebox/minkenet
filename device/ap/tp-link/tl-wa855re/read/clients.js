@@ -18,10 +18,16 @@ module.exports = {
             const p = line.replace('\r', '').split(' ');
             const k = p[1];
             switch (p[0]) {
+              case 'ip':
+                const ip = p[2];
+                if (ip !== '0.0.0.0') {
+                  list[k] = { ip: ip };
+                }
+                break;
               case 'mac':
                 const mac = p[2].replace(/-/g,':').toLowerCase();
-                if (mac !== '00:00:00:00:00:00') {
-                  list[k] = { mac: mac };
+                if (k in list) {
+                  list[k].mac = mac;
                 }
                 break;
               case 'type':
