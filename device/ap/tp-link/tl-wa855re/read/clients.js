@@ -25,9 +25,8 @@ module.exports = {
                 }
                 break;
               case 'mac':
-                const mac = p[2].replace(/-/g,':').toLowerCase();
                 if (k in list) {
-                  list[k].mac = mac;
+                  list[k].mac = p[2].replace(/-/g,':').toLowerCase();
                 }
                 break;
               case 'type':
@@ -36,9 +35,13 @@ module.exports = {
                     list[k].portnr = 'lan';
                   }
                   else if (ssid) {
-                    list[k].portnr = ssid;
                     list[k].ssid = ssid;
                   }
+                }
+                break;
+              case 'name':
+                if (k in list) {
+                  list[k].hostname = p[2];
                 }
                 break;
               case 'cSsid':
@@ -48,11 +51,6 @@ module.exports = {
                 break;
             }
           });
-          for (let k in list) {
-            if (!('portnr' in list[k])) {
-              delete list[k];
-            }
-          }
           return Object.values(list);
         }
       }
