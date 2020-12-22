@@ -91,7 +91,14 @@ class ClientManager extends EventEmitter {
       for (let key in macs) {
         const info = macs[key];
         const mac = info.mac;
-        change |= this.updateEntry(mac, info.ssid ? { ssid: info.ssid } : {});
+        const update = {};
+        if (info.ssid) {
+          update.ssid = info.ssid;
+        }
+        if (info.ip) {
+          update.ip = info.ip;
+        }
+        change |= this.updateEntry(mac, update);
         if (ndev2mac[mac]) {
           // Ignore mac on multiple ports for now
         }
@@ -118,8 +125,7 @@ class ClientManager extends EventEmitter {
             odev2mac[mac].keep = true;
           }
           else {
-            change = true;
-            this.mac[mac].connected = this.updateConnectionPoint(mac, devices);
+            change |= this.updateEntry(mac, { connected: this.updateConnectionPoint(mac, devices) });
             Log('update mac:', mac, portnr);
             this.emit('update.client', { mac: mac });
           }
@@ -145,8 +151,7 @@ class ClientManager extends EventEmitter {
     const hosts = this.arp.getAddresses();
     for (let i = 0; i < hosts.length; i++) {
       const mac = hosts[i].txt.macAddress;
-      const hostname = hosts[i].txt.hostname;
-      const updated = this.updateEntry(mac, { ip: hosts[i].ip, hostname: hostname != '?' ? hostname : '' });
+      const updated = this.updateEntry(mac, { ip: hosts[i].ip, hostname: hosts[i].txt.hostname });
       if (updated) {
         Log('update arp mac:', mac);
         change = true;
@@ -239,6 +244,8 @@ class ClientManager extends EventEmitter {
   }
 
   scrubEntries() {
+    // Update entries before we scrub
+    this.updateDeviceClients();
     let anychange = false;
     const before = Date.now() - 60 * 60 * 1000;
     for (let addr in this.mac) {
