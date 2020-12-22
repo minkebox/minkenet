@@ -32,7 +32,7 @@ module.exports = {
               case 'type':
                 if (k in list) {
                   if (p[2] == '0') {
-                    list[k].portnr = 'lan';
+                    list[k].portnr = 0;
                   }
                   else if (ssid) {
                     list[k].ssid = ssid;
