@@ -110,7 +110,9 @@ class Clients extends Page {
         name: filter,
         ssid: filter,
         oui: filter,
-        connection: filter
+        connection: filter,
+        wifi: filter === 'wifi',
+        wired: filter === 'wired'
       });
     }
     if (this.state.selected && !this.state.clients[this.state.selected.mac]) {

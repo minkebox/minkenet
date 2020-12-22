@@ -242,6 +242,8 @@ class ClientManager extends EventEmitter {
         (filter.ip && client.ip && client.ip.includes(filter.ip)) ||
         (filter.hostname && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||
         (filter.name && client.name.toLowerCase().includes(filter.name)) ||
+        (filter.wifi && client.ssid) ||
+        (filter.wired && !client.ssid) ||
         (filter.ssid && client.ssid.toLowerCase().includes(filter.ssid)) ||
         (filter.oui && client.oui && client.oui.toLowerCase().includes(filter.oui)) ||
         (filter.connection && client.connected && client.connected.device.name.toLowerCase().includes(filter.connection))
