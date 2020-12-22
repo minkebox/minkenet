@@ -10,6 +10,7 @@ class Clients extends Page {
     super(root);
     this.state = {
       clients: null,
+      sortedclients: null,
       selected: null,
       yesterday: null,
       capture: null,
@@ -118,6 +119,8 @@ class Clients extends Page {
     if (this.state.selected && !this.state.clients[this.state.selected.mac]) {
       this.state.selected = null;
     }
+    this.state.sortedclients = Object.values(this.state.clients);
+    this.state.sortedclients.sort((a, b) => b.lastSeen - a.lastSeen);
   }
 
   getCapture(mac) {

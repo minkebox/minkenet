@@ -9,7 +9,7 @@
     <div class="col col-wifi">WiFi</div>
     <div class="col col-oui">Manufacturer</div>
   </div>
-  {{#each clients}}
+  {{#each sortedclients}}
   <div id="mac-{{id}}" class="row {{#if (eq ../selected.mac mac)}}active{{/if}} {{#if (gt firstSeen ../yesterday)}}new{{/if}} {{#if (gt lastSeen ../yesterday)}}seen{{/if}}" onclick="selectclient(event,'{{mac}}')">
     {{> ClientsSummary}}
   </div>
