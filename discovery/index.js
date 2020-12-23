@@ -138,10 +138,12 @@ class Discovery extends EventEmitter {
   _getAddressRoot() {
     const ifaces = OS.networkInterfaces();
     for (let iface in ifaces) {
-      for (let i = 0; i < ifaces[iface].length; i++) {
-        const address = ifaces[iface][i];
-        if (!address.internal && address.family === 'IPv4') {
-          return address.address.split('.').slice(0, -1).join('.');
+      if (iface !== 'lo' && iface !== 'dns0') {
+        for (let i = 0; i < ifaces[iface].length; i++) {
+          const address = ifaces[iface][i];
+          if (!address.internal && address.family === 'IPv4') {
+            return address.address.split('.').slice(0, -1).join('.');
+          }
         }
       }
     }
