@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const MacAddress = require('macaddress');
+const OS = require('os');
 const PCap = require('pcap');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
 const TopologyManager = require('./TopologyManager');
@@ -11,6 +11,7 @@ const CAPTURE_DEFAULT_DEVICE = 'eth0';
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
+const ACTIVATE_INTERVAL = 60 * 1000; // 1 minute
 
 
 class CaptureManager extends EventEmitter {
@@ -19,12 +20,18 @@ class CaptureManager extends EventEmitter {
     super();
     this.mirrors = [];
     this.restores = [];
-    this.eaddr = [];
+    this.mymacs = [];
     this.session = null;
+    this.running = false;
 
     this._onPacket = this._onPacket.bind(this);
+  }
 
-    this._updateMacAddresses();
+  async start() {
+    this.activateCapturePoint();
+  }
+
+  stop() {
   }
 
   async startCapture(config) {
@@ -32,13 +39,14 @@ class CaptureManager extends EventEmitter {
     if (this.session) {
       throw new Error('capture already started');
     }
+    if (!this.attach) {
+      throw new Error('no attachment point found');
+    }
     const snapsize = parseInt(config.targetDevice.readKV(`network.physical.port.${config.targetPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
 
     const filter = this._buildFilter(config.filter);
     Log('startCapture: filter: ', filter);
 
-    await this._updateMacAddresses();
-    this._findCapturePoint();
     this._calculateMirrors(config);
     await this._activateMirrors();
 
@@ -52,6 +60,7 @@ class CaptureManager extends EventEmitter {
       snap_length: snapsize
     });
     this.session.on('packet', this._onPacket);
+    this.running = true;
   }
 
   async stopCapture() {
@@ -62,6 +71,7 @@ class CaptureManager extends EventEmitter {
       this.session = null;
     }
     await this._deactivateMirrors();
+    this.running = false;
   }
 
   _buildFilter(config) {
@@ -74,8 +84,8 @@ class CaptureManager extends EventEmitter {
       filter.push('(not ether multicast)');
     }
     if (config.ignoreHost) {
-      this.eaddr.forEach(entry => {
-        filter.push(`(not ether host ${entry.mac})`);
+      this.mymacs.forEach(mac => {
+        filter.push(`(not ether host ${mac})`);
       });
     }
 
@@ -139,8 +149,8 @@ class CaptureManager extends EventEmitter {
     }
 
     // Filter traffic from this application
-    this.eaddr.forEach(entry => {
-      filter.push(`(not (ether host ${entry.mac} and ip proto \\tcp and port ${global.WEBPORT}))`);
+    this.mymacs.forEach(mac => {
+      filter.push(`(not (ether host ${mac} and ip proto \\tcp and port ${global.WEBPORT}))`);
     });
 
     return filter.join(' and ');
@@ -150,23 +160,6 @@ class CaptureManager extends EventEmitter {
     if (raw.link_type === 'LINKTYPE_ETHERNET') {
       this.emit('packet', raw);
     }
-  }
-
-  async _updateMacAddresses() {
-    return new Promise(resolve => {
-      MacAddress.all((err, ifaces) => {
-        if (!err) {
-          this.eaddr = [];
-          for (let name in ifaces) {
-            const mac = ifaces[name].mac;
-            if (mac) {
-              this.eaddr.push({ name: name, mac: mac });
-            }
-          }
-        }
-        resolve();
-      });
-    });
   }
 
   _calculateMirrors(config) {
@@ -249,27 +242,82 @@ class CaptureManager extends EventEmitter {
     await DeviceInstanceManager.commit({ direction: 'near-to-far', preconnect: false });
   }
 
-  _findCapturePoint() {
-    Log('findCapturePoint:');
-    this.attach = null;
-    const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
-    Log('findCapturePort: device:', device);
-    const entry = this.eaddr.find(entry => entry.name === device);
-    Log('findCapturePort: entry:', entry);
-    if (entry) {
-      const client = ClientManager.getClientByMac(entry.mac);
-      if (client && client.connected && client.connected.portnr !== null) {
-        this.attach = {
-          captureDevice: device,
-          entryDevice: client.connected.device,
-          entryPortnr: client.connected.portnr
-        };
-        Log('findCapturePoint: attach:', this.attach.captureDevice, this.attach.entryDevice.name, this.attach.entryPortnr);
-        return;
+  async activateCapturePoint() {
+    for (;;) {
+      Log('activateCapturePoint:');
+      const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
+      const ifaces = OS.networkInterfaces();
+      const iface = ifaces[device];
+      if (iface) {
+
+        // Look for the capture point in the network
+        const client = ClientManager.getClientByMac(iface[0].mac);
+        if (client && client.connected && client.connected.portnr !== null) {
+          this.attach = {
+            captureDevice: device,
+            entryDevice: client.connected.device,
+            entryPortnr: client.connected.portnr
+          };
+          Log('activateCapturePoint: attach:', this.attach.captureDevice, this.attach.entryDevice.name, this.attach.entryPortnr);
+        }
+        else {
+          this.attach = null;
+          Log('activateCapturePoint: no capture point:', device);
+        }
+
+        // Update list of my mac addresses
+        const macs = {};
+        for (let name in ifaces) {
+          macs[ifaces[name][0].mac] = true;
+        }
+        this.mymacs = Object.keys(macs);
+
+        // Send a packet out of the capture point so we can locate it in the network.
+        // We do this periodically to keep point alive in the network.
+        const mac = iface[0].mac.split(':').map(v => parseInt(v, 16));
+        const pkt = Buffer.from([
+          0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+          0, 0, 0, 0, 0, 0,
+          0x08, 0x06, // ARP
+          0x08, 0x00, // Ethernet,
+          0x00, 0x04, // IPv4
+          6, // HW len
+          4, // Protocol len
+          0, 1, // Request
+          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
+          0, 0, 0, 0, // My IP - 0.0.0.0 as placeholder
+          0, 0, 0, 0, 0, 0, // Target HW
+          0, 0, 0, 0 // Target IP
+        ]);
+
+        let session;
+        try {
+          session = PCap.createSession(device, {
+            promiscuous: false,
+            monitor: false,
+            buffer_size: CAPTURE_BUFFER_SIZE,
+            snap_length: CAPTURE_DEFAULT_SNAP_SIZE
+          });
+          session.inject(pkt);
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+        finally {
+          if (session) {
+            session.close();
+          }
+        }
+
+        // If we don't have the attachment point, sync the state from our capture-able devices
+        // so we can find it.
+        if (!this.attach) {
+          TopologyManager.getCaptureDevices().forEach(dev => {
+            dev.watch();
+            dev.unwatch();
+          });
+        }
       }
+      await new Promise(resolve => setTimeout(resolve, ACTIVATE_INTERVAL));
     }
-    Log('findCapturePoint: no capture point:');
-    throw new Error('no capture point');
   }
 
 }
