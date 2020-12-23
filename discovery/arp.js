@@ -66,7 +66,7 @@ class Arp extends EventEmitter {
     }
     await Promise.all(list);
     const output = await new Promise(resolve => {
-      ChildProcess.exec(`${Apps.arp} -an`, (err, sout, serr) => {
+      ChildProcess.exec(`${Apps.arp} -a`, (err, sout, serr) => {
         resolve(sout);
       });
     });
@@ -79,6 +79,9 @@ class Arp extends EventEmitter {
           const ip = p[1].replace(/^\((.*)\)$/,"$1");
           if (!this.found[ip] || this.found[ip].txt.macAddress != mac) {
             this.found[ip] = { type: 'arp', ip: ip, txt: { macAddress: mac } };
+            if (p[0] !== '?') {
+              this.found[ip].txt.hostname = p[0];
+            }
             update = true;
           }
         }
