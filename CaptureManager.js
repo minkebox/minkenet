@@ -1,5 +1,5 @@
 const EventEmitter = require('events');
-const OS = require('os');
+const MacAddress = require('macaddress');
 const PCap = require('pcap');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
 const TopologyManager = require('./TopologyManager');
@@ -246,12 +246,11 @@ class CaptureManager extends EventEmitter {
     for (;;) {
       Log('activateCapturePoint:');
       const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
-      const ifaces = OS.networkInterfaces();
-      const iface = ifaces[device];
-      if (iface) {
+      try {
+        const dmac = await MacAddress.one(device);
 
         // Look for the capture point in the network
-        const client = ClientManager.getClientByMac(iface[0].mac);
+        const client = ClientManager.getClientByMac(dmac);
         if (client && client.connected && client.connected.portnr !== null) {
           this.attach = {
             captureDevice: device,
@@ -266,15 +265,11 @@ class CaptureManager extends EventEmitter {
         }
 
         // Update list of my mac addresses
-        const macs = {};
-        for (let name in ifaces) {
-          macs[ifaces[name][0].mac] = true;
-        }
-        this.mymacs = Object.keys(macs);
+        this.mymacs = Object.values(await MacAddress.all()).map(entry => entry.mac);
 
         // Send a packet out of the capture point so we can locate it in the network.
         // We do this periodically to keep point alive in the network.
-        const mac = iface[0].mac.split(':').map(v => parseInt(v, 16));
+        const mac = dmac.split(':').map(v => parseInt(v, 16));
         const pkt = Buffer.from([
           0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
           0, 0, 0, 0, 0, 0,
@@ -315,6 +310,9 @@ class CaptureManager extends EventEmitter {
             dev.unwatch();
           });
         }
+      }
+      catch (_) {
+        Log(_);
       }
       await new Promise(resolve => setTimeout(resolve, ACTIVATE_INTERVAL));
     }
