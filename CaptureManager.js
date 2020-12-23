@@ -272,7 +272,7 @@ class CaptureManager extends EventEmitter {
         const mac = dmac.split(':').map(v => parseInt(v, 16));
         const pkt = Buffer.from([
           0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          0, 0, 0, 0, 0, 0,
+          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
           0x08, 0x06, // ARP
           0x08, 0x00, // Ethernet,
           0x00, 0x04, // IPv4
