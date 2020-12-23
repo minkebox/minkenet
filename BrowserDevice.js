@@ -68,13 +68,14 @@ class BrowserDeviceInstance extends DeviceInstance {
     if (!this._watchRunning) {
       this._watchRunning = true;
       const TopologyManager = require('./TopologyManager');
+      const CaptureManager = require('./CaptureManager');
       const task = async () => {
         if (this._watchCount === 0) {
           this._watchRunning = false;
           return;
         }
         const start = Date.now();
-        if (!TopologyManager.running) {
+        if (!TopologyManager.running && !CaptureManager.running) {
           try {
             if (await this.update()) {
               await DB.updateDeviceState(this._id, this.state.toDB());
