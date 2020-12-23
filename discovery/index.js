@@ -18,7 +18,9 @@ class Discovery extends EventEmitter {
     super();
     this.agents = {};
     this.addresses = {};
-    this.dhcpBase = this._getDHCPBase();
+    this.addressRoot = this._getAddressRoot();
+
+    ARP.singleton.root = this.addressRoot;
 
     this._doUpdate = this._doUpdate.bind(this);
   }
@@ -76,7 +78,7 @@ class Discovery extends EventEmitter {
               if (ipv4 === 'dhcp') {
                 if (!this.agents.dhcp) {
                   // Scan the network.
-                  this.agents.dhcp = NET.getInstance(this.dhcpBase);
+                  this.agents.dhcp = NET.getInstance(this.addressRoot);
                   this.agents.dhcp.first = 1;
                   this.agents.dhcp.count = 255;
                 }
@@ -133,7 +135,7 @@ class Discovery extends EventEmitter {
     }
   }
 
-  _getDHCPBase() {
+  _getAddressRoot() {
     const ifaces = OS.networkInterfaces();
     for (let iface in ifaces) {
       for (let i = 0; i < ifaces[iface].length; i++) {
