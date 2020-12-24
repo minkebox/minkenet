@@ -270,7 +270,7 @@ class CaptureManager extends EventEmitter {
       Log('activateCapturePoint:');
       const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
       try {
-        ChildProcess.execSync(`/bin/ip link set ${device} up`);
+        //ChildProcess.execSync(`/bin/ip link set ${device} up`);
         const dmac = await MacAddress.one(device);
 
         // Look for the capture point in the network
