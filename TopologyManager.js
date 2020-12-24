@@ -256,14 +256,19 @@ class TopologyManager extends EventEmitter {
   // Build an order for each node in the topology, with the entry node being the 0th.
   //
   buildOrder() {
-    const order = [];
     const devices = DeviceInstanceManager.getAuthenticatedDevices();
-    devices.forEach(device => {
-      const path = this.findPath(this._entry.device, device);
-      order.push({ order: path ? path.length : Number.MAX_SAFE_INTEGER, device: device });
-    });
-    order.sort((a,  b) => a.order - b.order);
-    this._order = order.map(value => value.device);
+    if (this._entry) {
+      const order = [];
+      devices.forEach(device => {
+        const path = this.findPath(this._entry.device, device);
+        order.push({ order: path ? path.length : Number.MAX_SAFE_INTEGER, device: device });
+      });
+      order.sort((a,  b) => a.order - b.order);
+      this._order = order.map(value => value.device);
+    }
+    else {
+      this._order = devices;
+    }
   }
 
   order(devices, direction) {
