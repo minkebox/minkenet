@@ -206,7 +206,15 @@ class CaptureManager extends EventEmitter {
   async _activateMirrors() {
     // Create chain of mirrors, keeping a record of what the there before so we can restore it later
     this.restores = [];
-    let first = true;
+    let both = true;
+    // If we're mirroring traffic through multiple switches, we can only capture the ingress traffic (the traffic entering
+    // the port at the end of the mirror chain). While we can set the end mirror to also mirror the egress traffic, when this
+    // enters the next switch in the chain, it will look at the source ethernet address and think the associated device has moved
+    // somewhere else in the network (it can't know the traffic is *special*). This will cause all kinds of problems resulting in
+    // the network failing.
+    if (this.mirrors.length > 1) {
+      both = false;
+    }
     for (let i = 0; i < this.mirrors.length; i++) {
       const mirror = this.mirrors[i];
       if (mirror.source !== mirror.target) {
@@ -217,10 +225,10 @@ class CaptureManager extends EventEmitter {
           enable: true,
           target: mirror.target,
           port: {
-            [mirror.source]: first ? { egress: true, ingress: true } : { ingress: true }
+            [mirror.source]: both ? { egress: true, ingress: true } : { ingress: true }
           }
         }, { replace: true });
-        first = false;
+        both = false;
       }
     }
     // Activate mirrors from furthest to nearest. Some devices might become difficult to access when mirroring
