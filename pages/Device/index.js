@@ -206,7 +206,7 @@ class Devices extends Page {
           await device.connect();
         }
 
-        await device.commit()
+        await device.commit();
       })()
     ]);
 
