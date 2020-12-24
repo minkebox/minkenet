@@ -37,42 +37,56 @@ class CaptureManager extends EventEmitter {
 
   async startCapture(config) {
     Log('startCapture:');
-    if (this.session) {
-      throw new Error('capture already started');
+    try {
+      this.running = true;
+
+      if (this.session) {
+        throw new Error('capture already started');
+      }
+      if (!this.attach) {
+        throw new Error('no attachment point found');
+      }
+      const snapsize = parseInt(config.targetDevice.readKV(`network.physical.port.${config.targetPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
+
+      const filter = this._buildFilter(config.filter);
+      Log('startCapture: filter: ', filter);
+
+      this._calculateMirrors(config);
+      await this._activateMirrors();
+
+      Log('startCapture: createSession:');
+      this.session = PCap.createSession(this.attach.captureDevice, {
+        filter: filter,
+        promiscuous: true,
+        monitor: false,
+        buffer_size: CAPTURE_BUFFER_SIZE,
+        buffer_timeout: CAPTURE_BUFFER_TIMEOUT,
+        snap_length: snapsize
+      });
+      this.session.on('packet', this._onPacket);
     }
-    if (!this.attach) {
-      throw new Error('no attachment point found');
+    catch (e) {
+      this.running = false;
+      throw e;
     }
-    const snapsize = parseInt(config.targetDevice.readKV(`network.physical.port.${config.targetPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
-
-    const filter = this._buildFilter(config.filter);
-    Log('startCapture: filter: ', filter);
-
-    this._calculateMirrors(config);
-    await this._activateMirrors();
-
-    Log('startCapture: createSession:');
-    this.session = PCap.createSession(this.attach.captureDevice, {
-      filter: filter,
-      promiscuous: true,
-      monitor: false,
-      buffer_size: CAPTURE_BUFFER_SIZE,
-      buffer_timeout: CAPTURE_BUFFER_TIMEOUT,
-      snap_length: snapsize
-    });
-    this.session.on('packet', this._onPacket);
-    this.running = true;
   }
 
   async stopCapture() {
     Log('stopCapture:');
-    if (this.session) {
-      this.session.off('packet', this._onPacket);
-      this.session.close();
-      this.session = null;
+    if (!this.running) {
+      return;
     }
-    await this._deactivateMirrors();
-    this.running = false;
+    try {
+      if (this.session) {
+        this.session.off('packet', this._onPacket);
+        this.session.close();
+        this.session = null;
+      }
+      await this._deactivateMirrors();
+    }
+    finally {
+      this.running = false;
+    }
   }
 
   _buildFilter(config) {
