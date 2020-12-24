@@ -6,6 +6,7 @@ const DeviceInstanceManager = require('./DeviceInstanceManager');
 const TopologyManager = require('./TopologyManager');
 const ClientManager = require('./ClientManager');
 const ConfigDB = require('./Config');
+const Apps = require('./utils/HelperApps');
 const Log = require('debug')('capture');
 
 const CAPTURE_DEFAULT_DEVICE = 'eth0';
@@ -270,7 +271,7 @@ class CaptureManager extends EventEmitter {
       Log('activateCapturePoint:');
       const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
       try {
-        //ChildProcess.execSync(`/bin/ip link set ${device} up`);
+        ChildProcess.execSync(`${Apps.ip} link set ${device} up`);
         const dmac = await MacAddress.one(device);
 
         // Look for the capture point in the network

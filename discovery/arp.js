@@ -1,13 +1,8 @@
 const EventEmitter = require('events');
-const FS = require('fs');
 const ChildProcess = require('child_process');
+const Apps = require('../utils/HelperApps');
 
 const DEFAULT_SEARCH_INTERVAL = 10 * 60 * 1000; // 10 minutes
-
-const Apps = {
-  ping: [ '/bin/ping' ],
-  arp: [ '/usr/sbin/arp', '/sbin/arp' ]
-};
 
 class Arp extends EventEmitter {
 
@@ -16,7 +11,6 @@ class Arp extends EventEmitter {
     this.root = '127.0.0';
     this.discovery = null;
     this.found = {};
-    this._resolveApps();
   }
 
   start() {
@@ -42,19 +36,6 @@ class Arp extends EventEmitter {
 
   getAddresses() {
     return Object.values(this.found);
-  }
-
-  _resolveApps() {
-    for (let app in Apps) {
-      const options = Apps[app];
-      Apps[app] = '/bin/false';
-      for (let i = 0; i < options.length; i++) {
-        if (FS.existsSync(options[i])) {
-          Apps[app] = options[i];
-          break;
-        }
-      }
-    }
   }
 
   async _discover() {
