@@ -481,7 +481,9 @@ class Eval {
           LogNav('goto:', url);
           response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
           LogNav('goneto:', url, response.ok());
-          //LogContent(await frame.content());
+          if (LogContent.enabled) {
+            LogContent(await frame.content());
+          }
         }
         catch (e) {
           Log(e);
