@@ -240,8 +240,8 @@ class ClientManager extends EventEmitter {
     for (let m in this.mac) {
       const client = this.mac[m];
       if (
-        !(client.blocked && filter.onlyBlocked) ||
-        !(client.limited && filter.onlyLimited)
+        (!client.blocked && filter.onlyBlocked) ||
+        (!client.limited && filter.onlyLimited)
       ) {
         continue;
       }
