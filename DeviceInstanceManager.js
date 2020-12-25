@@ -26,8 +26,10 @@ class DeviceInstanceManager extends EventEmitter {
       if (device) {
         this.devices[device._id] = device;
         device.on('update', this.onDeviceUpdate);
-        if (device.monitor) {
-          device.watch();
+        // Update every device on startup, but only keep updating if we're monitoring.
+        device.watch();
+        if (!device.monitor) {
+          device.unwatch();
         }
       }
     }));
