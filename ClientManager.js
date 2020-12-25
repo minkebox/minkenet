@@ -158,7 +158,9 @@ class ClientManager extends EventEmitter {
         lastSeen: info.lastSeen || now,
         instances: [],
         oui: oui ? oui.split('\n')[0] : null,
-        connected: null
+        connected: null,
+        blocked: false,
+        limited: null
       };
       this.mac[addr] = entry;
       change = true;
@@ -238,6 +240,12 @@ class ClientManager extends EventEmitter {
     for (let m in this.mac) {
       const client = this.mac[m];
       if (
+        !(client.blocked && filter.onlyBlocked) ||
+        !(client.limited && filter.onlyLimited)
+      ) {
+        continue;
+      }
+      else if (
         (filter.mac && client.mac.includes(filter.mac)) ||
         (filter.ip && client.ip && client.ip.includes(filter.ip)) ||
         (filter.hostname && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||

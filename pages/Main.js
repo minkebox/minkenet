@@ -63,7 +63,7 @@ async function WS(ctx) {
     overview: new VizTab(State),
     devices: new Page(State, { summary: new DevicesTab(State), ports: new PortsTab(State), radios: new WirelessTab(State) }),
     networks: new Page(State, { vlans: new NetworksTab(State), links: new LinksTab(State), wifi: new WiFiTab(State), capture: new CaptureTab(State) }),
-    clients: new Page(State, { all: new ClientsTab(State) }),
+    clients: new ClientsTab(State),
     config: new Page(State, { adoption: new ConfigAdoptionTab(State), monitor: new ConfigMonitorTab(State), other: new ConfigOtherTab(State) })
   };
   State.current = State.tabs.overview,

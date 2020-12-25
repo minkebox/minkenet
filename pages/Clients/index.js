@@ -14,7 +14,8 @@ class Clients extends Page {
       selected: null,
       yesterday: null,
       capture: null,
-      filter: ''
+      filter: '',
+      type: null
     };
 
     this.onUpdateClient = this.onUpdateClient.bind(this);
@@ -23,17 +24,32 @@ class Clients extends Page {
   select() {
     super.select();
 
-    this.updateClients();
     this.state.yesterday = Date.now() - 24 * 60 * 60 * 1000;
     this.state.topologyValid = TopologyManager.valid;
 
     ClientManager.on('update.client', this.onUpdateClient);
-
-    this.html('main-container', Template.ClientsTab(this.state));
   }
 
   deselect() {
     ClientManager.off('update.client', this.onUpdateClient);
+  }
+
+  tabSelect(tab, arg) {
+    switch (tab) {
+      case 'blocked':
+        this.state.type = 'blocked';
+        break;
+      case 'limited':
+        this.state.type = 'limited';
+        break;
+      case 'all':
+      default:
+        this.state.type = null;
+        break;
+    }
+
+    this.updateClients();
+    this.html('main-container', Template.ClientsTab(this.state));
   }
 
   onUpdateClient(evt) {
@@ -100,7 +116,7 @@ class Clients extends Page {
 
   updateClients() {
     const filter = this.state.filter.toLowerCase();
-    if (!filter) {
+    if (!filter && !this.state.type) {
       this.state.clients = ClientManager.getAllClients();
     }
     else {
@@ -113,7 +129,9 @@ class Clients extends Page {
         oui: filter,
         connection: filter,
         wifi: filter === 'wifi',
-        wired: filter === 'wired'
+        wired: filter === 'wired',
+        onlyBlocked: this.state.type === 'blocked',
+        onlyLimited: this.state.type === 'limited'
       });
     }
     if (this.state.selected && !this.state.clients[this.state.selected.mac]) {
