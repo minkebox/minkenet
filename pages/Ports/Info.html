@@ -65,37 +65,27 @@
       </div>
     </div>
   </div>
-  {{#with XselectedPort.port.statistics}}
+  {{#if selectedPort.port.limit}}
   <div class="card">
-    <div data-toggle="collapse" data-target="#device-ports-statistics" class="card-header">
-      <div>Statistics</div>
+    <div data-toggle="collapse" data-target="#device-ports-limits" class="card-header">
+      <div>Limits</div>
     </div>
-    <div id="device-ports-statistics" class="collapse show">
+    <div id="device-ports-limits" class="collapse show">
       <div class="card-body">
         <div class="list-group">
           <form>
-            {{#if (isdefined rx.bytes)}}
-            {{>RO name="RX (MB)" value=(fixed (div rx.bytes 1048576) 2)}}
-            {{else if (isdefined rx.packets)}}
-            {{>RO name="RX (MPkts)"value=(fixed (div rx.packets 1048576) 2)}}
-            {{/if}}
-            {{#if (isdefined tx.bytes)}}
-            {{>RO name="TX (MB)" value=(fixed (div tx.bytes 1048576) 2)}}
-            {{else if (isdefined tx.packets)}}
-            {{>RO name="TX (MPkts)" value=(fixed (div tx.packets 1048576) 2)}}
-            {{/if}}
-            {{#if (isdefined rx.errors)}}
-            {{>RO name="RX errors" value=(fixed rx.errors)}}
-            {{/if}}
-            {{#if (isdefined tx.errors)}}
-            {{>RO name="TX errors" value=(fixed tx.errors)}}
-            {{/if}}
+            {{#with selectedPort}}
+            {{#with port}}
+            {{>RW name="Ingress (KB/s)" cmd="update.ingress" kv=(concat 'network.physical.port.' ../portnr '.limit.ingress') value=limit.ingress scale=1024}}
+            {{>RW name="Egress (KB/s)" cmd="update.egress" kv=(concat 'network.physical.port.' ../portnr '.limit.egress') value=limit.egress scale=1024}}
+            {{/with}}
+            {{/with}}
           </form>
         </div>
       </div>
     </div>
   </div>
-  {{/with}}
+  {{/if}}
   {{#if (gt selectedPort.clients.total 0)}}
   {{#with selectedPort.clients}}
   <div class="card">

@@ -66,8 +66,8 @@
           <div class="list-group">
             <form>
               {{#if selected.limited}}
-              {{>RW name="Ingress (bytes/sec)" cmd="update.ingress" key=selected.mac value=selected.limited.ingress}}
-              {{>RW name="Egress (bytes/sec)" cmd="update.egress" key=selected.mac value=selected.limited.egress}}
+              {{>RW name="Ingress (KBps)" cmd="update.ingress" key=selected.mac value=selected.limited.ingress scale=1024}}
+              {{>RW name="Egress (KBps)" cmd="update.egress" key=selected.mac value=selected.limited.egress scale=1024}}
               {{/if}}
               {{#if (isdefined selected.blocked)}}
               {{>RWCheckbox name="Blocked" cmd="update.blocked" key=selected.mac value=selected.blocked}}
