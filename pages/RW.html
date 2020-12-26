@@ -7,13 +7,13 @@
     {{else}}
     <input id="fid-{{#if kv}}{{kv}}{{else if cmd}}{{cmd}}{{/if}}"
       class="device-property-rw small"
-      value="{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}"
+      value="{{#if value.$}}{{#if scale}}{{div value.$ scale}}{{else}}{{value.$}}{{/if}}{{else}}{{#if scale}}{{div value scale}}{{else}}{{value}}{{/if}}{{/if}}"
       spellcheck="off"
       autocapitalize="off"
       autocomplete="off"
       {{#if default}}placeholder="{{default}}"{{/if}}
-      {{#if kv}}oninput="this.validity.patternMismatch || send('kv.update',{k:'{{kv}}',v:this.value},0.5)"{{/if}}
-      {{#if cmd}}oninput="this.validity.patternMismatch || send('{{cmd}}',{k:'{{key}}',v:this.value},0.5)"{{/if}}
+      {{#if kv}}oninput="this.validity.patternMismatch || send('kv.update',{k:'{{kv}}',v:this.value{{#if scale}}*{{scale}}{{/if}} },0.5)"{{/if}}
+      {{#if cmd}}oninput="this.validity.patternMismatch || send('{{cmd}}',{k:'{{key}}',v:this.value{{#if scale}}*{{scale}}{{/if}} },0.5)"{{/if}}
       {{#if pattern}}pattern="{{pattern}}"{{/if}}
     >
     {{/if}}
