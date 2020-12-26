@@ -5,7 +5,7 @@
     <input type="checkbox" class="device-property-rwcheckbox small" value="1"
     {{#if (isdefined value.$)}}{{#if value.$}}checked{{/if}}{{else}}{{#if value}}checked{{/if}}{{/if}}
     {{#if kv}}onchange="send('kv.update',{k:'{{kv}}',v:this.checked},0.5);"{{/if}}
-    {{#if cmd}}onchange="send('{{cmd}}',{k:"{{key}}",v:this.checked},0.5)"{{/if}}
+    {{#if cmd}}onchange="send('{{cmd}}',{k:'{{key}}',v:this.checked},0.5)"{{/if}}
     >
   </div>
 </div>
