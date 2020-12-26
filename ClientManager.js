@@ -73,6 +73,7 @@ class ClientManager extends EventEmitter {
       net[`${link[0].device._id}:${link[0].port}`] = true;
       net[`${link[1].device._id}:${link[1].port}`] = true;
     });
+    const attach = TopologyManager.getAttachmentPoint();
     const devices = DeviceInstanceManager.getAuthenticatedDevices();
     for (let i = 0; i < devices.length; i++) {
       const device = devices[i];
@@ -118,7 +119,7 @@ class ClientManager extends EventEmitter {
               egress: port.limit.egress
             };
           }
-          if ('enable' in port) {
+          if ('enable' in port && !(attach.device === device && attach.port === portnr)) {
             update.blocked = !port.enable;
           }
         }
