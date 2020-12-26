@@ -98,10 +98,6 @@ class Devices extends Page {
     }
   }
 
-  async 'device.details.summary.updaterequest' (msg) {
-    send('device.details.summary.update', { html: Template.DeviceDetails(this.state), key: msg.value });
-  }
-
   async 'kv.update' (msg) {
     this.state.selectedDevice.writeKV(msg.value.k, msg.value.v);
   }

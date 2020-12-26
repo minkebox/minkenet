@@ -118,21 +118,6 @@ onMessage['modal.hide.all'] = msg => {
   }
 }
 
-onMessage['device.details.summary.update'] = msg => {
-  let details = document.querySelector('.device-details-container');
-  let builder = document.createElement('tbody');
-  builder.innerHTML = msg.value.html;
-  if (msg.value.key) {
-    details = details.querySelector(msg.value.key);
-    builder = builder.querySelector(msg.value.key);
-  }
-  else {
-    details = details.firstElementChild;
-    builder = builder.firstElementChild;
-  }
-  details.replaceWith(builder);
-}
-
 const MAX_CAPTURE_PACKETS = 500;
 let pendingCaptureScroll = null;
 let captureRunning = false;

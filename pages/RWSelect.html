@@ -2,7 +2,8 @@
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
   <div class="col-sm-6">
   <select class="device-property-rwselect small"
-    onchange="{{#if kv}}send('kv.update',{ k:'{{kv}}',v:event.target.value}){{/if}}{{#if cmd}}send('{{cmd}}',{k:'{{key}}',v:this.value}){{/if}}{{#if update}};send('device.details.summary.updaterequest','{{update}}'){{/if}}">
+      {{#if kv}}onchange="send('kv.update',{ k:'{{kv}}',v:event.target.value})"{{/if}}
+      {{#if cmd}}onchange="send('{{cmd}}',{k:'{{key}}',v:this.value})"{{/if}}">
       {{#if options}}
       {{#each options}}
       <option {{#if (or (eq ../value this) (eq ../value.$ this))}}selected{{/if}} value="{{this}}">{{this}}</option>
