@@ -87,9 +87,21 @@ class Clients extends Page {
     this.state.selected.connected.device.writeKV(msg.value.k, msg.value.v);
   }
 
-  async 'client.name' (msg) {
+  async 'update.name' (msg) {
     ClientManager.setName(msg.value.k, msg.value.v);
     this.html(`mac-${msg.value.k.replace(/:/g, '-')}`, Template.ClientsSummary(this.state.selected));
+  }
+
+  async 'update.ingress' (msg) {
+    ClientManager.setIngress(msg.value.k, parseInt(msg.value.v));
+  }
+
+  async 'update.egress' (msg) {
+    ClientManager.setEgress(msg.value.k, parseInt(msg.value.v));
+  }
+
+  async 'update.blocked' (msg) {
+    ClientManager.setBlocked(msg.value.k, !!msg.value.v);
   }
 
   async 'client.filter' (msg) {

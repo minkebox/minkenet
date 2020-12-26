@@ -47,7 +47,7 @@
           <div class="list-group">
             <form>
               {{>RO name="Mac Address" value=selected.mac}}
-              {{>RW name="Name" cmd="client.name" key=selected.mac value=selected.name}}
+              {{>RW name="Name" cmd="update.name" key=selected.mac value=selected.name}}
               {{>RO name="IP Address" value=selected.ip}}
               {{>RO name="Hostname" value=selected.hostname}}
               {{>RO name="Manufacturer" value=selected.oui}}
@@ -56,6 +56,28 @@
         </div>
       </div>
     </div>
+    {{#if (or selected.limited (isdefined selected.blocked))}}
+    <div class="card">
+      <div data-toggle="collapse" data-target="#clients-limits" class="card-header">
+        <div>Limits</div>
+      </div>
+      <div id="clients-limits" class="collapse show">
+        <div class="card-body">
+          <div class="list-group">
+            <form>
+              {{#if selected.limited}}
+              {{>RW name="Ingress (bytes/sec)" cmd="update.ingress" key=selected.mac value=selected.limited.ingress}}
+              {{>RW name="Egress (bytes/sec)" cmd="update.egress" key=selected.mac value=selected.limited.egress}}
+              {{/if}}
+              {{#if (isdefined selected.blocked)}}
+              {{>RWCheckbox name="Blocked" cmd="update.blocked" key=selected.mac value=selected.blocked}}
+              {{/if}}
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    {{/if}}
     {{#if selected.ssid}}
     <div class="card">
       <div data-toggle="collapse" data-target="#clients-wifi" class="card-header">

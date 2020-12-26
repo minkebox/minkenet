@@ -106,9 +106,17 @@ class ClientManager extends EventEmitter {
         if (client.ssid) {
           update.ssid = client.ssid;
           update.connected = { device: device, portnr: client.ssid };
+          update.limited = null;
         }
         else if (!net[`${device._id}:${portnr}`]) {
           update.connected = { device: device, portnr: portnr };
+          const limit = device.readKV(`network.physical.port.${portnr}.limit`);
+          if (limit) {
+            update.limited = {
+              ingress: limit.ingress,
+              egress: limit.egress
+            };
+          }
         }
         const changed = this.updateEntry(client.mac, update);
         if (changed) {
@@ -159,8 +167,8 @@ class ClientManager extends EventEmitter {
         instances: [],
         oui: oui ? oui.split('\n')[0] : null,
         connected: null,
-        blocked: false,
-        limited: null
+        blocked: null,
+        limited: info.limited
       };
       this.mac[addr] = entry;
       change = true;
@@ -207,6 +215,37 @@ class ClientManager extends EventEmitter {
     }
   }
 
+  async setName(mac, name) {
+    this.mac[mac].name = name;
+    await DB.updateMac(this.toDB(mac));
+  }
+
+  async setIngress(mac, value) {
+    const client = this.mac[mac];
+    if (client && client.limited) {
+      client.limited.ingress = value;
+      if (client.connected && typeof client.connected.portnr === 'number') {
+        // Wired
+        client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.ingress`, value);
+      }
+    }
+  }
+
+  async setEgress(mac, value) {
+    const client = this.mac[mac];
+    if (client && client.limited) {
+      client.limited.egress = value;
+      if (client.connected && typeof client.connected.portnr === 'number') {
+        // Wired
+        client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.egress`, value);
+      }
+    }
+  }
+
+  async setBlocked(mac, isblocked) {
+
+  }
+
   getClientsForDeviceAndPort(device, portnr) {
     const clients = [];
     for (let mac in this.mac) {
@@ -239,23 +278,24 @@ class ClientManager extends EventEmitter {
     const clients = {};
     for (let m in this.mac) {
       const client = this.mac[m];
-      if (
-        (!client.blocked && filter.onlyBlocked) ||
-        (!client.limited && filter.onlyLimited)
-      ) {
-        continue;
+      let include = true;
+      if (filter.onlyBlocked && !client.blocked) {
+        include = false;
       }
-      else if (
-        (filter.mac && client.mac.includes(filter.mac)) ||
-        (filter.ip && client.ip && client.ip.includes(filter.ip)) ||
-        (filter.hostname && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||
-        (filter.name && client.name.toLowerCase().includes(filter.name)) ||
-        (filter.wifi && client.ssid) ||
-        (filter.wired && !client.ssid) ||
-        (filter.ssid && client.ssid.toLowerCase().includes(filter.ssid)) ||
-        (filter.oui && client.oui && client.oui.toLowerCase().includes(filter.oui)) ||
-        (filter.connection && client.connected && client.connected.device.name.toLowerCase().includes(filter.connection))
-      ) {
+      if (filter.onlyLimited && !(client.limited && (client.limited.ingress || client.limited.egress))) {
+        include = false;
+      }
+      if (include && (
+        ('mac' in filter && client.mac.includes(filter.mac)) ||
+        ('ip' in filter && client.ip && client.ip.includes(filter.ip)) ||
+        ('hostname' in filter && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||
+        ('name' in filter && client.name.toLowerCase().includes(filter.name)) ||
+        ('wifi' in filter && filter.wifi && client.ssid) ||
+        ('wired' in filter && filter.wired && !client.ssid) ||
+        ('ssid' in filter && client.ssid.toLowerCase().includes(filter.ssid)) ||
+        ('oui' in filter && client.oui && client.oui.toLowerCase().includes(filter.oui)) ||
+        ('connection' in filter && client.connected && client.connected.device.name.toLowerCase().includes(filter.connection))
+      )) {
         clients[m] = client;
       }
     }
@@ -271,11 +311,6 @@ class ClientManager extends EventEmitter {
       }
     });
     return dmacs;
-  }
-
-  async setName(mac, name) {
-    this.mac[mac].name = name;
-    await DB.updateMac(this.toDB(mac));
   }
 
   toDB(mac) {
