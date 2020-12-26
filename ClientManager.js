@@ -257,7 +257,6 @@ class ClientManager extends EventEmitter {
   }
 
   async setBlocked(mac, isblocked) {
-    console.log('setBlocked', mac, isblocked);
     const client = this.mac[mac];
     if (client) {
       client.blocked = isblocked;
