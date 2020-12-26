@@ -107,15 +107,19 @@ class ClientManager extends EventEmitter {
           update.ssid = client.ssid;
           update.connected = { device: device, portnr: client.ssid };
           update.limited = null;
+          update.blocked = null;
         }
         else if (!net[`${device._id}:${portnr}`]) {
           update.connected = { device: device, portnr: portnr };
-          const limit = device.readKV(`network.physical.port.${portnr}.limit`);
-          if (limit) {
+          const port = device.readKV(`network.physical.port.${portnr}`);
+          if (port.limit) {
             update.limited = {
-              ingress: limit.ingress,
-              egress: limit.egress
+              ingress: port.limit.ingress,
+              egress: port.limit.egress
             };
+          }
+          if ('enable' in port) {
+            update.blocked = !port.enable;
           }
         }
         const changed = this.updateEntry(client.mac, update);
@@ -167,7 +171,7 @@ class ClientManager extends EventEmitter {
         instances: [],
         oui: oui ? oui.split('\n')[0] : null,
         connected: null,
-        blocked: null,
+        blocked: info.blocked,
         limited: info.limited
       };
       this.mac[addr] = entry;
@@ -224,9 +228,14 @@ class ClientManager extends EventEmitter {
     const client = this.mac[mac];
     if (client && client.limited) {
       client.limited.ingress = value;
-      if (client.connected && typeof client.connected.portnr === 'number') {
-        // Wired
-        client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.ingress`, value);
+      if (client.connected) {
+        if (client.ssid) {
+          // WiFi
+        }
+        else if (typeof client.connected.portnr === 'number') {
+          // Wired
+          client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.ingress`, value);
+        }
       }
     }
   }
@@ -235,15 +244,33 @@ class ClientManager extends EventEmitter {
     const client = this.mac[mac];
     if (client && client.limited) {
       client.limited.egress = value;
-      if (client.connected && typeof client.connected.portnr === 'number') {
-        // Wired
-        client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.egress`, value);
+      if (client.connected) {
+        if (client.ssid) {
+          // WiFi
+        }
+        else if (typeof client.connected.portnr === 'number') {
+          // Wired
+          client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.limit.egress`, value);
+        }
       }
     }
   }
 
   async setBlocked(mac, isblocked) {
-
+    console.log('setBlocked', mac, isblocked);
+    const client = this.mac[mac];
+    if (client) {
+      client.blocked = isblocked;
+      if (client.connected) {
+        if (client.ssid) {
+          // WiFi
+        }
+        else if (typeof client.connected.portnr === 'number') {
+          // Wired
+          client.connected.device.writeKV(`network.physical.port.${client.connected.portnr}.enable`, !isblocked);
+        }
+      }
+    }
   }
 
   getClientsForDeviceAndPort(device, portnr) {
