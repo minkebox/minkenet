@@ -1,7 +1,6 @@
 const EventEmitter = require('events');
 const Debounce = require('./utils/Debounce');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
-const { stat } = require('fs');
 
 class WiFiManager extends EventEmitter {
 
