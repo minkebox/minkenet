@@ -686,7 +686,10 @@ class Eval {
   }
 
   async map(value, result) {
-    if (value.map) {
+    if (result === null || result === undefined) {
+      return result;
+    }
+    else if (value.map) {
       if (typeof value.map === 'function') {
         result = await value.map(result);
       }
