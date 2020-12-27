@@ -270,7 +270,10 @@ class Capture extends Page {
         this.state.selectedPoints.splice(conn, 1);
       }
       else {
-        this.state.selectedPoints.push({ device: device, portnr: portnr });
+        const attach = CaptureManager.getAttachmentPoint();
+        if (attach && !(attach.device === device && attach.portnr === portnr)) {
+          this.state.selectedPoints.push({ device: device, portnr: portnr });
+        }
       }
     }
 

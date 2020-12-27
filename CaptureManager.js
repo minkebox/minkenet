@@ -36,6 +36,16 @@ class CaptureManager extends EventEmitter {
   stop() {
   }
 
+  getAttachmentPoint() {
+    if (!this.attach) {
+      return null;
+    }
+    return {
+      device: this.attach.entryDevice,
+      portnr: this.attach.entryPortnr
+    };
+  }
+
   async startCapture(config) {
     Log('startCapture:');
     try {
@@ -188,6 +198,11 @@ class CaptureManager extends EventEmitter {
       Log('_calculateMirrors: no target points');
       throw new Error('no points');
     }
+    config.points.forEach(point => {
+      if (point.device === this.attach.entryDevice && point.portnr === this.attach.entryPortnr) {
+        throw new Error('cannot capture attachment point');
+      }
+    });
 
     const mirrors = {};
     config.points.forEach(point => {
