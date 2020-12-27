@@ -74,8 +74,10 @@ const Device = {
     $3: require('../tl-sg108e/write/igmp'),
     $4: require('../tl-sg108e/write/vlan'),
     $5: require('../tl-sg108e/write/lag'),
-    $6: require('../tl-sg108e/write/mirror'),
-    $7: require('../tl-sg108e/write/ip')
+    $6: require('../tl-sg108e/write/physical'),
+    $7: require('../tl-sg108e/write/mirror'),
+    $8: require('../tl-sg108e/write/limits'),
+    $9: require('../tl-sg108e/write/ip')
   },
   commit: require('../tl-sg108e/write/commit')
 
