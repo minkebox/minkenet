@@ -8,16 +8,17 @@ module.exports = {
             $: `guard`,
             arg: {
               $: `fetch`,
-              arg: `/port_setting.cgi`,
+              arg: `/qos_bandwidth_set.cgi`,
+              method: 'post',
               params: {
                 igrRate: {
                   $: 'kv',
-                  arg: `${itr.path}.ingress`,
+                  arg: `${itr.path}.limit.ingress`,
                   map: v => v * 8 / 1024
                 },
                 egrRate: {
                   $: 'kv',
-                  arg: `${itr.path}.egress`,
+                  arg: `${itr.path}.limit.egress`,
                   map: v => v * 8 / 1024
                 },
                 [`sel_${itr.index + 1}`]: 1,

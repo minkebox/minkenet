@@ -18,7 +18,7 @@ module.exports = {
                 issExtRateCtrlIndex: `${itr.index + 1}`,
                 issExtRateCtrlPortIngressRateLimit: {
                   $: 'kv',
-                  arg: `${itr.path}.ingress`,
+                  arg: `${itr.path}.limit.ingress`,
                   map: v => {
                     v = 8 * v / (1024 * 1024);
                     if (v <= 1) {
@@ -44,7 +44,7 @@ module.exports = {
                 },
                 issExtRateCtrlPortEgressRateLimit: {
                   $: 'kv',
-                  arg: `${itr.path}.egress`,
+                  arg: `${itr.path}.limit.egress`,
                   map: v => {
                     v = 8 * v / (1024 * 1024);
                     if (v <= 1) {
