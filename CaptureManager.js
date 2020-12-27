@@ -47,7 +47,7 @@ class CaptureManager extends EventEmitter {
       if (!this.attach) {
         throw new Error('no attachment point found');
       }
-      const snapsize = parseInt(config.targetDevice.readKV(`network.physical.port.${config.targetPortNr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
+      const snapsize = parseInt(this.attach.entryDevice.readKV(`network.physical.port.${this.attach.entryPortnr}.framesize`) || CAPTURE_DEFAULT_SNAP_SIZE);
 
       const filter = this._buildFilter(config.filter);
       Log('startCapture: filter: ', filter);
@@ -179,73 +179,66 @@ class CaptureManager extends EventEmitter {
   }
 
   _calculateMirrors(config) {
-    this.mirrors = [];
 
     if (!this.attach) {
       Log('_calculateMirrors: no attachment port:');
       throw new Error('no attachment port');
     }
-    if (!config.targetDevice) {
-      Log('_calculateMirrors: no target device');
-      throw new Error('no device');
+    if (!config.points || !config.points.length) {
+      Log('_calculateMirrors: no target points');
+      throw new Error('no points');
     }
 
-    // Find the path between the attachment point and the port we want to capture.
-    const path = TopologyManager.findPath(config.targetDevice, this.attach.entryDevice);
-    if (!path) {
-      Log('_calculateMirrors: cannot build mirrors');
-      throw new Error('no mirrors possible');
-    }
+    const mirrors = {};
+    config.points.forEach(point => {
 
-    // Convert path into a set of mirrors
-    let current = { device: config.targetDevice, port: config.targetPortNr };
-    for (let i = 0; i < path.length; i++) {
-      const link = path[i];
-      const exit = link[0];
-      if (current.device != exit.device) {
-        Log(`_calculateMirrors: bad link: ${current.device._id} - ${exit.device._id}`);
-        throw new Error('bad link');
+      // Find the path between the attachment point and the port we want to capture.
+      const path = TopologyManager.findPath(point.device, this.attach.entryDevice);
+      if (!path) {
+        Log('_calculateMirrors: cannot build mirrors');
+        throw new Error('no mirrors possible');
       }
-      this.mirrors.push({ device: current.device, source: current.port, target: exit.port });
-      current = link[1];
-    }
-    if (current.device != this.attach.entryDevice) {
-      Log(`_calculateMirrors: bad link to attach: ${current.device.name} - ${this.attach.entryDevice.name}`);
-      throw new Error('bad link to attach');
-    }
-    this.mirrors.push({ device: this.attach.entryDevice, source: current.port, target: this.attach.entryPortnr });
+      // Add the attach point to the end of the path
+      path.push([ { device: this.attach.entryDevice, port: this.attach.entryPortnr }, {} ]);
 
-    Log('_calculateMirrors: mirrors:', this.mirrors.map(m => [{ device: m.device.name, source: m.source, target: m.target }][0]));
+      // Convert path into a set of mirrors
+      let current = { device: point.device, port: point.portnr };
+      for (let i = 0; i < path.length; i++) {
+        const mirror = mirrors[current.device._id] || (mirrors[current.device._id] = { device: current.device, sources: [], target: null });
+        if (mirror.target === null || mirror.target === path[i][0].port) {
+          mirror.target = path[i][0].port;
+          mirror.sources.push(current.port);
+        }
+        else {
+          throw new Error('impossible mirrors');
+        }
+        current = path[i][1];
+      }
+    });
+    this.mirrors = Object.values(mirrors);
+
+    Log('_calculateMirrors: mirrors:', this.mirrors.map(m => [{ device: m.device.name, sources: m.sources, target: m.target }][0]));
   }
 
   async _activateMirrors() {
     // Create chain of mirrors, keeping a record of what the there before so we can restore it later
     this.restores = [];
-    let both = true;
     // If we're mirroring traffic through multiple switches, we can only capture the ingress traffic (the traffic entering
     // the port at the end of the mirror chain). While we can set the end mirror to also mirror the egress traffic, when this
     // enters the next switch in the chain, it will look at the source ethernet address and think the associated device has moved
     // somewhere else in the network (it can't know the traffic is *special*). This will cause all kinds of problems resulting in
     // the network failing.
-    if (this.mirrors.length > 1) {
-      both = false;
-    }
-    for (let i = 0; i < this.mirrors.length; i++) {
-      const mirror = this.mirrors[i];
-      if (mirror.source !== mirror.target) {
-        const current = mirror.device.readKV(`network.mirror.0`);
-        this.restores.push({ device: mirror.device, mirror: current });
-        mirror.device.writeKV('network.mirror.0',
-        {
-          enable: true,
-          target: mirror.target,
-          port: {
-            [mirror.source]: both ? { egress: true, ingress: true } : { ingress: true }
-          }
-        }, { replace: true });
-        both = false;
-      }
-    }
+    this.mirrors.forEach(mirror => {
+      this.restores.push({ device: mirror.device, mirror: mirror.device.readKV(`network.mirror.0`) });
+      const ports = {};
+      mirror.sources.forEach(portnr => ports[portnr] = { ingress: true });
+      mirror.device.writeKV('network.mirror.0',
+      {
+        enable: true,
+        target: mirror.target,
+        port: ports
+      }, { replace: true });
+    });
     // Activate mirrors from furthest to nearest. Some devices might become difficult to access when mirroring
     // is happening on nodes between outselves and them (I'm not sure that it should, as tcp should deal with duplicate
     // packets but some switches clearly have issues with this).

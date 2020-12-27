@@ -143,7 +143,8 @@ class Capture extends Page {
         ignoreBroadcast: true,
         ignoreMulticast: true,
         ignoreHost: true
-      }
+      },
+      selectedPoints: []
     };
     this.eaddr = [];
     this.attach = null;
@@ -162,14 +163,12 @@ class Capture extends Page {
     TopologyManager.on('update', this.onUpdate);
     CaptureManager.on('packet', this.onPacket);
 
+    this.onUpdate();
+
     if (arg) {
-      this.state.selectedDevice = arg.device;
-      this.state.selectedPortNr = arg.portnr;
+      this.togglePort(arg.device, arg.portnr);
       this.state.capture = arg.capture;
     }
-
-    this.state.devices = null;
-    this.updateState(this.state.selectedDevice, this.state.selectedPortNr);
 
     this.html('main-container', Template.CaptureTab(this.state));
   }
@@ -190,8 +189,10 @@ class Capture extends Page {
   }
 
   onUpdate() {
-    this.state.devices = null;
-    this.updateState(null, null);
+    this.state.devices = TopologyManager.getCaptureDevices();
+    this.state.topologyValid = TopologyManager.valid;
+    this.state.selectedPoints = [];
+    this.togglePort();
   }
 
   packet(raw, text) {
@@ -220,8 +221,7 @@ class Capture extends Page {
         this.message(Template.CaptureMsgStarting());
         this.state.capture = msg.value;
         await CaptureManager.startCapture({
-          targetDevice: this.state.selectedDevice,
-          targetPortNr: this.state.selectedPortNr,
+          points: this.state.selectedPoints,
           filter: this.state.capture
         });
         this.message(Template.CaptureMsgStarted());
@@ -257,36 +257,33 @@ class Capture extends Page {
 
   async 'device.port.select' (msg) {
     const device = DeviceInstanceManager.getDeviceById(msg.value.id);
-    const port = parseInt(msg.value.port);
-    this.updateState(device, port);
+    const portnr = parseInt(msg.value.port);
+    this.togglePort(device, portnr);
     this.html('capture-devices', Template.PortsDevices(this.state));
     this.html('capture-port', Template.CapturePort(this.state));
   }
 
-  updateState(device, portnr) {
-    this.state.selectedDevice = device;
-    this.state.selectedPortNr = portnr;
-
-    if (!this.state.devices) {
-      this.state.devices = TopologyManager.getCaptureDevices();
-      if (this.state.devices.indexOf(this.state.selectedDevice) === -1) {
-        this.state.selectedDevice = null;
-        this.state.selectedPortNr = null;
+  togglePort(device, portnr) {
+    if (device) {
+      const conn = this.state.selectedPoints.findIndex(connection => connection.device === device && connection.portnr === portnr);
+      if (conn !== -1) {
+        this.state.selectedPoints.splice(conn, 1);
+      }
+      else {
+        this.state.selectedPoints.push({ device: device, portnr: portnr });
       }
     }
-    this.state.ports = Array(this.state.devices.length);
-    this.state.topologyValid = TopologyManager.valid;
 
-    if (this.state.selectedDevice && this.state.selectedPortNr !== null) {
-      const ports = [];
-      ports[this.state.selectedPortNr] = 'A';
-      this.state.ports[this.state.devices.indexOf(this.state.selectedDevice)] = ports;
-      this.state.selectedPortName = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortNr}.name`);
+    const devports = Array(this.state.devices.length);
+    for (let i = 0; i < devports.length; i++) {
+      devports[i] = [];
+      this.state.selectedPoints.filter(connection => connection.device === this.state.devices[i]).forEach(connection => devports[i][connection.portnr] = 'A');
     }
-    else {
-      this.state.selectedPortNr = null;
-      this.state.selectedPortName = null;
-    }
+    this.state.ports = devports;
+
+    this.state.selectedDevice = device;
+    this.state.selectedPortNr = portnr;
+    this.state.selectedPortName = device && device.readKV(`network.physical.port.${portnr}.name`) || '-';
   }
 
   _render(style, raw) {

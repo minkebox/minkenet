@@ -1,15 +1,21 @@
 <div class="card-body" style="padding: 1.25rem 60px 1.25rem 20px">
   <div class="list-group">
     <div class="row">
+      <label class="col-sm-7 col-form-label col-form-label-sm">Device</label>
+      <div class="col-sm-5 d-flex align-items-center">
+        <div class="device-property-ro small">{{#if selectedDevice}}{{selectedDevice.name}}{{else}}-{{/if}}</div>
+      </div>
+    </div>
+    <div class="row">
       <label class="col-sm-7 col-form-label col-form-label-sm">Port</label>
       <div class="col-sm-5 d-flex align-items-center">
-        <div class="device-property-ro small">{{add 1 selectedPortNr}}</div>
+        <div class="device-property-ro small">{{#if selectedDevice}}{{add 1 selectedPortNr}}{{else}}-{{/if}}</div>
       </div>
     </div>
     <div class="row">
       <label class="col-sm-7 col-form-label col-form-label-sm">Name</label>
       <div class="col-sm-5 d-flex align-items-center">
-        <div class="device-property-ro small">{{selectedPortName}}</div>
+        <div class="device-property-ro small">{{#if selectedPortName}}{{selectedPortName}}{{else}}-{{/if}}</div>
       </div>
     </div>
   </div>
