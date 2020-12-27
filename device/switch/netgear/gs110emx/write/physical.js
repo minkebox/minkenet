@@ -14,7 +14,7 @@ module.exports = {
                 $: 'eval',
                 arg: 'top.GAMBIT'
               },
-              PORT_NO: `${itr.index + 1};`,
+              PORT_NO: `${itr.index + 1}`,
               PORT_DESCRIPTION: {
                 $: 'kv',
                 arg: `${itr.path}.name`
