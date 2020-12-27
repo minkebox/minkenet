@@ -119,7 +119,7 @@ class ClientManager extends EventEmitter {
               egress: port.limit.egress
             };
           }
-          if ('enable' in port && !(attach.device === device && attach.port === portnr)) {
+          if ('enable' in port && !(attach && attach.device === device && attach.port === portnr)) {
             update.blocked = !port.enable;
           }
         }
