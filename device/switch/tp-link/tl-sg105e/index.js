@@ -65,7 +65,8 @@ const Device = {
     $4: require('../tl-sg108e/read/vlan'),
     $5: require('../tl-sg108e/read/lag'),
     $statistics: require('../tl-sg108e/read/statistics'),
-    $6: require('../tl-sg108e/read/mirror')
+    $6: require('../tl-sg108e/read/mirror'),
+    $7: require('../tl-sg108e/read/limits')
   },
   write: {
     $1: require('../tl-sg108e/write/name'),
