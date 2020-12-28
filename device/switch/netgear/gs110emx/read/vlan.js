@@ -28,20 +28,14 @@ module.exports = {
             index: itr.index + 1
           }, {
             $: 'fn',
-            arg: async function() {
+            arg: async ctx => {
               const port = {};
               for (let p = 0; p < 10; p++) {
-                try {
-                  await this.eval('selector', `.portMember:nth-child(${p + 2}) .tagImg`);
+                if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .tagImg`) !== null) {
                   port[p] = { tagged: true };
                 }
-                catch (_) {
-                  try {
-                    await this.eval('selector', `.portMember:nth-child(${p + 2}) .untImg`);
-                    port[p] = { tagged: false };
-                  }
-                  catch (_) {
-                  }
+                else if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .untImg`) !== null) {
+                  port[p] = { tagged: false };
                 }
               }
               return {
