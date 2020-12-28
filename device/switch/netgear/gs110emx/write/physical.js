@@ -14,7 +14,7 @@ module.exports = {
                 $: 'eval',
                 arg: 'top.GAMBIT'
               },
-              PORT_NO: `${itr.index + 1}`,
+              PORT_NO: `${itr.index + 1};`, // Note: semi-colon here is *not* a mistake
               PORT_DESCRIPTION: {
                 $: 'kv',
                 arg: `${itr.path}.name`
