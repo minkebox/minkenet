@@ -57,7 +57,11 @@ async function WS(ctx) {
     send: send,
     current: null,
     commitState: null,
-    onMessage: {}
+    onMessage: {},
+    common: {
+      device: null,
+      portnr: null
+    }
   };
   State.tabs = {
     overview: new VizTab(State),

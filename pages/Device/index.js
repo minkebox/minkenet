@@ -32,8 +32,10 @@ class Devices extends Page {
     super.select();
     DeviceInstanceManager.on('update', this.onListUpdate);
     this.state.devices = DeviceInstanceManager.getAllDevices();
+    this.state.selectedDevice = this.root.common.device;
     if (!this.state.selectedDevice && this.state.devices.length) {
       this.state.selectedDevice = this.state.devices[0];
+      this.root.common.device = this.state.selectedDevice;
     }
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
@@ -86,6 +88,7 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = device;
+    this.root.common.device = this.state.selectedDevice;
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.on('updating', this.onDeviceUpdating);
@@ -118,6 +121,7 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = null;
+    this.root.common.device = this.state.selectedDevice;
 
     this.authenticating = true;
     let device = DeviceInstanceManager.getDeviceById(msg.value.id);
@@ -228,6 +232,7 @@ class Devices extends Page {
       DeviceInstanceManager.removeDevice(this.state.selectedDevice);
       DB.removeDevice(this.state.selectedDevice._id);
       this.state.selectedDevice = null;
+      this.root.common.device = this.state.selectedDevice;
       this.select();
     }
   }

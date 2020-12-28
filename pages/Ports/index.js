@@ -25,13 +25,17 @@ class Ports extends Page {
   select() {
     super.select();
     this.state.devices = DeviceInstanceManager.getAllDevices();
+    this.state.selectedDevice = this.root.common.device;
+    this.state.selectedPortnr = this.root.common.portnr;
     if (!this.state.selectedDevice && this.state.devices.length) {
       this.state.selectedDevice = this.state.devices[0];
+      this.root.common.device = this.state.selectedDevice;
     }
-    if (this.state.selectedDevice && !this.state.selectedPort) {
-      this.state.selectPortnr = 0;
-      this.selectPort();
+    if (this.state.selectedPortnr === null) {
+      this.state.selectedPortnr = 0;
     }
+    this.selectPort();
+
     this.state.selectedDevice.on('update', this.onDeviceUpdate);
     this.state.selectedDevice.on('updating', this.onDeviceUpdating);
     this.state.selectedDevice.watch();
@@ -58,6 +62,7 @@ class Ports extends Page {
     }
     const last = this.state.selectedDevice;
     this.state.selectedDevice = device;
+    this.root.common.device = this.state.selectedDevice;
     this.updateCard(last);
     this.updateCard(device);
     this.selectPort();
@@ -110,6 +115,10 @@ class Ports extends Page {
       this.state.porthighlights = [];
       this.state.porthighlights[this.state.selectedPortnr] = 'A';
     }
+    else {
+      this.state.selectedPortnr = null;
+    }
+    this.root.common.portnr = this.state.selectedPortnr;
     this.html('details-ports', Template.PortsInfo(this.state));
   }
 
