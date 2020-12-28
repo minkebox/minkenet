@@ -256,6 +256,9 @@ class Capture extends Page {
   }
 
   async 'device.port.select' (msg) {
+    if (CaptureManager.running) {
+      return;
+    }
     const device = DeviceInstanceManager.getDeviceById(msg.value.id);
     const portnr = parseInt(msg.value.port);
     this.togglePort(device, portnr);
