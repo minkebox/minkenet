@@ -35,7 +35,6 @@ class Devices extends Page {
     this.state.selectedDevice = this.root.common.device;
     if (!this.state.selectedDevice && this.state.devices.length) {
       this.state.selectedDevice = this.state.devices[0];
-      this.root.common.device = this.state.selectedDevice;
     }
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
@@ -53,6 +52,7 @@ class Devices extends Page {
       this.state.selectedDevice.off('updating', this.onDeviceUpdating);
     }
     DeviceInstanceManager.off('update', this.onListUpdate);
+    this.root.common.device = this.state.selectedDevice;
   }
 
   onDeviceUpdate() {
@@ -88,7 +88,6 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = device;
-    this.root.common.device = this.state.selectedDevice;
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.on('updating', this.onDeviceUpdating);
@@ -121,7 +120,6 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = null;
-    this.root.common.device = this.state.selectedDevice;
 
     this.authenticating = true;
     let device = DeviceInstanceManager.getDeviceById(msg.value.id);
@@ -225,16 +223,29 @@ class Devices extends Page {
   }
 
   async 'device.forget' (msg) {
-    if (this.state.selectedDevice) {
-      this.deselect()
-      this.state.selectedDevice.logout();
-      MonitorManager.monitorDevice(this.state.selectedDevice, false);
-      DeviceInstanceManager.removeDevice(this.state.selectedDevice);
-      DB.removeDevice(this.state.selectedDevice._id);
-      this.state.selectedDevice = null;
-      this.root.common.device = this.state.selectedDevice;
-      this.select();
+    if (!this.state.selectedDevice) {
+      return;
     }
+    this.state.selectedDevice.unwatch();
+    this.state.selectedDevice.off('update', this.onDeviceUpdate);
+    this.state.selectedDevice.off('updating', this.onDeviceUpdating);
+
+    this.state.selectedDevice.logout();
+    MonitorManager.monitorDevice(this.state.selectedDevice, false);
+    DeviceInstanceManager.removeDevice(this.state.selectedDevice);
+    DB.removeDevice(this.state.selectedDevice._id);
+
+    this.state.selectedDevice = null;
+
+    this.state.devices = DeviceInstanceManager.getAllDevices();
+    if (this.state.devices.length) {
+      this.state.selectedDevice = this.state.devices[0];
+      this.state.selectedDevice.on('update', this.onDeviceUpdate);
+      this.state.selectedDevice.on('updating', this.onDeviceUpdating);
+      this.state.selectedDevice.watch();
+    }
+
+    this.html('main-container', Template.DeviceTab(this.state));
   }
 
   scanUpdate(evt) {

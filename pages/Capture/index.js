@@ -169,6 +169,9 @@ class Capture extends Page {
       this.togglePort(arg.device, arg.portnr);
       this.state.capture = arg.capture;
     }
+    else {
+      this.togglePort(this.root.common.device, this.root.common.portnr);
+    }
 
     this.html('main-container', Template.CaptureTab(this.state));
   }
@@ -180,6 +183,9 @@ class Capture extends Page {
     CaptureManager.off('packet', this.onPacket);
 
     CaptureManager.stopCapture();
+
+    this.root.common.device = this.state.selectedDevice;
+    this.root.common.portnr = this.state.selectedPortNr;
   }
 
   onPacket(raw) {
