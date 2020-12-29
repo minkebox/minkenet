@@ -165,13 +165,18 @@ class Capture extends Page {
 
     this.onUpdate();
 
+    let device = this.root.common.device;
+    let portnr = this.root.common.portnr;
     if (arg) {
-      this.togglePort(arg.device, arg.portnr);
+      device = arg.device;
+      portnr = arg.portnr;
       this.state.capture = arg.capture;
     }
-    else {
-      this.togglePort(this.root.common.device, this.root.common.portnr);
+    if (this.state.devices.indexOf(device) === -1) {
+      device = null;
+      portnr = null;
     }
+    this.togglePort(device, portnr);
 
     this.html('main-container', Template.CaptureTab(this.state));
   }

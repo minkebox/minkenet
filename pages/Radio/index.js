@@ -20,7 +20,11 @@ class Radio extends Page {
   select() {
     super.select();
     this.state.devices = DeviceInstanceManager.getWiFiDevices();
-    if (!this.state.selectedDevice && this.state.devices.length) {
+    this.state.selectedDevice = this.root.common.device;
+    if (!this.state.devices.length) {
+      this.state.selectedDevice = null;
+    }
+    else if (!this.state.selectedDevice || this.state.devices.indexOf(this.state.selectedDevice) === -1) {
       this.state.selectedDevice = this.state.devices[0];
     }
 
@@ -39,6 +43,7 @@ class Radio extends Page {
       this.state.selectedDevice.off('update', this.onDeviceUpdate);
     }
     DeviceInstanceManager.off('update', this.onListUpdate);
+    this.root.common.device = this.state.selectedDevice;
   }
 
   async 'device.select' (msg) {
