@@ -1,5 +1,5 @@
 {{#with device}}
-<div class="device-card d-inline-block {{#if (eq this ../selectedDevice)}}active{{/if}}" {{#if _authenticated}}onclick="send('device.select','{{_id}}')"{{/if}}>
+<div class="device-card d-inline-block {{#if (eq this ../selectedDevice)}}active{{/if}} {{#if (gte _watchFail 5)}}watch-fail{{/if}}" {{#if _authenticated}}onclick="send('device.select','{{_id}}')"{{/if}}>
   <img src="{{description.image}}" class="card-img-top">
   <div class="card-body">
     {{#if properties.system.name}}

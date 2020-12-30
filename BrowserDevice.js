@@ -31,6 +31,7 @@ class BrowserDeviceInstance extends DeviceInstance {
     this._watchRunning = false;
     this._authenticated = false; // Login information valid
     this._validated = false; // Device is logged-in
+    this._watchFail = 0;
   }
 
   //
@@ -67,6 +68,7 @@ class BrowserDeviceInstance extends DeviceInstance {
     Log('watch:', this._id, this._watchCount);
     if (!this._watchRunning) {
       this._watchRunning = true;
+      this._watchFail = 0;
       const TopologyManager = require('./TopologyManager');
       const CaptureManager = require('./CaptureManager');
       const task = async () => {
@@ -78,11 +80,17 @@ class BrowserDeviceInstance extends DeviceInstance {
         if (!TopologyManager.running && !CaptureManager.running) {
           try {
             if (await this.update()) {
+              this._watchFail = 0;
               await DB.updateDeviceState(this._id, this.state.toDB());
+            }
+            else {
+              throw new Error('watch update failed');
             }
           }
           catch (e) {
             Log('watch:error:', e);
+            this._watchFail++;
+            this.emit('watch.error');
           }
         }
         setTimeout(task, Math.max(0, Date.now() - start + REFRESH_TIMING));
@@ -100,6 +108,9 @@ class BrowserDeviceInstance extends DeviceInstance {
   unwatch() {
     if (this._watchCount > 0) {
       this._watchCount--;
+    }
+    else {
+      this._watchFail = 0;
     }
     Log('unwatch:', this._id, this._watchCount);
     return this._watchCount;

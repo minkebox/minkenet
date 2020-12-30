@@ -201,6 +201,10 @@ body.pending-changes .pending-changes-disabled {
   left: 20px;
   justify-content: flex-end;
 }
+.device-card.watch-fail {
+  margin: 4px;
+  border: 1px solid var(--error-border-color);
+}
 
 .details-column,
 .device-details-column,
