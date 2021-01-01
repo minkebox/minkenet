@@ -68,12 +68,15 @@ class Clients extends Page {
       this.state.portnamekv = `network.physical.port.${portnr}.name`;
       this.state.porthighlights = [];
       this.state.porthighlights[portnr] = 'A';
+      const macs = ClientManager.getClientsForDeviceAndPort(this.state.selected.connected.device, portnr);
+      this.state.single = macs.length === 1 ? true : false;
     }
     else {
       this.state.portid = null;
       this.state.portname = null;
       this.state.portnamekv = null;
       this.state.porthighlights = [];
+      this.state.single = false;
     }
     this.state.capture = this.getCapture(mac);
   }

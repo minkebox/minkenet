@@ -56,7 +56,7 @@
         </div>
       </div>
     </div>
-    {{#if (or selected.limited (isdefined selected.blocked))}}
+    {{#if (and single (or selected.limited (isdefined selected.blocked)))}}
     <div class="card">
       <div data-toggle="collapse" data-target="#clients-limits" class="card-header">
         <div>Limits</div>
