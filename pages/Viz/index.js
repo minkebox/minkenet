@@ -111,10 +111,22 @@ class Viz extends Page {
       return null;
     }
 
+    let title = mon.title;
+    if (title.indexOf('##device##') === 0) {
+      title = device.name;
+      const portnr = parseInt(mon.title.substring(10) || -1);
+      if (portnr !== -1) {
+        const port = device.readKV(`network.physical.port.${portnr}`);
+        if (port && port.name) {
+          title = port.name;
+        }
+      }
+    }
+
     const graph = {
       type: '',
       id: `mon-${mon.id}`,
-      title: mon.title,
+      title: title,
       series: [],
       data: '[]',
       mon: mon

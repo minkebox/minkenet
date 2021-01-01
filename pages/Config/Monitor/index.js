@@ -137,14 +137,10 @@ class Monitor extends Page {
   }
 
   async updateMonitor(mon) {
-    let title = this.state.selected.name;
-    if (this.state.selectedPort.name) {
-      title = this.state.selectedPort.name;
-    }
     await MonitorManager.monitorDeviceKeysType(
       this.state.selected,
       mon.id,
-      title,
+      `##device##${this.state.selectedPortNr}`,
       mon.key.split(',').map(k => {
         switch (k) {
           case 'statistics.rx.bytes':
