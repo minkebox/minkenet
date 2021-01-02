@@ -15,7 +15,7 @@ const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
 const ACTIVATE_INTERVAL = 60 * 1000; // 1 minute
 
-PCap.warningHandler = (msg) => Log(msg);
+PCap.warningHandler = (msg) => Log(`PCap warning: ${msg}`);
 
 
 class CaptureManager extends EventEmitter {
