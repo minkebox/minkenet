@@ -112,7 +112,6 @@ module.exports = {
               $: 'selector',
               arg: `input[name="cbid.wireless.wifix_ssid_${itr.index + 1}.ssid"]`,
               map: async function(v) {
-                console.log('***', v, this);
                 if (await this.eval('eval', `document.querySelector('input[name="cbid.wireless.wifix_ssid_${itr.index + 1}.ssid"]').disabled`)) {
                   return '';
                 }
