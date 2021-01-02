@@ -97,7 +97,7 @@ class Eval {
       {
         try {
           const frame = await this.getEvalFrame(context, value);
-          const result = await this.map(value, await frame.evaluate(await this.eval('literal', value.arg, context, path, device)));
+          const result = await this.map(value, await frame.evaluate(await this.eval('literal', value.arg, context, path, device)), callContext);
           if (result !== null && result !== undefined) {
             return result;
           }
@@ -112,7 +112,7 @@ class Eval {
       case 'jsonp':
       {
         try {
-          const result = await this.map(value, JSONPath({ path: value.arg, json: context })[0]);
+          const result = await this.map(value, JSONPath({ path: value.arg, json: context })[0], callContext);
           if (result !== null && result !== undefined) {
             return result;
           }
@@ -127,7 +127,7 @@ class Eval {
       case 'selector':
       {
         try {
-          const result = await this.map(value, await (await this.getEvalFrame(context, value)).$eval(value.arg, elem => elem.type == 'radio' || elem.type == 'checkbox' ? elem.checked : (elem.value || elem.innerText)));
+          const result = await this.map(value, await (await this.getEvalFrame(context, value)).$eval(value.arg, elem => elem.type == 'radio' || elem.type == 'checkbox' ? elem.checked : (elem.value || elem.innerText)), callContext);
           if (result !== null && result !== undefined) {
             return result;
           }
@@ -180,7 +180,7 @@ class Eval {
           });
           //Log('varbind:', varbind);
           try {
-            const result = this.map(value, this.convertFromVarbind(varbind));
+            const result = this.map(value, this.convertFromVarbind(varbind), callContext);
             if (result !== null && result !== undefined) {
               return result;
             }
@@ -203,7 +203,7 @@ class Eval {
         else {
           nvalue = await this.eval('kv', path, frame, path, device)
         }
-        const text = await this.map(value, nvalue);
+        const text = await this.map(value, nvalue, callContext);
         Log('set text', text);
         await frame.$eval(value.arg, (elem, text) => elem.value = text, text);
         if (value.wait) {
@@ -221,7 +221,7 @@ class Eval {
         else {
           nvalue = await this.eval('kv', path, frame, path, device)
         }
-        const text = await this.map(value, nvalue);
+        const text = await this.map(value, nvalue, callContext);
         Log('type text', text);
         // Remove the INPUT value before we 'type' in the new text.
         await frame.$eval(value.arg, elem => elem.value = '');
@@ -240,7 +240,7 @@ class Eval {
         else {
           nvalue = await this.eval('kv', path, context, path, device);
         }
-        nvalue = await this.map(value, nvalue);
+        nvalue = await this.map(value, nvalue, callContext);
         const oid = await this.eval('literal', value.arg, context, path, device);
         const varbind = this.convertToVarbind(oid, value.type, nvalue);
         Log('varbind:', varbind);
@@ -277,7 +277,7 @@ class Eval {
         else {
           option = await this.eval('kv', path, frame, path, device);
         }
-        option = TypeConversion.toString(await this.map(value, option));
+        option = TypeConversion.toString(await this.map(value, option, callContext));
         Log('select option', option);
         const selected = await frame.select(value.arg, option);
         Log('selected', selected);
@@ -321,7 +321,7 @@ class Eval {
       }
       case 'kv':
       {
-        const v = await this.map(value, device.readKV(value.arg || path, value.options));
+        const v = await this.map(value, device.readKV(value.arg || path, value.options), callContext);
         Log('v=', v);
         return v;
       }
@@ -420,7 +420,7 @@ class Eval {
       case 'fn':
       {
         try {
-          return this.map(value, await value.arg.call(callContext, callContext));
+          return this.map(value, await value.arg.call(callContext, callContext), callContext);
         }
         catch (e) {
           Log(e);
@@ -685,13 +685,13 @@ class Eval {
     return await this.getEvalFrame(page.mainFrame(), { frame: name });
   }
 
-  async map(value, result) {
+  async map(value, result, callContext) {
     if (result === null || result === undefined) {
       return result;
     }
     else if (value.map) {
       if (typeof value.map === 'function') {
-        result = await value.map(result);
+        result = await value.map.call(callContext, result);
       }
       else {
         if (!(result in value.map)) {
