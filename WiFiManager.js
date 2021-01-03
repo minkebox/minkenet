@@ -64,11 +64,7 @@ class WiFiManager extends EventEmitter {
     }
     station.instances.push({
       device: device,
-      station: {
-        bands: [],
-        security: { options: [ 'none' ] },
-        steering: { options: [ 'balance' ] }
-      } // ... FIX ...
+      station: station
     });
     return true;
   }
@@ -99,7 +95,7 @@ class WiFiManager extends EventEmitter {
 
     config.security = {
       mode: primary.security.mode,
-      options: primary.security.options,
+      options: [].concat(primary.security.options),
       passphrase: primary.security.passphrase
     };
 
@@ -114,7 +110,7 @@ class WiFiManager extends EventEmitter {
     config.isolate = primary.isolate;
     config.bands = {};
 
-    for (let i = 0; i < station.instances.length; i++) {
+    for (let i = 1; i < station.instances.length; i++) {
       const stat = station.instances[i].station;
 
       // Make all bands available to station, even if all devices dont support them.
@@ -128,9 +124,9 @@ class WiFiManager extends EventEmitter {
       });
 
       // Only support security modes available on all devices
-      for (let i = config.security.options.length - 1; i >= 0; i--) {
-        if (stat.security.options.indexOf(config.security.options[i]) === -1) {
-          config.security.options.splice(i, 1);
+      for (let j = config.security.options.length - 1; j >= 0; j--) {
+        if (stat.security.options.indexOf(config.security.options[j]) === -1) {
+          config.security.options.splice(j, 1);
         }
       }
 
