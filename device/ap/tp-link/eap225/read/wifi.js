@@ -29,6 +29,27 @@ module.exports = {
 									}
 								},
 								security: {
+									mode: {
+										$: 'fn',
+										arg: async ctx => {
+											const s = await ctx.eval('jsonp', `data[${itr.index}].securityMode`);
+											const v = await ctx.eval('jsonp', `data[${itr.index}].psk_version`);
+											const c = await ctx.eval('jsonp', `data[${itr.index}].psk_cipher`);
+											return `${s}:${v}:${c}`;
+										},
+										map: {
+											'0:3:1': 'none',
+											'3:1:1': 'wpa/psk/tkip/aes',
+											'3:2:1': 'wpa2/psk/tkip/aes',
+											'3:3:1': 'wpa/wpa2/psk/tkip/aes',
+											'3:1:2': 'wpa/psk/tkip',
+											'3:2:2': 'wpa2/psk/tkip',
+											'3:3:2': 'wpa/wpa2/psk/tkip',
+											'3:1:3': 'wpa/psk/aes',
+											'3:2:3': 'wpa2/psk/aes',
+											'3:3:3': 'wpa/wpa2/psk/aes'
+										}
+									},
 									passphrase: `data[${itr.index}].psk_key`
 								}
 							}]
@@ -59,6 +80,27 @@ module.exports = {
 									}
 								},
 								security: {
+									mode: {
+										$: 'fn',
+										arg: async ctx => {
+											const s = await ctx.eval('jsonp', `data[${itr.index}].securityMode`);
+											const v = await ctx.eval('jsonp', `data[${itr.index}].psk_version`);
+											const c = await ctx.eval('jsonp', `data[${itr.index}].psk_cipher`);
+											return `${s}:${v}:${c}`;
+										},
+										map: {
+											'0:3:1': 'none',
+											'3:1:1': 'wpa/psk/tkip/aes',
+											'3:2:1': 'wpa2/psk/tkip/aes',
+											'3:3:1': 'wpa/wpa2/psk/tkip/aes',
+											'3:1:2': 'wpa/psk/tkip',
+											'3:2:2': 'wpa2/psk/tkip',
+											'3:3:2': 'wpa/wpa2/psk/tkip',
+											'3:1:3': 'wpa/psk/aes',
+											'3:2:3': 'wpa2/psk/aes',
+											'3:3:3': 'wpa/wpa2/psk/aes'
+										}
+									},
 									passphrase: `data[${itr.index}].psk_key`
 								}
 							}]
