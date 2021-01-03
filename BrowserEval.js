@@ -45,7 +45,7 @@ class Eval {
         if (typeof value[k] === 'object' && '$' in value[k] && typeof value[k].map === 'object') {
           result = {
             $: result,
-            selection: Object.values(value[k].map)
+            selection: Object.values(value[k].map).filter((v, i, s) => s.indexOf(v) === i)
           };
         }
         if (key === '_') {
