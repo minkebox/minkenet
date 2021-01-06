@@ -47,10 +47,15 @@ class MDNS extends EventEmitter {
         Log('socket bind error: ', err);
       });
       this._socket.bind(PORT, MCAST_ADDRESS, () => {
-        this._socket.setMulticastTTL(255);
-        this._socket.setMulticastLoopback(false);
-        this._socket.addMembership(MCAST_ADDRESS, '0.0.0.0');
-        this._socket.setMulticastInterface('0.0.0.0');
+        try {
+          this._socket.setMulticastTTL(255);
+          this._socket.setMulticastLoopback(false);
+          this._socket.addMembership(MCAST_ADDRESS, '0.0.0.0');
+          this._socket.setMulticastInterface('0.0.0.0');
+        }
+        catch (e) {
+          Log(e);
+        }
         resolve();
       });
     });
