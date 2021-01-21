@@ -12,7 +12,7 @@ module.exports = {
           0: {
             $: 'jsonp',
             arg: '$[0].macaddr',
-            map: mac => Maps.toMacAddress
+            map: Maps.toMacAddress
           }
         }
       },
