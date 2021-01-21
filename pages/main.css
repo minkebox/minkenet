@@ -25,7 +25,8 @@
   --port-border: grey;
   --port-up: #265b36;
   --port-down: black;
-  --port-selected: #c0c0c0;
+  --port-selected: #c4c56e;
+  --port-highlighted: #c0c0c0;
   --error-border-color: #c03d25;
 }
 
@@ -310,11 +311,16 @@ body.pending-changes .pending-changes-disabled {
 .port.up {
   background-color: var(--port-up);
 }
+.port.selected-S,
+.port.selected-S .inner-port {
+  border: solid 0.5px var(--port-selected);
+  z-index: 1;
+}
 .port.selected-T,
 .port.selected-U,
 .port.selected-T .inner-port,
 .port.selected-U .inner-port {
-  border: solid 1px var(--port-selected);
+  border: solid 1px var(--port-highlighted);
   z-index: 1;
 }
 
@@ -536,7 +542,7 @@ body.pending-changes .pending-changes-disabled {
 #monitor-hardware .port.selected-A .inner-port,
 #bond-devices .port.selected-A,
 #bond-devices .port.selected-A .inner-port {
-  border: solid 1px var(--port-selected);
+  border: solid 1px var(--port-highlighted);
   z-index: 1;
 }
 

@@ -58,7 +58,14 @@ class Networks extends Page {
     });
     this.state.selected = this.state.networks.find(vlan => vlan.id == this.state.vid);
     this.state.devices = DeviceInstanceManager.getAuthenticatedDevices();
-    this.state.ports = this.state.devices.map(dev => VLANManager.getVLANDeviceVLANPorts(dev, this.state.vid));
+    this.state.ports = this.state.devices.map(dev => [].concat(VLANManager.getVLANDeviceVLANPorts(dev, this.state.vid)));
+    if (this.state.port) {
+      const didx = this.state.devices.indexOf(this.state.device);
+      const p = this.state.ports[didx];
+      if (!p[this.state.portnr] || p[this.state.portnr] === 'X') {
+        p[this.state.portnr] = 'S';
+      }
+    }
     const vdev = VLANManager.getVLANDevice(this.state.device);
     if (!vdev) {
       this.state.vlan = null;
@@ -120,70 +127,53 @@ class Networks extends Page {
 
   'device.port.select' (msg) {
     this.updateState({ portnr: msg.value.port, device: DeviceInstanceManager.getDeviceById(msg.value.id) });
-    // No vlan for this device - add this device to this vlan
-    let autoroute = Config.read('network.vlan.autoroute');
-    if (!this.state.vlan) {
-      const vlan = VLANManager.getVLANDevice(this.state.device, true).getVLAN(this.state.vid, true);
-      vlan.setName(this.state.selected.name);
-      vlan.setPort(this.state.portnr, 'T');
-    }
-    else {
-      const vlan = VLANManager.getVLANDeviceVLAN(this.state.device, this.state.vid);
-      const tag = vlan.getPort(this.state.portnr);
-      vlan.setName(this.state.selected.name);
-      if (this.state.ldevice == this.state.device && this.state.lportnr == this.state.portnr) {
-        const link = TopologyManager.findLink(this.state.device, this.state.portnr);
-        switch (tag) {
-          case 'X':
-            vlan.setPort(this.state.portnr, 'T');
-            if (link) {
-              link[0].ports.forEach(portnr => vlan.setPort(portnr, 'T'));
-            }
-            break;
-          case 'T':
-            vlan.setPort(this.state.portnr, 'U');
-            if (link) {
-              link[0].ports.forEach(portnr => vlan.setPort(portnr, 'U'));
-            }
-            break;
-          case 'U':
-          default:
-            vlan.setPort(this.state.portnr, 'X');
-            if (link) {
-              link[0].ports.forEach(portnr => vlan.setPort(portnr, 'X'));
-            }
-            autoroute = false;
-            break;
-        }
-      }
-      else {
-        autoroute = false;
-      }
-    }
-    if (autoroute) {
-      // If autoroute is enable, make sure we have a vlan built from this device to others with this vlan
-      const others = VLANManager.getVLANDevices(this.state.vid);
-      if (others.length >= 2) {
-        const path = TopologyManager.findPath(others[0] !== this.state.device ? others[0] : others[1], this.state.device) || [];
-        path.forEach(link => {
-          Log(link[0].device.name, link[0].lag, '<->', link[1].device.name, link[1].lag);
-          const fv = VLANManager.getVLANDeviceVLAN(link[0].device, this.state.vid, true);
-          const tv = VLANManager.getVLANDeviceVLAN(link[1].device, this.state.vid, true);
-          link[0].lag.ports.forEach(p => fv.setPort(p, 'T'));
-          link[1].lag.ports.forEach(p => tv.setPort(p, 'T'));
-        });
-      }
-    }
-    this.updateState();
-    this.html('network-overview', Template.NetworkNetwork(this.state));
     this.html('network-devices', Template.PortsDevices(this.state));
     this.html('network-port', Template.NetworkPort(this.state));
   }
 
   async 'device.port.tag' (msg) {
     const vlan = VLANManager.getVLANDeviceVLAN(this.state.device, this.state.vid);
-    const tag = (msg.value.v === 'Keep tag' ? 'T' : 'U');
-    TopologyManager.findLink(this.state.device, this.state.portnr)[0].ports.forEach(portnr => vlan.setPort(portnr, tag));
+    let tag;
+    switch (msg.value.v) {
+      case 'Keep tag':
+        tag = 'T';
+        break;
+      case 'Tag incoming, Untag exiting':
+        tag = 'U';
+        break;
+      case 'None':
+      default:
+        tag = 'X';
+        break;
+    }
+
+    if (TopologyManager.valid) {
+      const link = TopologyManager.findLink(this.state.device, this.state.portnr);
+      link[0].ports.forEach(portnr => vlan.setPort(portnr, tag));
+
+      const autoroute = Config.read('network.vlan.autoroute');
+      if (autoroute && tag !== 'X') {
+        // If autoroute is enable, make sure we have a vlan built from this device to others with this vlan
+        const others = VLANManager.getVLANDevices(this.state.vid);
+        if (others.length >= 2) {
+          const path = TopologyManager.findPath(others[0] !== this.state.device ? others[0] : others[1], this.state.device) || [];
+          path.forEach(link => {
+            Log(link[0].device.name, link[0].lag, '<->', link[1].device.name, link[1].lag);
+            const fv = VLANManager.getVLANDeviceVLAN(link[0].device, this.state.vid, true);
+            const tv = VLANManager.getVLANDeviceVLAN(link[1].device, this.state.vid, true);
+            link[0].lag.ports.forEach(p => fv.setPort(p, 'T'));
+            link[1].lag.ports.forEach(p => tv.setPort(p, 'T'));
+          });
+        }
+      }
+    }
+    else {
+      const vlan = VLANManager.getVLANDevice(this.state.device, true).getVLAN(this.state.vid, true);
+      vlan.setPort(this.state.portnr, tag);
+    }
+
+    this.updateState();
+    this.html('network-devices', Template.PortsDevices(this.state));
   }
 
   async 'network.vlan.create' (msg) {

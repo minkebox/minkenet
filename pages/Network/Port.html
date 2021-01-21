@@ -1,14 +1,18 @@
 <div class="card-body">
   <div class="list-group">
     <form>
+      {{#if @root.device.name}}
       {{>RO name="Device" value=@root.device.name}}
       {{>RO name="Port id" value=@root.port.id}}
       {{#if (eq (lookup @root.vlan.ports @root.portnr) 'T')}}
-      {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'Tag incoming, Untag exiting' 'Keep tag') value='Keep tag'}}
+      {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'None' 'Tag incoming, Untag exiting' 'Keep tag') value='Keep tag'}}
       {{else if (eq (lookup @root.vlan.ports @root.portnr) 'U')}}
-      {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'Tag incoming, Untag exiting' 'Keep tag') value='Tag incoming, Untag exiting'}}
+      {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'None' 'Tag incoming, Untag exiting' 'Keep tag') value='Tag incoming, Untag exiting'}}
+      {{else}}
+      {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'None' 'Tag incoming, Untag exiting' 'Keep tag') value='None'}}
       {{/if}}
       {{>RO name="Other VLANs on this port" value=@root.othervlans}}
+      {{/if}}
     </form>
   </div>
 </div>
