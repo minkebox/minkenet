@@ -4,6 +4,7 @@
       {{#if @root.device.name}}
       {{>RO name="Device" value=@root.device.name}}
       {{>RO name="Port id" value=@root.port.id}}
+      {{>RO name="Name" value=@root.port.name}}
       {{#if (eq (lookup @root.vlan.ports @root.portnr) 'T')}}
       {{>RWSelect cmd="device.port.tag" name="Tag" options=(array 'None' 'Tag incoming, Untag exiting' 'Keep tag') value='Keep tag'}}
       {{else if (eq (lookup @root.vlan.ports @root.portnr) 'U')}}
