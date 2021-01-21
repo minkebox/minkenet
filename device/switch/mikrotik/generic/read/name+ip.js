@@ -6,16 +6,6 @@ function mac(m) {
   return m.replace(/(..)(?!$)/g,'$1:');
 }
 
-function int2ip(ip32) {
-  let ip = ip32 % 256;
-  for (let i = 3; i > 0; i--) {
-    ip32 = Math.floor(ip32 / 256);
-    ip = `${ip}.${ip32 % 256}`;
-  }
-  return ip;
-}
-
-
 module.exports = {
   $1: {
     $: 'fetch',
@@ -33,7 +23,7 @@ module.exports = {
         },
         ipv4: {
           mode: { $: 'eval', arg: '$R.iptp', map: { 0: 'dhcp', 1: 'static', 2: 'dhcp' } },
-          address: { $: 'eval', arg: `'cip' in $R ? $R.cip : $R.ip`, map: int2ip }
+          address: { $: 'eval', arg: `'cip' in $R ? $R.cip : $R.ip`, map: Maps.intToIPAddress }
         }
       },
       network: {

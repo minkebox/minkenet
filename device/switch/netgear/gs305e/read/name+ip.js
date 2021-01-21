@@ -9,7 +9,7 @@ module.exports = {
         0: {
           $: `selector`,
           arg: `#tbl2 tr:nth-child(4) td:last-child`,
-          map: mac => mac.toLowerCase()
+          map: Maps.toMacAddress
         }
       },
       firmware: {

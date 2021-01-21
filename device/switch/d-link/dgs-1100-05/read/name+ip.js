@@ -15,7 +15,7 @@ module.exports = {
         0: {
           $: 'eval',
           arg: 'g_DeviceInfo[2]',
-          map: mac => mac.replace(/-/g,':').toLowerCase()
+          map: Maps.toMacAddress
         }
       },
       firmware: {

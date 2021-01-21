@@ -1,5 +1,3 @@
-const OID = require('../../../../../OID');
-
 module.exports = {
   system: {
     name: { $: 'oid', arg: OID.system.name },

@@ -1,8 +1,3 @@
-const hex = (v) => {
-  const r = `${v.toString(16)}`;
-  return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
-}
-
 module.exports = {
   network: {
     physical: {
@@ -45,7 +40,7 @@ module.exports = {
                     break;
                 }
               }
-              return `{en:${hex(en)},nm:[${nm}],an:${hex(an)},spdc:[${spdc.map(v => hex(v))}],dpxc:0x01ff,fctc:${hex(fct)},fctr:${hex(fct)}}`;
+              return `{en:${Maps.toHex2(en)},nm:[${nm}],an:${Maps.toHex2(an)},spdc:[${spdc.map(v => Maps.toHex2(v))}],dpxc:0x01ff,fctc:${Maps.toHex2(fct)},fctr:${Maps.toHex2(fct)}}`;
             }
           }
         }
@@ -53,5 +48,3 @@ module.exports = {
     }
   }
 };
-
-//{en:0xff,nm:[],an:0x01ff,spdc:[0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00],dpxc:0x01ff,fctc:0x00,fctr:0x00}

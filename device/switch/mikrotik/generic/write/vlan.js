@@ -1,8 +1,3 @@
-const hex = (v) => {
-  const r = `${v.toString(16)}`;
-  return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
-}
-
 module.exports = {
   network: {
     vlans: {
@@ -27,14 +22,14 @@ module.exports = {
               for (let p in ports) {
                 members |= 1 << p;
               }
-              params.push(`{vid:${hex(vid)},piso:0x00,lrn:0x01,mrr:0x00,igmp:${hex(igmp)},mbr:${hex(members)}}`);
+              params.push(`{vid:${Maps.toHex2(vid)},piso:0x00,lrn:0x01,mrr:0x00,igmp:${Maps.toHex2(igmp)},mbr:${Maps.toHex2(members)}}`);
             }
             if (management) {
               await ctx.eval({
                 $: 'fetch',
                 arg: '/sys.b',
                 method: 'post',
-                params: `{avln:${hex(management)}}`
+                params: `{avln:${Maps.toHex2(management)}}`
               });
             }
             return `[${params.join(',')}]`;
@@ -56,7 +51,7 @@ module.exports = {
             const vlan = [];
             const vlni = [];
             for (let pvid in pvids) {
-              dvid.push(hex(pvids[pvid].pvid));
+              dvid.push(Maps.toHex2(pvids[pvid].pvid));
               vlan.push('0x01');
               vlni.push('0x00');
             }

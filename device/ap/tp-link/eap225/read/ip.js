@@ -1,5 +1,3 @@
-const OID = require('../../../../../OID');
-
 module.exports = {
   system: {
     ipv4$1: {

@@ -1,7 +1,3 @@
-function mac(m) {
-  return m.replace(/-/g, ':').toLowerCase();
-}
-
 module.exports = {
   network: {
     clients: {
@@ -15,7 +11,7 @@ module.exports = {
           mac: {
             $: 'eval',
             arg: `Info[1][${itr.index}][0]`,
-            map: mac
+            map: Maps.toMacAddress
           },
           vlan: `Info[1][${itr.index}][1]`,
           portnr: {

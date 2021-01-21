@@ -1,3 +1,5 @@
+const Maps = require("../../../../../Maps");
+
 module.exports = {
   system: {
     $: 'fetch',
@@ -8,7 +10,7 @@ module.exports = {
         version: 'data.firmwareVersion'
       },
       hardware: {
-        version: { $: 'jsonp', arg: 'data.hardwareVersion', map: v => v }
+        version: { $: 'jsonp', arg: 'data.hardwareVersion', map: Maps.Null }
       }
     }
   }

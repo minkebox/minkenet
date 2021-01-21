@@ -1,4 +1,3 @@
-const OID = require('../../../../../OID');
 const BASE = '1.3.6.1.2.1.2.2';
 
 module.exports = {

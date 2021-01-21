@@ -14,7 +14,7 @@ module.exports = {
         version: {
           $: 'selector',
           arg: '#dev_info .title-option:nth-child(12) td:last-child',
-          map: x => x
+          map: Maps.Null
         }
       }
     }

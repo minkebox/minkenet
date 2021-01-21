@@ -26,12 +26,12 @@ module.exports = {
           1: {
             $: 'jsonp',
             arg: '$.wifinets[0].mac',
-            map: mac => mac.toLowerCase()
+            map: Maps.toMacAddress
           },
           2: {
             $: 'jsonp',
             arg: '$.wifinets[1].mac',
-            map: mac => mac.toLowerCase()
+            map: Maps.toMacAddress
           }
         }
       },

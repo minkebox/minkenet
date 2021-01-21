@@ -1,8 +1,3 @@
-const hex = (v) => {
-  const r = `${v.toString(16)}`;
-  return '0x' + `00000000${r}`.substr(-2*Math.ceil(r.length / 2));
-}
-
 module.exports = {
   network: {
     mirror: {
@@ -30,7 +25,7 @@ module.exports = {
                   }
                 }
               }
-              return `{mrto:${hex(mrto)},imr:${hex(imr)},omr:${hex(omr)}}`
+              return `{mrto:${Maps.toHex2(mrto)},imr:${Maps.toHex2(imr)},omr:${Maps.toHex2(omr)}}`
             }
           }
         }

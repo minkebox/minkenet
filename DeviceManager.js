@@ -6,13 +6,21 @@ class DeviceManager {
 
   constructor() {
     this.devices = [];
-    this.loadDevices(`${__dirname}/device`);
+    this._loadAllDevices();
   }
 
-  loadDevices(dir) {
+  _loadAllDevices() {
+    // Put some helpers in global scope
+    global.OID = require('./OID');
+    global.Maps = require('./Maps');
+
+    this._loadDevices(`${__dirname}/device`);
+  }
+
+  _loadDevices(dir) {
     FS.readdirSync(dir, { encoding: 'utf8', withFileTypes: true }).forEach(entry => {
       if (entry.isDirectory()) {
-        this.loadDevices(`${dir}/${entry.name}`);
+        this._loadDevices(`${dir}/${entry.name}`);
       }
       else if (entry.name === 'index.js') {
         const description = require(dir);

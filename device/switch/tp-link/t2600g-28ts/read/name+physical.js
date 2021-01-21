@@ -1,7 +1,3 @@
-function mac(m) {
-  return m.replace(/-/g, ':').toLowerCase();
-}
-
 module.exports = {
   $: 'navigate',
   arg: '/userRpm/SystemInfoRpm.htm',
@@ -15,7 +11,7 @@ module.exports = {
         0: {
           $: 'selector',
           arg: `#sp_sysInfo7`,
-          map: mac
+          map: Maps.toMacAddress
         }
       },
       firmware: {

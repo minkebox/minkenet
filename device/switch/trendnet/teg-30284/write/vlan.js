@@ -1,3 +1,5 @@
+const Maps = require("../../../../../Maps");
+
 module.exports = {
   network: {
     vlans: {
@@ -92,7 +94,7 @@ module.exports = {
                           }
                           return mem.map(v => v.toString(16).toUpperCase()).join('') + '0000000000000000';
                         },
-                        map: null
+                        map: Maps.Null
                       },
                       dot1qVlanStaticUntaggedPorts: {
                         $: 'fn',
@@ -106,7 +108,7 @@ module.exports = {
                           }
                           return mem.map(v => v.toString(16).toUpperCase()).join('') + '0000000000000000';
                         },
-                        map: null
+                        map: Maps.Null
                       },
                       dot1qMgmtVlanStatus: {
                         $: 'fn',
