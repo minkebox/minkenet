@@ -78,7 +78,7 @@ module.exports = {
                     method: 'BatchPost',
                     id: 0,
                     params: [{
-                      dot1qVlanStaticVlanId: itr.key,
+                      dot1qVlanStaticVlanId: `${itr.key}`,
                       dot1qVlanStaticName: { $: 'kv', arg: `${itr.path}.name` },
                       dot1qVlanStaticEgressPorts: {
                         $: 'fn',
@@ -91,7 +91,8 @@ module.exports = {
                             }
                           }
                           return mem.map(v => v.toString(16).toUpperCase()).join('') + '0000000000000000';
-                        }
+                        },
+                        map: null
                       },
                       dot1qVlanStaticUntaggedPorts: {
                         $: 'fn',
@@ -104,7 +105,8 @@ module.exports = {
                             }
                           }
                           return mem.map(v => v.toString(16).toUpperCase()).join('') + '0000000000000000';
-                        }
+                        },
+                        map: null
                       },
                       dot1qMgmtVlanStatus: {
                         $: 'fn',
