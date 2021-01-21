@@ -42,7 +42,7 @@ class Eval {
           return null;
         }
         // Include the selection if there is one
-        if (typeof value[k] === 'object' && '$' in value[k] && typeof value[k].map === 'object') {
+        if (typeof value[k] === 'object' && '$' in value[k] && value[k].map !== null && typeof value[k].map === 'object') {
           result = {
             $: result,
             selection: Object.values(value[k].map).filter((v, i, s) => s.indexOf(v) === i)
@@ -686,7 +686,7 @@ class Eval {
   }
 
   async map(value, result, callContext) {
-    if (result === null || result === undefined) {
+    if (result === null || result === undefined || value.map === null) {
       return result;
     }
     else if (value.map) {
