@@ -11,6 +11,7 @@ const Log = require('debug')('browser');
 const LogContent = Log.extend('content');
 const LogState = Log.extend('state');
 const LogSNMP = require('debug')('snmp');
+const LogDontWrite = require('debug')('nowrite');
 
 const TIMEOUT = { // in mseconds
   loginNavigation: 60000,
@@ -392,7 +393,12 @@ class BrowserDeviceInstance extends DeviceInstance {
     }
     await this.q(async (page) => {
       Log('write:');
-      await this.eval('literal', this.description.write, page.mainFrame());
+      if (LogDontWrite.enabled) {
+        LogDontWrite(JSON.stringify(this.readKV('$', { changes: true }), null, 2));
+      }
+      else {
+        await this.eval('literal', this.description.write, page.mainFrame());
+      }
       Log('written:');
     });
   }
