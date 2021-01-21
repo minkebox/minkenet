@@ -33,9 +33,13 @@
             {{>RO name="Peer" value=peer}}
             {{else if clients}}
             {{#if (eq clients.total 1)}}
+            {{#if (lookup (lookup clients.macs 0) 'name')}}
             {{>RO name="Client" value=(lookup (lookup clients.macs 0) 'name')}}
+            {{else if (lookup (lookup clients.macs 0) 'hostname')}}
+            {{>RO name="Client" value=(lookup (lookup clients.macs 0) 'hostname')}}
+            {{/if}}
             {{else if (ne clients.total 0)}}
-            {{>RO name="Purpose" value="Switch/Router/AP"}}
+            {{>RO name="Clients" value="multiple"}}
             {{/if}}
             {{/if}}
             {{/with}}

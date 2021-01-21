@@ -2,6 +2,7 @@ const Template = require('../Template');
 const VLANManager = require('../../VLANManager');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const TopologyManager = require('../../TopologyManager');
+const ClientManager = require('../../ClientManager');
 const Debounce = require('../../utils/Debounce');
 const Config = require('../../Config');
 const Page = require('../Page');
@@ -46,7 +47,7 @@ class Networks extends Page {
       }
       if ('portnr' in arg) {
         this.state.lportnr = this.state.portnr;
-        this.state.portnr = arg.portnr;
+        this.state.portnr = parseInt(arg.portnr);
       }
     }
     this.state.port = this.state.device && this.state.device.readKV(`network.physical.port.${this.state.portnr}`);
@@ -59,13 +60,32 @@ class Networks extends Page {
     this.state.selected = this.state.networks.find(vlan => vlan.id == this.state.vid);
     this.state.devices = DeviceInstanceManager.getAuthenticatedDevices();
     this.state.ports = this.state.devices.map(dev => [].concat(VLANManager.getVLANDeviceVLANPorts(dev, this.state.vid)));
+    this.state.peer = null;
     if (this.state.port) {
       const didx = this.state.devices.indexOf(this.state.device);
       const p = this.state.ports[didx];
       if (!p[this.state.portnr] || p[this.state.portnr] === 'X') {
         p[this.state.portnr] = 'S';
       }
+      const macs = ClientManager.getClientsForDeviceAndPort(this.state.device, this.state.portnr);
+      if (macs.length === 0) {
+        this.state.peer = null;
+      }
+      else if (macs.length === 1) {
+        this.state.peer = macs[0].name || macs[0].hostname;
+      }
+      else {
+        const peer = TopologyManager.findLink(this.state.device, this.state.portnr);
+        if (peer) {
+          this.state.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
+        }
+        else {
+          const mac = macs.find(mac => mac.name || mac.hostname);
+          this.state.peer = mac ? `${mac.name || mac.hostname}, ...` : null;
+        }
+      }
     }
+
     const vdev = VLANManager.getVLANDevice(this.state.device);
     if (!vdev) {
       this.state.vlan = null;
