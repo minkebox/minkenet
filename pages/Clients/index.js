@@ -36,6 +36,9 @@ class Clients extends Page {
 
   tabSelect(tab, arg) {
     switch (tab) {
+      case 'new':
+        this.state.type = 'new';
+        break;
       case 'blocked':
         this.state.type = 'blocked';
         break;
@@ -145,6 +148,7 @@ class Clients extends Page {
         connection: filter,
         wifi: filter === 'wifi',
         wired: filter === 'wired',
+        onlyNew: this.state.type === 'new',
         onlyBlocked: this.state.type === 'blocked',
         onlyLimited: this.state.type === 'limited'
       });

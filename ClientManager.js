@@ -302,10 +302,14 @@ class ClientManager extends EventEmitter {
   }
 
   getFilteredClients(filter) {
+    const inlast24hours = Date.now() - (24 * 60 * 60 * 1000);
     const clients = {};
     for (let m in this.mac) {
       const client = this.mac[m];
       let include = true;
+      if (filter.onlyNew && client.firstSeen <= inlast24hours) {
+        include = false;
+      }
       if (filter.onlyBlocked && !client.blocked) {
         include = false;
       }
