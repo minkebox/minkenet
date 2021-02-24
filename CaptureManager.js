@@ -9,7 +9,6 @@ const ConfigDB = require('./Config');
 const Apps = require('./utils/HelperApps');
 const Log = require('debug')('capture');
 
-const CAPTURE_DEFAULT_DEVICE = 'eth0';
 const CAPTURE_BUFFER_SIZE = 1024 * 1024; // 1MB
 const CAPTURE_BUFFER_TIMEOUT = 0; // Immediate delivery
 const CAPTURE_DEFAULT_SNAP_SIZE = 2000; // Reasonable default size if we can't work this out
@@ -279,75 +278,77 @@ class CaptureManager extends EventEmitter {
   async activateCapturePoint() {
     for (;;) {
       Log('activateCapturePoint:');
-      const device = ConfigDB.read('network.capture.device') || CAPTURE_DEFAULT_DEVICE;
-      try {
-        ChildProcess.execSync(`${Apps.ip} link set ${device} up`);
-        const dmac = await MacAddress.one(device);
-
-        // Look for the capture point in the network
-        const client = ClientManager.getClientByMac(dmac);
-        if (client && client.connected && client.connected.portnr !== null) {
-          this.attach = {
-            captureDevice: device,
-            entryDevice: client.connected.device,
-            entryPortnr: client.connected.portnr
-          };
-          Log('activateCapturePoint: attach:', this.attach.captureDevice, this.attach.entryDevice.name, this.attach.entryPortnr);
-        }
-        else {
-          this.attach = null;
-          Log('activateCapturePoint: no capture point:', device);
-        }
-
-        // Update list of my mac addresses
-        this.mymacs = Object.values(await MacAddress.all()).map(entry => entry.mac);
-
-        // Send a packet out of the capture point so we can locate it in the network.
-        // We do this periodically to keep point alive in the network.
-        const mac = dmac.split(':').map(v => parseInt(v, 16));
-        const pkt = Buffer.from([
-          0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
-          0x08, 0x06, // ARP
-          0x08, 0x00, // Ethernet,
-          0x00, 0x04, // IPv4
-          6, // HW len
-          4, // Protocol len
-          0, 1, // Request
-          mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
-          0, 0, 0, 0, // My IP - 0.0.0.0 as placeholder
-          0, 0, 0, 0, 0, 0, // Target HW
-          0, 0, 0, 0 // Target IP
-        ]);
-
-        let session;
+      const device = ConfigDB.read('network.capture.device');
+      if (device) {
         try {
-          session = PCap.createSession(device, {
-            promiscuous: false,
-            monitor: false,
-            buffer_size: CAPTURE_BUFFER_SIZE,
-            snap_length: CAPTURE_DEFAULT_SNAP_SIZE
-          });
-          session.inject(pkt);
-          await new Promise(resolve => setTimeout(resolve, 100));
-        }
-        finally {
-          if (session) {
-            session.close();
+          ChildProcess.execSync(`${Apps.ip} link set ${device} up`);
+          const dmac = await MacAddress.one(device);
+
+          // Look for the capture point in the network
+          const client = ClientManager.getClientByMac(dmac);
+          if (client && client.connected && client.connected.portnr !== null) {
+            this.attach = {
+              captureDevice: device,
+              entryDevice: client.connected.device,
+              entryPortnr: client.connected.portnr
+            };
+            Log('activateCapturePoint: attach:', this.attach.captureDevice, this.attach.entryDevice.name, this.attach.entryPortnr);
+          }
+          else {
+            this.attach = null;
+            Log('activateCapturePoint: no capture point:', device);
+          }
+
+          // Update list of my mac addresses
+          this.mymacs = Object.values(await MacAddress.all()).map(entry => entry.mac);
+
+          // Send a packet out of the capture point so we can locate it in the network.
+          // We do this periodically to keep point alive in the network.
+          const mac = dmac.split(':').map(v => parseInt(v, 16));
+          const pkt = Buffer.from([
+            0xff, 0xff, 0xff, 0xff, 0xff, 0xff,
+            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
+            0x08, 0x06, // ARP
+            0x08, 0x00, // Ethernet,
+            0x00, 0x04, // IPv4
+            6, // HW len
+            4, // Protocol len
+            0, 1, // Request
+            mac[0], mac[1], mac[2], mac[3], mac[4], mac[5], // My mac
+            0, 0, 0, 0, // My IP - 0.0.0.0 as placeholder
+            0, 0, 0, 0, 0, 0, // Target HW
+            0, 0, 0, 0 // Target IP
+          ]);
+
+          let session;
+          try {
+            session = PCap.createSession(device, {
+              promiscuous: false,
+              monitor: false,
+              buffer_size: CAPTURE_BUFFER_SIZE,
+              snap_length: CAPTURE_DEFAULT_SNAP_SIZE
+            });
+            session.inject(pkt);
+            await new Promise(resolve => setTimeout(resolve, 100));
+          }
+          finally {
+            if (session) {
+              session.close();
+            }
+          }
+
+          // If we don't have the attachment point, sync the state from our capture-able devices
+          // so we can find it.
+          if (!this.attach) {
+            TopologyManager.getCaptureDevices().forEach(dev => {
+              dev.watch();
+              dev.unwatch();
+            });
           }
         }
-
-        // If we don't have the attachment point, sync the state from our capture-able devices
-        // so we can find it.
-        if (!this.attach) {
-          TopologyManager.getCaptureDevices().forEach(dev => {
-            dev.watch();
-            dev.unwatch();
-          });
+        catch (_) {
+          Log(_);
         }
-      }
-      catch (_) {
-        Log(_);
       }
       await new Promise(resolve => setTimeout(resolve, ACTIVATE_INTERVAL));
     }
