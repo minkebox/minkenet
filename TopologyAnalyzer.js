@@ -27,6 +27,14 @@ class TopologyAnalyzer extends EventEmitter {
       this._devices = DeviceInstanceManager.getAuthenticatedDevices();
       this._snapfn = this._generateDevicesSnapFunction();
 
+      // Connect to everything before we start
+      if (!await this._connectAll()) {
+        return {
+          success: false,
+          reason: 'connecting'
+        };
+      }
+
       // Probe each device in turn and generate a snap traffic difference between probes
       const snaps = {};
       this.emit('status', { op: 'baseline' });
@@ -46,7 +54,7 @@ class TopologyAnalyzer extends EventEmitter {
       }
 
       if (!this.running) {
-        this.emit('status', { op: 'complete', success: false, reason: 'canceled' });
+        this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
         return;
       }
 
@@ -56,15 +64,24 @@ class TopologyAnalyzer extends EventEmitter {
       // consist of a number of devices with a pair of 'lit up' rx and tx ports, and a single
       // device with a lit up rx port (which should be the target).
 
-      // Calculate the mean and standard deviation of the traffic for each snap.
+      // Calculate the max, mean and standard deviation of the traffic for each snap.
       // We use this information for filtering out the signal from the noise.
       for (let id in snaps) {
         const traffic = snaps[id].snaps[0].traffic;
         let total = 0;
+        let max = 0;
         let count = 0;
         for (let idx = 0; idx < traffic.length; idx++) {
           const trafficInstance = traffic[idx];
-          trafficInstance.ports.forEach(port => total += port.rx + port.tx);
+          trafficInstance.ports.forEach(port => {
+            total += port.rx + port.tx;
+            if (port.rx > max) {
+              max = port.rx;
+            }
+            if (port.tx > max) {
+              max = port.tx;
+            }
+          });
           count += 2 * trafficInstance.ports.length * 2;
         }
         const mean = total / count;
@@ -74,20 +91,53 @@ class TopologyAnalyzer extends EventEmitter {
           trafficInstance.ports.forEach(port => variance += Math.pow(port.rx - mean, 2) + Math.pow(port.tx - mean, 2));
         }
         snaps[id].signal.stddev = {
-          mean: mean,
-          deviation: Math.sqrt(variance / (count - 1))
+          max: max,
+          mean: Math.floor(mean),
+          deviation: Math.floor(Math.sqrt(variance / (count - 1)))
         };
       }
 
+      if (Log.enabled) {
+        const p = b => `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})`;
+        Log('unfiltered snaps:');
+        for (let id in snaps) {
+          Log(` target: ${identity(snaps[id].target)}: max ${snaps[id].signal.stddev.max.toLocaleString()} mean ${snaps[id].signal.stddev.mean.toLocaleString()} deviation ${snaps[id].signal.stddev.deviation.toLocaleString()}`);
+          const traffic = snaps[id].snaps[0].traffic;
+          for (let idx = 0; idx < traffic.length; idx++) {
+            const trafficInstance = traffic[idx];
+            const foundRx = { port: -1, rx: 0 };
+            const foundTx = { port: -1, tx: 0 };
+            trafficInstance.ports.forEach((port, idx) => {
+              if (port.rx > foundRx.rx) {
+                foundRx.rx = port.rx;
+                foundRx.port = idx;
+              }
+              if (port.tx > foundTx.tx) {
+                foundTx.tx = port.tx;
+                foundTx.port = idx;
+              }
+            });
+            Log(`  ${identity(trafficInstance.device)} rx: ${p(foundRx)} tx: ${p(foundTx)}`);
+          }
+        }
+      }
+
       // Filter each traffic snap and identify the rx and tx port with the largest traffic
-      // above the mean + 2 standard deviation.
+      // above a specific threshold.
       for (let id in snaps) {
         const traffic = snaps[id].snaps[0].traffic;
         snaps[id].signal.best = [];
         for (let idx = 0; idx < traffic.length; idx++) {
           const trafficInstance = traffic[idx];
-          const foundRx = { port: -1, rx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
-          const foundTx = { port: -1, tx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
+          // Theshold: mean + 2 std deviations
+          //const foundRx = { port: -1, rx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
+          //const foundTx = { port: -1, tx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
+          // Threshold: max - 2 std deviations
+          //const foundRx = { port: -1, rx: snaps[id].signal.stddev.max - 2 * snaps[id].signal.stddev.deviation };
+          //const foundTx = { port: -1, tx: snaps[id].signal.stddev.max - 2 * snaps[id].signal.stddev.deviation };
+          // Threshold: Avg of mean and max
+          const foundRx = { port: -1, rx: (snaps[id].signal.stddev.mean + snaps[id].signal.stddev.max) / 2 };
+          const foundTx = { port: -1, tx: (snaps[id].signal.stddev.mean + snaps[id].signal.stddev.max) / 2 };
           trafficInstance.ports.forEach((port, idx) => {
             if (port.rx > foundRx.rx) {
               foundRx.rx = port.rx;
@@ -128,17 +178,17 @@ class TopologyAnalyzer extends EventEmitter {
         }
         filteredSnaps.push({
           target: snaps[id].target,
-          active: active
+          active: active,
+          stddev: snaps[id].signal.stddev
         });
       }
 
       // What we have so far
       if (Log.enabled) {
         const p = b => b ? `${b.port} (${(b.rx || b.tx).toLocaleString()})` : `-`;
-        //const p = b => b ? `${b.port}` : `-`;
         Log('filtered snaps:');
         filteredSnaps.forEach(snap => {
-          Log(` target: ${identity(snap.target)}:`);
+          Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
           snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${p(active.rx)} tx: ${p(active.tx)}`));
         });
       }
@@ -147,7 +197,6 @@ class TopologyAnalyzer extends EventEmitter {
 
       const links = [];
       let entryPoint = null;
-      let indent = 1;
 
       const walk = path => {
 
@@ -167,6 +216,7 @@ class TopologyAnalyzer extends EventEmitter {
 
         // Create a link for each new candidate, then recurse with the new extended path.
         candidates.forEach(snap => {
+          Log(`${new Array(path.length + 1).join('  ')}${identity(snap.target)}`);
 
           const self = snap.active.find(active => active.device === snap.target);
           const prev = snap.active.find(active => active.device === path[0]);
@@ -180,14 +230,11 @@ class TopologyAnalyzer extends EventEmitter {
             ]);
           }
 
-          Log(`${new Array(indent).join('  ')}${identity(snap.target)}`);
-          indent++;
           walk([ snap.target ].concat(path));
-          indent--;
         });
 
       }
-
+      Log('hierarchy:');
       walk([]);
 
       if (Log.enabled) {
@@ -195,7 +242,7 @@ class TopologyAnalyzer extends EventEmitter {
           Log('entry point:', identity(entryPoint.device), 'port:', entryPoint.port);
         }
         else {
-          Log('entry pointL missing;');
+          Log('entry point: missing');
         }
         Log('links:');
         links.forEach(link => {
@@ -216,6 +263,32 @@ class TopologyAnalyzer extends EventEmitter {
 
   stop() {
     this.running = false;
+  }
+
+  //
+  // Connect to all the devices (before we start the analysis).
+  //
+  async _connectAll() {
+    try {
+      Log('connecting');
+      this.emit('status', { op: 'connecting' });
+      const connections = await Promise.all(this._devices.map(dev => dev.connect()))
+      if (!this.running) {
+        this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
+        return false;
+      }
+      if (!connections.reduce((a, b) => a && b)) {
+        Log('connecting failed', connections.map((success, idx) => success ? '' : `${identity(this._devices[idx])} `).join(''));
+        this.emit('status', { op: 'complete', success: false, reason: 'connecting' });
+        return false;
+      }
+      return true;
+    }
+    catch (e) {
+      Log('connecting failed', e);
+      this.emit('status', { op: 'complete', success: false, reason: 'connecting' });
+      return false;
+    }
   }
 
   //
@@ -386,8 +459,8 @@ class TopologyAnalyzer extends EventEmitter {
       const ports = [];
       for (let pidx = 0; pidx < cports.length; pidx++) {
         ports[pidx] = {
-          rx: (cports[pidx].rx - pports[pidx].rx) >>> 0,
-          tx: (cports[pidx].tx - pports[pidx].tx) >>> 0
+          rx: Math.floor(((cports[pidx].rx - pports[pidx].rx) >>> 0) / 1000000),
+          tx: Math.floor(((cports[pidx].tx - pports[pidx].tx) >>> 0) / 1000000)
         };
       }
       traffic[idx] = { device: ctraffic[idx].device, ports: ports };
