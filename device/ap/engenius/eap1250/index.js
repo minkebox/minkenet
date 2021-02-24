@@ -46,7 +46,7 @@ const Device = {
 
   statistics: {
     prefer: 'bytes',
-    scale: 1
+    scale: 3
   },
 
   constants: {
