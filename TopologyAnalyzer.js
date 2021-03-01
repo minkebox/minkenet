@@ -13,6 +13,7 @@ const PROBE_PAYLOAD_SIZE = 1400;
 const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
 const PROBE_SPEEDLIMIT = 500 * 1000 * 1000; // 500Mb/s
+const MAX_ATTEMPTS = 3;
 
 const identity = dev => dev ? `[${dev.name} ${dev.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}]` : `[-]`;
 
@@ -36,75 +37,171 @@ class TopologyAnalyzer extends EventEmitter {
       }
 
       // Probe each device in turn and generate a snap traffic difference between probes
-      const snaps = {};
+      const snaps = [];
       this.emit('status', { op: 'baseline' });
       Log('probe: baseline');
       let lastsnap = await this._probeAndSnap(null);
-      for (let i = 0; i < this._devices.length && this.running; i++) {
+      for (let i = 0; i < this._devices.length; i++) {
         const selected = this._devices[i];
-        Log('probe:', identity(selected));
-        this.emit('status', { op: 'probe', device: selected });
-        const snap = await this._probeAndSnap(selected);
-        snaps[selected._id] = {
+        let stddev = null;
+        let best = null;
+        let snapdiff = null;
+        let attempt = 0;
+        let retry = true;
+        for (; retry && attempt < MAX_ATTEMPTS && this.running; attempt++) {
+          retry = false;
+          Log(`probe: ${attempt}:`, identity(selected));
+          this.emit('status', { op: 'probe', device: selected, attempt: attempt });
+
+          // Run a probe test then calculate the traffic it generated (appoximately).
+          const snap = await this._probeAndSnap(selected);
+          snapdiff = this._calculateTrafficChange(snap, lastsnap);
+          lastsnap = snap;
+
+          // Calculate the max, mean and standard deviation of the traffic for each snap.
+          // We use this information for filtering out the signal from the noise.
+
+          const traffic = snapdiff.traffic;
+          let total = 0;
+          let max = 0;
+          let count = 0;
+          for (let idx = 0; idx < traffic.length; idx++) {
+            const trafficInstance = traffic[idx];
+            trafficInstance.ports.forEach(port => {
+              total += port.rx + port.tx;
+              if (port.rx > max) {
+                max = port.rx;
+              }
+              if (port.tx > max) {
+                max = port.tx;
+              }
+            });
+            count += trafficInstance.ports.length * 2;
+          }
+          const mean = Math.round(total / count);
+          let variance = 0;
+          for (let idx = 0; idx < traffic.length; idx++) {
+            const trafficInstance = traffic[idx];
+            trafficInstance.ports.forEach(port => variance += Math.pow(port.rx - mean, 2) + Math.pow(port.tx - mean, 2));
+          }
+          stddev = {
+            max: max,
+            mean: mean,
+            deviation: Math.round(Math.sqrt(variance / (count - 1)))
+          };
+
+          // Filter each traffic snap and identify the rx and tx port with the largest traffic
+          // above a specific threshold.
+
+          best = [];
+          for (let idx = 0; idx < traffic.length; idx++) {
+            const trafficInstance = traffic[idx];
+
+            // Theshold: mean + 2 std deviations
+            //const foundRx = { port: -1, rx: snaps[id].stddev.mean + 2 * snaps[id].stddev.deviation, count: 0 };
+            //const foundTx = { port: -1, tx: snaps[id].stddev.mean + 2 * snaps[id].stddev.deviation, count: 0 };
+            // Threshold: max - 2 std deviations
+            //const foundRx = { port: -1, rx: snaps[id].stddev.max - 2 * snaps[id].stddev.deviation, count: 0 };
+            //const foundTx = { port: -1, tx: snaps[id].stddev.max - 2 * snaps[id].stddev.deviation, count: 0 };
+            // Threshold: Avg of mean and max
+            const foundRx = { port: -1, rx: (stddev.mean + stddev.max) / 2, count: 0 };
+            const foundTx = { port: -1, tx: (stddev.mean + stddev.max) / 2, count: 0 };
+            trafficInstance.ports.forEach((port, idx) => {
+              if (port.rx > foundRx.rx) {
+                foundRx.rx = port.rx;
+                foundRx.port = idx;
+                foundRx.count++;
+              }
+              if (port.tx > foundTx.tx) {
+                foundTx.tx = port.tx;
+                foundTx.port = idx;
+                foundTx.count++;
+              }
+            });
+
+            // Include this signal if we have an active rx port. We may also have an active tx
+            // port but *only* having an active tx port isn't valid as anything we cannot measure
+            // transmitted data without also receiving.
+
+            if (foundRx.count === 0) {
+              if (foundTx.count === 0) {
+                best[idx] = null;
+              }
+              else {
+                // Somehow we see traffic being transmitted but none received. Retry
+                retry = true;
+              }
+            }
+            else if (foundRx.count === 1) {
+              if (foundTx.count === 0) {
+                best[idx] = {
+                  device: trafficInstance.device,
+                  rx: foundRx
+                };
+              }
+              else if (foundTx.count === 1) {
+                best[idx] = {
+                  device: trafficInstance.device,
+                  rx: foundRx,
+                  tx: foundTx
+                };
+              }
+              else {
+                // There can be at most one tx port lit-up, so there may be too much traffic in this snap
+                // to analyze. Retry
+                retry = true;
+              }
+            }
+            else {
+              // More than one rx port it lit-up, so there was too much traffic on the network for this snap
+              // to be analyzed. Retry
+              retry = true;
+            }
+          }
+        }
+
+        // Canceled?
+        if (!this.running) {
+          return {
+            success: false,
+            reason: 'canceled'
+          };
+        }
+
+        // Tried a number of time to analyse a snap but eventually gave up - fail
+        if (retry) {
+          return {
+            success: false,
+            reason: 'busy'
+          };
+        }
+
+        // At this point the snap should only include rx and tx ports with significant traffic as a result of the
+        // specific target probe. The noise on other ports should have been filtered out.
+        // Reduce the filtered data to a set of snaps which just contains a list of device+ports which were lit-up
+        // during the probe.
+        const active = [];
+        for (let idx = 0; idx < best.length; idx++) {
+          if (best[idx]) {
+            active.push(best[idx]);
+          }
+        }
+
+        snaps.push({
           target: selected,
-          snaps: [ this._calculateTrafficChange(snap, lastsnap) ],
-          signal: {}
-        };
-        lastsnap = snap;
-      }
-
-      if (!this.running) {
-        this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
-        return;
-      }
-
-      // The traffic data will be noisy. Noise is created by other traffic in the network and
-      // inexact reporting by devices of their traffic.
-      // So we filter the traffic data so we have a single 'path' between devices. A path will
-      // consist of a number of devices with a pair of 'lit up' rx and tx ports, and a single
-      // device with a lit up rx port (which should be the target).
-
-      // Calculate the max, mean and standard deviation of the traffic for each snap.
-      // We use this information for filtering out the signal from the noise.
-      for (let id in snaps) {
-        const traffic = snaps[id].snaps[0].traffic;
-        let total = 0;
-        let max = 0;
-        let count = 0;
-        for (let idx = 0; idx < traffic.length; idx++) {
-          const trafficInstance = traffic[idx];
-          trafficInstance.ports.forEach(port => {
-            total += port.rx + port.tx;
-            if (port.rx > max) {
-              max = port.rx;
-            }
-            if (port.tx > max) {
-              max = port.tx;
-            }
-          });
-          count += 2 * trafficInstance.ports.length * 2;
-        }
-        const mean = total / count;
-        let variance = 0;
-        for (let idx = 0; idx < traffic.length; idx++) {
-          const trafficInstance = traffic[idx];
-          trafficInstance.ports.forEach(port => variance += Math.pow(port.rx - mean, 2) + Math.pow(port.tx - mean, 2));
-        }
-        snaps[id].signal.stddev = {
-          max: max,
-          mean: Math.floor(mean),
-          deviation: Math.floor(Math.sqrt(variance / (count - 1)))
-        };
+          snap: snapdiff,
+          active: active,
+          stddev: stddev
+        });
       }
 
       if (Log.enabled) {
-        const p = b => `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})`;
+        const p = b => b ? `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})` : `-`;
+
         Log('unfiltered snaps:');
-        for (let id in snaps) {
-          Log(` target: ${identity(snaps[id].target)}: max ${snaps[id].signal.stddev.max.toLocaleString()} mean ${snaps[id].signal.stddev.mean.toLocaleString()} deviation ${snaps[id].signal.stddev.deviation.toLocaleString()}`);
-          const traffic = snaps[id].snaps[0].traffic;
-          for (let idx = 0; idx < traffic.length; idx++) {
-            const trafficInstance = traffic[idx];
+        snaps.forEach(snap => {
+          Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
+          snap.snap.traffic.forEach(trafficInstance => {
             const foundRx = { port: -1, rx: 0 };
             const foundTx = { port: -1, tx: 0 };
             trafficInstance.ports.forEach((port, idx) => {
@@ -118,76 +215,11 @@ class TopologyAnalyzer extends EventEmitter {
               }
             });
             Log(`  ${identity(trafficInstance.device)} rx: ${p(foundRx)} tx: ${p(foundTx)}`);
-          }
-        }
-      }
-
-      // Filter each traffic snap and identify the rx and tx port with the largest traffic
-      // above a specific threshold.
-      for (let id in snaps) {
-        const traffic = snaps[id].snaps[0].traffic;
-        snaps[id].signal.best = [];
-        for (let idx = 0; idx < traffic.length; idx++) {
-          const trafficInstance = traffic[idx];
-          // Theshold: mean + 2 std deviations
-          //const foundRx = { port: -1, rx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
-          //const foundTx = { port: -1, tx: snaps[id].signal.stddev.mean + 2 * snaps[id].signal.stddev.deviation };
-          // Threshold: max - 2 std deviations
-          //const foundRx = { port: -1, rx: snaps[id].signal.stddev.max - 2 * snaps[id].signal.stddev.deviation };
-          //const foundTx = { port: -1, tx: snaps[id].signal.stddev.max - 2 * snaps[id].signal.stddev.deviation };
-          // Threshold: Avg of mean and max
-          const foundRx = { port: -1, rx: (snaps[id].signal.stddev.mean + snaps[id].signal.stddev.max) / 2 };
-          const foundTx = { port: -1, tx: (snaps[id].signal.stddev.mean + snaps[id].signal.stddev.max) / 2 };
-          trafficInstance.ports.forEach((port, idx) => {
-            if (port.rx > foundRx.rx) {
-              foundRx.rx = port.rx;
-              foundRx.port = idx;
-            }
-            if (port.tx > foundTx.tx) {
-              foundTx.tx = port.tx;
-              foundTx.port = idx;
-            }
           });
-          if (foundRx.port !== -1) {
-            // Include this signal if we have an active rx port. We may also have an active tx
-            // port but *only* having an active tx port isn't valid as anything we cannot measure
-            // transmitted data without also receiving.
-            snaps[id].signal.best[idx] = {
-              device: trafficInstance.device,
-              rx: foundRx
-            };
-            if (foundTx.port !== -1) {
-              snaps[id].signal.best[idx].tx = foundTx;
-            }
-          }
-        }
-      }
-
-      // At this point, snaps for each probe should only include rx and tx ports with significant traffic as a result of the
-      // specific target probe. The noise on other ports should have been filtered out.
-      // Reduce the filtered data to a set of snaps which just contains a list of device+ports which were lit-up
-      // during the probe.
-      const filteredSnaps = [];
-      for (let id in snaps) {
-        const best = snaps[id].signal.best;
-        const active = [];
-        for (let idx = 0; idx < best.length; idx++) {
-          if (best[idx]) {
-            active.push(best[idx]);
-          }
-        }
-        filteredSnaps.push({
-          target: snaps[id].target,
-          active: active,
-          stddev: snaps[id].signal.stddev
         });
-      }
-
-      // What we have so far
-      if (Log.enabled) {
-        const p = b => b ? `${b.port} (${(b.rx || b.tx).toLocaleString()})` : `-`;
+        Log('');
         Log('filtered snaps:');
-        filteredSnaps.forEach(snap => {
+        snaps.forEach(snap => {
           Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
           snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${p(active.rx)} tx: ${p(active.tx)}`));
         });
@@ -202,7 +234,7 @@ class TopologyAnalyzer extends EventEmitter {
 
         // Create a list of candidates. A candidate must contain all the devices in the path plus one more.
         const candidates = [];
-        filteredSnaps.forEach(snap => {
+        snaps.forEach(snap => {
           let success = (path.length + 1 == snap.active.length);
           for (let i = 0; i < path.length && success; i++) {
             if (!snap.active.find(active => active.device === path[i])) {
@@ -274,7 +306,7 @@ class TopologyAnalyzer extends EventEmitter {
       this.emit('status', { op: 'connecting' });
       const connections = await Promise.all(this._devices.map(dev => dev.connect()))
       if (!this.running) {
-        this.emit('status', { op: 'complete', success: false, reason: 'cancelled' });
+        this.emit('status', { op: 'complete', success: false, reason: 'canceled' });
         return false;
       }
       if (!connections.reduce((a, b) => a && b)) {

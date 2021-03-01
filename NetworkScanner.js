@@ -44,7 +44,7 @@ class Scanner extends EventEmitter {
   }
 
   stop() {
-    this.emit('status', { op: 'cancelled' });
+    this.emit('status', { op: 'canceled' });
     this.running = false;
   }
 

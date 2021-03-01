@@ -3,7 +3,11 @@ Connecting to devices
 {{else if (eq op 'baseline')}}
 Establishing network baseline
 {{else if (eq op 'probe')}}
+{{#if (eq attempt 0)}}
 Analyzing {{device.properties.system.ipv4.address.$}}
+{{else}}
+Re-analyzing {{device.properties.system.ipv4.address.$}}
+{{/if}}
 {{else if (eq op 'probes-complete')}}
 {{else if (eq op 'analyzing')}}
 Analyzing network
@@ -12,7 +16,7 @@ Analyzing network
 Success
 {{else}}
 <span style="color:red">
-{{#if (eq reason 'cancelled')}}
+{{#if (eq reason 'canceled')}}
 {{else if (eq reason 'connecting')}}
 Failed to connect to one or more devices
 {{else if (eq reason 'baseline')}}
