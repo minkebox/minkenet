@@ -26,8 +26,8 @@ class TopologyAnalyzer extends EventEmitter {
     try {
       this.running = true;
 
-      // Get the devices in the network and generate the function to read their traffic.
-      this._devices = DeviceInstanceManager.getAuthenticatedDevices();
+      // Get the devices in the network we can monitor and generate the function to read their traffic.
+      this._devices = DeviceInstanceManager.getAuthenticatedDevices().filter(dev => !!dev.statisticsInfo());
       this._snapfn = this._generateDevicesSnapFunction();
 
       // Connect to everything before we start
