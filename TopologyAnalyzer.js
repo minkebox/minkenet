@@ -57,7 +57,7 @@ class TopologyAnalyzer extends EventEmitter {
           // Hopefully this just happens at the beginning, but we may have to do this again if a probe fails
           // and we attempt to recover.
           if (!lastsnap) {
-            this.emit('status', { op: 'baseline' });
+            this.emit('status', { op: 'baseline', attempt: attempt });
             Log('probe: baseline');
             try {
               lastsnap = await this._probeAndSnap(null);

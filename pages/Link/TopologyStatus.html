@@ -1,7 +1,11 @@
 {{#if (eq op 'connecting')}}
 Connecting to devices
 {{else if (eq op 'baseline')}}
+{{#if (eq attempt 0)}}
 Establishing network baseline
+{{else}}
+Re-establishing network baseline
+{{/if}}
 {{else if (eq op 'probe')}}
 {{#if (eq attempt 0)}}
 Analyzing {{device.properties.system.ipv4.address.$}}
