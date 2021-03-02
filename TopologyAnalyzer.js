@@ -266,24 +266,28 @@ class TopologyAnalyzer extends EventEmitter {
         });
 
       }
+      Log('');
       Log('hierarchy:');
       walk([]);
 
       if (Log.enabled) {
-        if (entryPoint) {
-          Log('entry point:', identity(entryPoint.device), 'port:', entryPoint.port);
-        }
-        else {
-          Log('entry point: missing');
-        }
+        Log('entry point:', entryPoint ? `${identity(entryPoint.device)} port: ${entryPoint.port}` : 'missing');
         Log('links:');
         links.forEach(link => {
           Log(` ${identity(link[0].device)}:${link[0].port} <--> ${identity(link[1].device)}:${link[1].port}`);
         });
       }
 
+      // Topology needs to basically look like this
+      if (!entryPoint || links.length !== this._devices.length - 1) {
+        return {
+          success: false,
+          reason: 'busy'
+        };
+      }
+
       return {
-        success: (entryPoint && links.length == this._devices.length - 1),
+        success: true,
         entry: entryPoint,
         topology: links
       };
