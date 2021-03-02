@@ -4,7 +4,6 @@ const DeviceInstanceManager = require('../../DeviceInstanceManager');
 const TopologyManager = require('../../TopologyManager');
 const Debounce = require('../../utils/Debounce');
 const VLANManager = require('../../VLANManager');
-const { VM } = require('handlebars');
 const Log = require('debug')('links');
 
 class Links extends Page {
