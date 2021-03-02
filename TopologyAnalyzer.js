@@ -14,6 +14,7 @@ const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
 const PROBE_SPEEDLIMIT = 500 * 1000 * 1000; // 500Mb/s
 const MAX_ATTEMPTS = 3;
+const ZSCORE_CEILING = 3;
 
 const identity = dev => dev ? `[${dev.name} ${dev.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}]` : `[-]`;
 
@@ -92,36 +93,33 @@ class TopologyAnalyzer extends EventEmitter {
 
           // Filter each traffic snap and identify the rx and tx port with the largest traffic
           // above a specific threshold.
+          // We use a high zscore to detect the outliers (our traffic), of which there should only be
+          // one for tx and rx per device.
 
           best = [];
           for (let idx = 0; idx < traffic.length; idx++) {
             const trafficInstance = traffic[idx];
-
-            // Theshold: mean + 2 std deviations
-            //const foundRx = { port: -1, rx: snaps[id].stddev.mean + 2 * snaps[id].stddev.deviation, count: 0 };
-            //const foundTx = { port: -1, tx: snaps[id].stddev.mean + 2 * snaps[id].stddev.deviation, count: 0 };
-            // Threshold: max - 2 std deviations
-            //const foundRx = { port: -1, rx: snaps[id].stddev.max - 2 * snaps[id].stddev.deviation, count: 0 };
-            //const foundTx = { port: -1, tx: snaps[id].stddev.max - 2 * snaps[id].stddev.deviation, count: 0 };
-            // Threshold: Avg of mean and max
-            const foundRx = { port: -1, rx: (stddev.mean + stddev.max) / 2, count: 0 };
-            const foundTx = { port: -1, tx: (stddev.mean + stddev.max) / 2, count: 0 };
+            const foundRx = { port: -1, rx: 0, count: 0 };
+            const foundTx = { port: -1, tx: 0, count: 0 };
             trafficInstance.ports.forEach((port, idx) => {
-              if (port.rx > foundRx.rx) {
+              const zscoreRx = (port.rx - stddev.mean) / stddev.deviation;
+              const zscoreTx = (port.tx - stddev.mean) / stddev.deviation;
+              if (zscoreRx > ZSCORE_CEILING) {
                 foundRx.rx = port.rx;
                 foundRx.port = idx;
                 foundRx.count++;
               }
-              if (port.tx > foundTx.tx) {
+              if (zscoreTx > ZSCORE_CEILING) {
                 foundTx.tx = port.tx;
                 foundTx.port = idx;
                 foundTx.count++;
               }
             });
 
-            // Include this signal if we have an active rx port. We may also have an active tx
-            // port but *only* having an active tx port isn't valid as anything we cannot measure
-            // transmitted data without also receiving.
+            // Include this signal if we have an active rx port which may optionally have an active tx.
+            // Only specific combinations are valid if we've successfully identify our probe traffic.
+            // Other combinations are flagged and we will retry this probe.
+            // Valid combinations: [rx:0,tx:0] [rx:1,tx:0] [rx:1,tx:1]
 
             if (foundRx.count === 0) {
               if (foundTx.count === 0) {
@@ -129,15 +127,24 @@ class TopologyAnalyzer extends EventEmitter {
               }
               else {
                 // Somehow we see traffic being transmitted but none received. Retry
+                Log('error: tx traffic only');
                 retry = true;
               }
             }
             else if (foundRx.count === 1) {
               if (foundTx.count === 0) {
-                best[idx] = {
-                  device: trafficInstance.device,
-                  rx: foundRx
-                };
+                // rx-only traffic will only happen on the device we're probing (it wont be transmitting the traffic
+                // onwards).
+                if (trafficInstance.device === selected) {
+                  best[idx] = {
+                    device: trafficInstance.device,
+                    rx: foundRx
+                  };
+                }
+                else {
+                  Log('error: rx-only traffic on non-target');
+                  retry = true;
+                }
               }
               else if (foundTx.count === 1) {
                 best[idx] = {
@@ -149,12 +156,14 @@ class TopologyAnalyzer extends EventEmitter {
               else {
                 // There can be at most one tx port lit-up, so there may be too much traffic in this snap
                 // to analyze. Retry
+                Log('error: tx traffic > 1');
                 retry = true;
               }
             }
             else {
               // More than one rx port it lit-up, so there was too much traffic on the network for this snap
               // to be analyzed. Retry
+              Log('error: rx traffic > 1');
               retry = true;
             }
           }
