@@ -40,9 +40,7 @@ class TopologyAnalyzer extends EventEmitter {
 
       // Probe each device in turn and generate a snap traffic difference between probes
       const snaps = [];
-      this.emit('status', { op: 'baseline' });
-      Log('probe: baseline');
-      let lastsnap = await this._probeAndSnap(null);
+      let lastsnap = null;
       for (let i = 0; i < this._devices.length; i++) {
         const selected = this._devices[i];
         let stddev = null;
