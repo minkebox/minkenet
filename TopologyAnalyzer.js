@@ -14,9 +14,10 @@ const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
 const PROBE_SPEEDLIMIT = 750 * 1000 * 1000; // bits/s
 const MAX_ATTEMPTS = 3;
-const ZSCORE_CEILING = 3;
+const ZSCORE_FLOOR = 3;
 
 const identity = dev => dev ? `[${dev.name} ${dev.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}]` : `[-]`;
+const portid = b => b ? `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})` : `-`;
 
 class TopologyAnalyzer extends EventEmitter {
 
@@ -51,11 +52,38 @@ class TopologyAnalyzer extends EventEmitter {
         let retry = true;
         for (; retry && attempt < MAX_ATTEMPTS && this.running; attempt++) {
           retry = false;
+
+          // If we don't have a previous snap, we need to establish a baseline.
+          // Hopefully this just happens at the beginning, but we may have to do this again if a probe fails
+          // and we attempt to recover.
+          if (!lastsnap) {
+            this.emit('status', { op: 'baseline' });
+            Log('probe: baseline');
+            try {
+              lastsnap = await this._probeAndSnap(null);
+            }
+            catch (e) {
+              Log(e);
+              retry = true;
+              continue;
+            }
+          }
+
           Log(`probe: ${attempt}:`, identity(selected));
           this.emit('status', { op: 'probe', device: selected, attempt: attempt });
 
-          // Run a probe test then calculate the traffic it generated (appoximately).
-          const snap = await this._probeAndSnap(selected);
+          // Run a probe test then calculate the traffic it generated (approximately).
+          let snap;
+          try {
+            snap = await this._probeAndSnap(selected);
+          }
+          catch (e) {
+            Log(e);
+            // If the snap fails we will need to reestablish a baseline and retry
+            lastsnap = null;
+            retry = true;
+            continue;
+          }
           snapdiff = this._calculateTrafficChange(snap, lastsnap);
           lastsnap = snap;
 
@@ -104,12 +132,12 @@ class TopologyAnalyzer extends EventEmitter {
             trafficInstance.ports.forEach((port, idx) => {
               const zscoreRx = (port.rx - stddev.mean) / stddev.deviation;
               const zscoreTx = (port.tx - stddev.mean) / stddev.deviation;
-              if (zscoreRx > ZSCORE_CEILING) {
+              if (zscoreRx > ZSCORE_FLOOR) {
                 foundRx.rx = port.rx;
                 foundRx.port = idx;
                 foundRx.count++;
               }
-              if (zscoreTx > ZSCORE_CEILING) {
+              if (zscoreTx > ZSCORE_FLOOR) {
                 foundTx.tx = port.tx;
                 foundTx.port = idx;
                 foundTx.count++;
@@ -121,7 +149,20 @@ class TopologyAnalyzer extends EventEmitter {
             // Other combinations are flagged and we will retry this probe.
             // Valid combinations: [rx:0,tx:0] [rx:1,tx:0] [rx:1,tx:1]
 
-            if (foundRx.count === 0) {
+            // rx-only traffic will only happen on the device we're probing (it wont be transmitting the traffic onwards).
+            if (trafficInstance.device === selected) {
+              if (foundRx.count === 1 && foundTx.count === 0) {
+                best[idx] = {
+                  device: trafficInstance.device,
+                  rx: foundRx
+                };
+              }
+              else {
+                Log(`error: ${identity(trafficInstance.device)} tx traffic on target`);
+                retry = true;
+              }
+            }
+            else if (foundRx.count === 0) {
               if (foundTx.count === 0) {
                 best[idx] = null;
               }
@@ -132,21 +173,7 @@ class TopologyAnalyzer extends EventEmitter {
               }
             }
             else if (foundRx.count === 1) {
-              if (foundTx.count === 0) {
-                // rx-only traffic will only happen on the device we're probing (it wont be transmitting the traffic
-                // onwards).
-                if (trafficInstance.device === selected) {
-                  best[idx] = {
-                    device: trafficInstance.device,
-                    rx: foundRx
-                  };
-                }
-                else {
-                  Log(`error: ${identity(trafficInstance.device)} rx-only traffic on non-target`);
-                  retry = true;
-                }
-              }
-              else if (foundTx.count === 1) {
+              if (foundTx.count === 1) {
                 best[idx] = {
                   device: trafficInstance.device,
                   rx: foundRx,
@@ -154,9 +181,9 @@ class TopologyAnalyzer extends EventEmitter {
                 };
               }
               else {
-                // There can be at most one tx port lit-up, so there may be too much traffic in this snap
+                // There can be at only one tx port lit-up, so there may be too much traffic in this snap
                 // to analyze. Retry
-                Log(`error: ${identity(trafficInstance.device)} tx traffic > 1`);
+                Log(`error: ${identity(trafficInstance.device)} tx traffic !== 1`);
                 retry = true;
               }
             }
@@ -205,8 +232,6 @@ class TopologyAnalyzer extends EventEmitter {
       }
 
       if (Log.enabled) {
-        const p = b => b ? `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})` : `-`;
-
         Log('unfiltered snaps:');
         snaps.forEach(snap => {
           Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
@@ -223,14 +248,14 @@ class TopologyAnalyzer extends EventEmitter {
                 foundTx.port = idx;
               }
             });
-            Log(`  ${identity(trafficInstance.device)} rx: ${p(foundRx)} tx: ${p(foundTx)}`);
+            Log(`  ${identity(trafficInstance.device)} rx: ${portid(foundRx)} tx: ${portid(foundTx)}`);
           });
         });
         Log('');
         Log('filtered snaps:');
         snaps.forEach(snap => {
           Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
-          snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${p(active.rx)} tx: ${p(active.tx)}`));
+          snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${portid(active.rx)} tx: ${portid(active.tx)}`));
         });
       }
 
@@ -307,6 +332,7 @@ class TopologyAnalyzer extends EventEmitter {
   }
 
   stop() {
+    Log('stopping');
     this.running = false;
   }
 
@@ -317,7 +343,12 @@ class TopologyAnalyzer extends EventEmitter {
     try {
       Log('connecting');
       this.emit('status', { op: 'connecting' });
-      const connections = await Promise.all(this._devices.map(dev => dev.connect()))
+      const connections = await Promise.all(this._devices.map(async dev => {
+        Log(`connect: ${identity(dev)}`);
+        const success = await dev.connect();
+        Log(`done: ${identity(dev)}`);
+        return success;
+      }));
       if (!this.running) {
         this.emit('status', { op: 'complete', success: false, reason: 'canceled' });
         return false;
@@ -396,7 +427,11 @@ class TopologyAnalyzer extends EventEmitter {
         }
       }
       return {
-        update: async () => await dev.statistics(),
+        update: async () => {
+          Log(`update: ${identity(dev)}`);
+          await dev.statistics();
+          Log(`done: ${identity(dev)}`);
+        },
         read: () => {
           const r = [];
           const v = dev.readKV(`network.physical.port`);
@@ -426,7 +461,11 @@ class TopologyAnalyzer extends EventEmitter {
         }
       }
       return {
-        update: async () => await dev.statistics(),
+        update: async () => {
+          Log(`update: ${identity(dev)}`);
+          await dev.statistics();
+          Log(`done: ${identity(dev)}`);
+        },
         read: () => {
           const r = [];
           const v = dev.readKV(`network.physical.port`);
