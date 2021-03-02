@@ -320,7 +320,7 @@ class TopologyManager extends EventEmitter {
 
     this.analyser = new TopologyAnalyzer();
     this.analyser.on('status', event => this.emit('status', event));
-
+    this.running = true;
     const results = await this.analyser.analyze();
     this.running = false;
     this.valid = results.success;

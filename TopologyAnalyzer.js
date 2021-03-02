@@ -393,7 +393,11 @@ class TopologyAnalyzer extends EventEmitter {
     });
     this._buildDevicesLagMap();
     return async () => {
-      await Promise.all(snaps.map(async snap => await snap.snap.update()));
+      // Updating sequentially seems to be faster than running them all together - not sure why
+      //await Promise.all(snaps.map(async snap => await snap.snap.update()));
+      for (let i = 0; i < snaps.length; i++) {
+        await snaps[i].snap.update();
+      }
       const traffic = [];
       snaps.forEach(snap => {
         traffic.push({ device: snap.dev, ports: this._lagMerge(snap.dev, snap.snap.read()) });
@@ -509,7 +513,7 @@ class TopologyAnalyzer extends EventEmitter {
           }
         });
       }
-      send();
+      setTimeout(send, 0); // Give pending events time to propogate
     });
     return count * PROBE_PAYLOAD_RAW_SIZE;
   }
