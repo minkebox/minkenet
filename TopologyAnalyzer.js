@@ -12,7 +12,7 @@ const DRAIN_TIME = 500;
 const PROBE_PAYLOAD_SIZE = 1400;
 const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
-const PROBE_SPEEDLIMIT = 500 * 1000 * 1000; // 500Mb/s
+const PROBE_SPEEDLIMIT = 750 * 1000 * 1000; // bits/s
 const MAX_ATTEMPTS = 3;
 const ZSCORE_CEILING = 3;
 
@@ -127,7 +127,7 @@ class TopologyAnalyzer extends EventEmitter {
               }
               else {
                 // Somehow we see traffic being transmitted but none received. Retry
-                Log('error: tx traffic only');
+                Log(`error: ${identity(trafficInstance.device)} tx traffic only`);
                 retry = true;
               }
             }
@@ -142,7 +142,7 @@ class TopologyAnalyzer extends EventEmitter {
                   };
                 }
                 else {
-                  Log('error: rx-only traffic on non-target');
+                  Log(`error: ${identity(trafficInstance.device)} rx-only traffic on non-target`);
                   retry = true;
                 }
               }
@@ -156,14 +156,14 @@ class TopologyAnalyzer extends EventEmitter {
               else {
                 // There can be at most one tx port lit-up, so there may be too much traffic in this snap
                 // to analyze. Retry
-                Log('error: tx traffic > 1');
+                Log(`error: ${identity(trafficInstance.device)} tx traffic > 1`);
                 retry = true;
               }
             }
             else {
               // More than one rx port it lit-up, so there was too much traffic on the network for this snap
               // to be analyzed. Retry
-              Log('error: rx traffic > 1');
+              Log(`error: ${identity(trafficInstance.device)} rx traffic > 1`);
               retry = true;
             }
           }
@@ -376,19 +376,32 @@ class TopologyAnalyzer extends EventEmitter {
   // for analysis.
   //
   _generateDeviceSnap(dev) {
-    const keys = dev.readKV('network.physical.port', { depth: 1 });
     const info = dev.statisticsInfo();
     if (info.prefer !== 'packets' && dev.readKV(`network.physical.port.0.statistics.rx.bytes`) !== null) {
       const scale = info.scale;
+      const rx = (v) => {
+        try {
+          return scale * parseInt(v.statistics.rx.bytes);
+        }
+        catch (_) {
+          return 0;
+        }
+      }
+      const tx = (v) => {
+        try {
+          return scale * parseInt(v.statistics.tx.bytes);
+        }
+        catch (_) {
+          return 0;
+        }
+      }
       return {
         update: async () => await dev.statistics(),
         read: () => {
           const r = [];
-          for (let key in keys) {
-            r.push({
-              rx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.bytes`)),
-              tx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.bytes`))
-            });
+          const v = dev.readKV(`network.physical.port`);
+          for (let key in v) {
+            r.push({ rx: rx(v[key]), tx: tx(v[key]) });
           }
           return r;
         }
@@ -396,15 +409,29 @@ class TopologyAnalyzer extends EventEmitter {
     }
     else {
       const scale = PROBE_PAYLOAD_RAW_SIZE * info.scale;
+      const rx = (v) => {
+        try {
+          return scale * parseInt(v.statistics.rx.packets);
+        }
+        catch (_) {
+          return 0;
+        }
+      }
+      const tx = (v) => {
+        try {
+          return scale * parseInt(v.statistics.tx.packets);
+        }
+        catch (_) {
+          return 0;
+        }
+      }
       return {
         update: async () => await dev.statistics(),
         read: () => {
           const r = [];
-          for (let key in keys) {
-            r.push({
-              rx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.rx.packets`)),
-              tx: scale * parseInt(dev.readKV(`network.physical.port.${key}.statistics.tx.packets`))
-            });
+          const v = dev.readKV(`network.physical.port`);
+          for (let key in v) {
+            r.push({ rx: rx(v[key]), tx: tx(v[key]) });
           }
           return r;
         }
