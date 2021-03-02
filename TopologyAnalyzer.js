@@ -13,8 +13,8 @@ const PROBE_PAYLOAD_SIZE = 1400;
 const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
 const PROBE_SPEEDLIMIT = 750 * 1000 * 1000; // bits/s
-const MAX_ATTEMPTS = 3;
-const ZSCORE_FLOOR = 3;
+const MAX_ATTEMPTS = 5;
+const ZSCORE_FLOOR = 3.5;
 
 const identity = dev => dev ? `[${dev.name} ${dev.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}]` : `[-]`;
 const portid = b => b ? `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})` : `-`;
