@@ -434,6 +434,7 @@ class TopologyAnalyzer extends EventEmitter {
           }
           else if (Date.now() - begin > PROBE_TIME) {
             // Let the packets drain
+            client.close();
             setTimeout(resolve, DRAIN_TIME);
           }
           else {
