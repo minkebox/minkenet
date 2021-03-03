@@ -40,50 +40,56 @@ class TopologyAnalyzer extends EventEmitter {
 
       // Probe each device in turn and generate a snap traffic difference between probes
       const snaps = [];
+      let snap = null;
       let lastsnap = null;
       for (let i = 0; i < this._devices.length; i++) {
         const selected = this._devices[i];
+
         let stddev = null;
         let best = null;
         let snapdiff = null;
         let attempt = 0;
         let retry = true;
+
         for (; retry && attempt < MAX_ATTEMPTS && this.running; attempt++) {
+
+          lastsnap = snap;
           retry = false;
 
-          // If we don't have a previous snap, we need to establish a baseline.
-          // Hopefully this just happens at the beginning, but we may have to do this again if a probe fails
-          // and we attempt to recover.
-          if (!lastsnap) {
-            this.emit('status', { op: 'baseline', attempt: attempt });
-            Log('probe: baseline');
-            try {
-              lastsnap = await this._probeAndSnap(null);
-            }
-            catch (e) {
-              Log(e);
-              retry = true;
-              continue;
-            }
-          }
-
-          Log(`probe: ${attempt}:`, identity(selected));
-          this.emit('status', { op: 'probe', device: selected, attempt: attempt });
-
-          // Run a probe test then calculate the traffic it generated (approximately).
-          let snap;
           try {
-            snap = await this._probeAndSnap(selected);
+            if (lastsnap && attempt % 2 === 1) {
+              // When we fail to extract useful signal from the snap it can be because there is extra traffic
+              // confusing the signal. So we try to immediately take another snap in an attempt to isolte that
+              // traffic and remove it from our signal.
+              this.emit('status', { op: 'probe', device: selected, attempt: attempt });
+              Log('probe: denoise');
+              snap = await this._probeAndSnap(null);
+              const noise = this._calculateTrafficChange(snap, lastsnap, 1000000);
+              snapdiff = this._calculateTrafficChange(snapdiff, noise, 1);
+            }
+            else {
+              // If we don't have a previous snap, we need to establish a baseline.
+              // Hopefully this just happens at the beginning, but we may have to do this again if a probe fails
+              // and we attempt to recover.
+              if (!lastsnap) {
+                this.emit('status', { op: 'baseline', attempt: attempt });
+                Log('probe: baseline');
+                lastsnap = await this._probeAndSnap(null);
+              }
+              // Run a probe test then calculate the traffic it generated (approximately).
+              Log(`probe: ${attempt}:`, identity(selected));
+              this.emit('status', { op: 'probe', device: selected, attempt: attempt });
+              snap = await this._probeAndSnap(selected);
+              snapdiff = this._calculateTrafficChange(snap, lastsnap, 1000000);
+            }
           }
           catch (e) {
             Log(e);
             // If the snap fails we will need to reestablish a baseline and retry
-            lastsnap = null;
+            snap = null;
             retry = true;
             continue;
           }
-          snapdiff = this._calculateTrafficChange(snap, lastsnap);
-          lastsnap = snap;
 
           // Calculate the max, mean and standard deviation of the traffic for each snap.
           // We use this information for filtering out the signal from the noise.
@@ -383,7 +389,6 @@ class TopologyAnalyzer extends EventEmitter {
   // Generate a function which will snapshot the traffic on the given devices, and return the data.
   //
   _generateDevicesSnapFunction() {
-    Log('generate device snap fn:');
     const snaps = [];
     this._devices.forEach(dev => {
       const snap = this._generateDeviceSnap(dev);
@@ -432,7 +437,7 @@ class TopologyAnalyzer extends EventEmitter {
         update: async () => {
           Log(`update: ${identity(dev)}`);
           await dev.statistics();
-          Log(`done: ${identity(dev)}`);
+          Log(`done:   ${identity(dev)}`);
         },
         read: () => {
           const r = [];
@@ -466,7 +471,7 @@ class TopologyAnalyzer extends EventEmitter {
         update: async () => {
           Log(`update: ${identity(dev)}`);
           await dev.statistics();
-          Log(`done: ${identity(dev)}`);
+          Log(`done:   ${identity(dev)}`);
         },
         read: () => {
           const r = [];
@@ -511,7 +516,7 @@ class TopologyAnalyzer extends EventEmitter {
           }
         });
       }
-      setTimeout(send, 0); // Give pending events time to propogate
+      setTimeout(send, 100); // Give pending events a moment to propogate
     });
     return count * PROBE_PAYLOAD_RAW_SIZE;
   }
@@ -563,7 +568,7 @@ class TopologyAnalyzer extends EventEmitter {
   //
   // Calculate the change in traffic between the two snaps, managing rollover counters.
   //
-  _calculateTrafficChange(current, previous) {
+  _calculateTrafficChange(current, previous, div) {
     const traffic = [];
     const ctraffic = current.traffic;
     const ptraffic = previous.traffic;
@@ -573,8 +578,8 @@ class TopologyAnalyzer extends EventEmitter {
       const ports = [];
       for (let pidx = 0; pidx < cports.length; pidx++) {
         ports[pidx] = {
-          rx: Math.floor(((cports[pidx].rx - pports[pidx].rx) >>> 0) / 1000000),
-          tx: Math.floor(((cports[pidx].tx - pports[pidx].tx) >>> 0) / 1000000)
+          rx: Math.floor(((cports[pidx].rx - pports[pidx].rx) >>> 0) / div),
+          tx: Math.floor(((cports[pidx].tx - pports[pidx].tx) >>> 0) / div)
         };
       }
       traffic[idx] = { device: ctraffic[idx].device, ports: ports };

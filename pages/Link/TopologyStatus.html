@@ -8,9 +8,9 @@ Re-establishing network baseline
 {{/if}}
 {{else if (eq op 'probe')}}
 {{#if (eq attempt 0)}}
-Analyzing {{device.name}} [{{device.properties.system.ipv4.address.$}}]
+Analyzing {{device.properties.system.ipv4.address.$}} [{{device.name}}]
 {{else}}
-Re-analyzing {{device.name}} [{{device.properties.system.ipv4.address.$}}]
+Re-analyzing {{device.properties.system.ipv4.address.$}} [{{device.name}}]
 {{/if}}
 {{else if (eq op 'probes-complete')}}
 {{else if (eq op 'analyzing')}}
