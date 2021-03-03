@@ -63,6 +63,7 @@ class TopologyAnalyzer extends EventEmitter {
               // traffic and remove it from our signal.
               this.emit('status', { op: 'probe', device: selected, attempt: attempt });
               Log('probe: denoise');
+              await new Promise(resolve => setTimeout(resolve, PROBE_TIME));
               snap = await this._probeAndSnap(null);
               const noise = this._calculateTrafficChange(snap, lastsnap, v => (v >>> 0) / 1000000);
               snapdiff = this._calculateTrafficChange(snapdiff, noise, v => v);
