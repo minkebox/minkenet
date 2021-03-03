@@ -14,7 +14,7 @@ const PROBE_PAYLOAD_RAW_SIZE = PROBE_PAYLOAD_SIZE + 46;
 const PROBE_PORT = 80;
 const PROBE_SPEEDLIMIT = 750 * 1000 * 1000; // bits/s
 const MAX_ATTEMPTS = 5;
-const ZSCORE_FLOOR = 3.5;
+const ZSCORE_FLOOR = 3;
 
 const identity = dev => dev ? `[${dev.name} ${dev.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS)}]` : `[-]`;
 const portid = b => b ? `${b.port} (${(b.rx || b.tx || '0').toLocaleString()})` : `-`;
@@ -50,6 +50,7 @@ class TopologyAnalyzer extends EventEmitter {
         let snapdiff = null;
         let attempt = 0;
         let retry = true;
+        let denoise = false;
 
         for (; retry && attempt < MAX_ATTEMPTS && this.running; attempt++) {
 
@@ -57,12 +58,13 @@ class TopologyAnalyzer extends EventEmitter {
           retry = false;
 
           try {
-            if (lastsnap && attempt % 2 === 1) {
+            if (denoise && attempt > 0) {
               // When we fail to extract useful signal from the snap it can be because there is extra traffic
               // confusing the signal. So we try to immediately take another snap in an attempt to isolte that
               // traffic and remove it from our signal.
+              denoise = false;
               this.emit('status', { op: 'probe', device: selected, attempt: attempt });
-              Log('probe: denoise');
+              Log(`denoise ${attempt}:`, identity(selected));
               await new Promise(resolve => setTimeout(resolve, PROBE_TIME));
               snap = await this._probeAndSnap(null);
               const noise = this._calculateTrafficChange(snap, lastsnap, v => (v >>> 0) / 1000000);
@@ -72,13 +74,14 @@ class TopologyAnalyzer extends EventEmitter {
               // If we don't have a previous snap, we need to establish a baseline.
               // Hopefully this just happens at the beginning, but we may have to do this again if a probe fails
               // and we attempt to recover.
+              denoise = true;
               if (!lastsnap) {
                 this.emit('status', { op: 'baseline', attempt: attempt });
                 Log('probe: baseline');
                 lastsnap = await this._probeAndSnap(null);
               }
               // Run a probe test then calculate the traffic it generated (approximately).
-              Log(`probe: ${attempt}:`, identity(selected));
+              Log(`probe ${attempt}:`, identity(selected));
               this.emit('status', { op: 'probe', device: selected, attempt: attempt });
               snap = await this._probeAndSnap(selected);
               // Calculate the difference between the two traffic records. We adjust the value to allow
@@ -89,6 +92,7 @@ class TopologyAnalyzer extends EventEmitter {
           catch (e) {
             Log(e);
             // If the snap fails we will need to reestablish a baseline and retry
+            denoise = false;
             snap = null;
             retry = true;
             continue;
@@ -136,20 +140,31 @@ class TopologyAnalyzer extends EventEmitter {
             const trafficInstance = traffic[idx];
             const foundRx = { port: -1, rx: 0, count: 0 };
             const foundTx = { port: -1, tx: 0, count: 0 };
-            trafficInstance.ports.forEach((port, idx) => {
-              const zscoreRx = (port.rx - stddev.mean) / stddev.deviation;
-              const zscoreTx = (port.tx - stddev.mean) / stddev.deviation;
-              if (zscoreRx > ZSCORE_FLOOR) {
-                foundRx.rx = port.rx;
-                foundRx.port = idx;
-                foundRx.count++;
-              }
-              if (zscoreTx > ZSCORE_FLOOR) {
-                foundTx.tx = port.tx;
-                foundTx.port = idx;
-                foundTx.count++;
-              }
-            });
+            // Quick handling of probing selected devices with a single port (most often access points) where,
+            // the port *must* be the one lit-up.
+            // Note: For whatever reason, the APs I've tested have very poor traffic reporting (often wrong by a
+            // factor or 3 or 4) so this assumption helps when detecting them.
+            if (trafficInstance.ports.length === 1 && trafficInstance.device === selected) {
+              foundRx.port = 0;
+              foundRx.rx = trafficInstance.ports[0].rx;
+              foundRx.count = 1;
+            }
+            else {
+              trafficInstance.ports.forEach((port, idx) => {
+                const zscoreRx = (port.rx - stddev.mean) / stddev.deviation;
+                const zscoreTx = (port.tx - stddev.mean) / stddev.deviation;
+                if (zscoreRx > ZSCORE_FLOOR) {
+                  foundRx.rx = port.rx;
+                  foundRx.port = idx;
+                  foundRx.count++;
+                }
+                if (zscoreTx > ZSCORE_FLOOR) {
+                  foundTx.tx = port.tx;
+                  foundTx.port = idx;
+                  foundTx.count++;
+                }
+              });
+            }
 
             // Include this signal if we have an active rx port which may optionally have an active tx.
             // Only specific combinations are valid if we've successfully identify our probe traffic.
@@ -165,7 +180,7 @@ class TopologyAnalyzer extends EventEmitter {
                 };
               }
               else {
-                Log(`error: ${identity(trafficInstance.device)} tx traffic on target`);
+                Log(`error: ${identity(trafficInstance.device)} bad traffic on target (rx ${foundRx.rx}/${foundRx.port}/${foundRx.count} tx ${foundTx.tx}/${foundTx.port}/${foundTx.count})`);
                 retry = true;
               }
             }
@@ -175,7 +190,7 @@ class TopologyAnalyzer extends EventEmitter {
               }
               else {
                 // Somehow we see traffic being transmitted but none received. Retry
-                Log(`error: ${identity(trafficInstance.device)} tx traffic only`);
+                Log(`error: ${identity(trafficInstance.device)} tx traffic only (rx ${foundRx.rx}/${foundRx.port}/${foundRx.count} tx ${foundTx.tx}/${foundTx.port}/${foundTx.count})`);
                 retry = true;
               }
             }
@@ -190,16 +205,24 @@ class TopologyAnalyzer extends EventEmitter {
               else {
                 // There can be at only one tx port lit-up, so there may be too much traffic in this snap
                 // to analyze. Retry
-                Log(`error: ${identity(trafficInstance.device)} tx traffic !== 1`);
+                Log(`error: ${identity(trafficInstance.device)} tx traffic !== 1 (rx ${foundRx.rx}/${foundRx.port}/${foundRx.count} tx ${foundTx.tx}/${foundTx.port}/${foundTx.count})`);
                 retry = true;
               }
             }
             else {
               // More than one rx port it lit-up, so there was too much traffic on the network for this snap
               // to be analyzed. Retry
-              Log(`error: ${identity(trafficInstance.device)} rx traffic > 1`);
+              Log(`error: ${identity(trafficInstance.device)} rx traffic > 1 (rx ${foundRx.rx}/${foundRx.port}/${foundRx.count} tx ${foundTx.tx}/${foundTx.port}/${foundTx.count})`);
               retry = true;
             }
+          }
+
+          if (retry) {
+            this.logSnap({
+              target: selected,
+              snap: snapdiff,
+              stddev: stddev
+            });
           }
         }
 
@@ -238,33 +261,7 @@ class TopologyAnalyzer extends EventEmitter {
         });
       }
 
-      if (Log.enabled) {
-        Log('unfiltered snaps:');
-        snaps.forEach(snap => {
-          Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
-          snap.snap.traffic.forEach(trafficInstance => {
-            const foundRx = { port: -1, rx: 0 };
-            const foundTx = { port: -1, tx: 0 };
-            trafficInstance.ports.forEach((port, idx) => {
-              if (port.rx > foundRx.rx) {
-                foundRx.rx = port.rx;
-                foundRx.port = idx;
-              }
-              if (port.tx > foundTx.tx) {
-                foundTx.tx = port.tx;
-                foundTx.port = idx;
-              }
-            });
-            Log(`  ${identity(trafficInstance.device)} rx: ${portid(foundRx)} tx: ${portid(foundTx)}`);
-          });
-        });
-        Log('');
-        Log('filtered snaps:');
-        snaps.forEach(snap => {
-          Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
-          snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${portid(active.rx)} tx: ${portid(active.tx)}`));
-        });
-      }
+      this.logSnaps(snaps);
 
       // Time to reconstruct the network links from our filtered snaps.
 
@@ -341,6 +338,42 @@ class TopologyAnalyzer extends EventEmitter {
   stop() {
     Log('stopping');
     this.running = false;
+  }
+
+  logSnaps(snaps) {
+    if (Log.enabled) {
+      Log('unfiltered snaps:');
+      snaps.forEach(snap => {
+       this.logSnap(snap);
+      });
+      Log('');
+      Log('filtered snaps:');
+      snaps.forEach(snap => {
+        Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
+        snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${portid(active.rx)} tx: ${portid(active.tx)}`));
+      });
+    }
+  }
+
+  logSnap(snap) {
+    if (Log.enabled) {
+      Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
+      snap.snap.traffic.forEach(trafficInstance => {
+        const foundRx = { port: -1, rx: 0 };
+        const foundTx = { port: -1, tx: 0 };
+        trafficInstance.ports.forEach((port, idx) => {
+          if (port.rx > foundRx.rx) {
+            foundRx.rx = port.rx;
+            foundRx.port = idx;
+          }
+          if (port.tx > foundTx.tx) {
+            foundTx.tx = port.tx;
+            foundTx.port = idx;
+          }
+        });
+        Log(`  ${identity(trafficInstance.device)} rx: ${portid(foundRx)} tx: ${portid(foundTx)}`);
+      });
+    }
   }
 
   //
@@ -438,9 +471,9 @@ class TopologyAnalyzer extends EventEmitter {
       }
       return {
         update: async () => {
-          Log(`update: ${identity(dev)}`);
+          Log(` update: ${identity(dev)}`);
           await dev.statistics();
-          Log(`done:   ${identity(dev)}`);
+          Log(` done:   ${identity(dev)}`);
         },
         read: () => {
           const r = [];
@@ -472,9 +505,9 @@ class TopologyAnalyzer extends EventEmitter {
       }
       return {
         update: async () => {
-          Log(`update: ${identity(dev)}`);
+          Log(` update: ${identity(dev)}`);
           await dev.statistics();
-          Log(`done:   ${identity(dev)}`);
+          Log(` done:   ${identity(dev)}`);
         },
         read: () => {
           const r = [];
