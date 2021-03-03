@@ -1,7 +1,6 @@
 const FS = require('fs');
 const Path = require('path');
 const DB = require('nedb');
-const Barrier = require('./utils/Barrier');
 const Log = require('debug')('db');
 
 const DB_PATH = `${__dirname}/db`;

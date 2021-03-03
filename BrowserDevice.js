@@ -7,6 +7,7 @@ const Eval = require('./BrowserEval');
 const DB = require('./Database');
 const TypeConversion = require('./utils/TypeConversion');
 const DeviceState = require('./DeviceState');
+const Barrier = require('./utils/Barrier');
 const Log = require('debug')('browser');
 const LogContent = Log.extend('content');
 const LogState = Log.extend('state');
@@ -420,7 +421,7 @@ class BrowserDeviceInstance extends DeviceInstance {
   //
   // Connect to the hardware device. Despite whatever state we start it, if we can, we will
   // be connected and authenticated once we're done.
-  async connect() {
+  connect = Barrier(async function() {
     if (this._validated) {
       Log('already connected:');
       return true;
@@ -438,7 +439,7 @@ class BrowserDeviceInstance extends DeviceInstance {
     }
     Log('failed to connect:');
     return false;
-  }
+  })
 
   //
   // Update the local state so it reflects the actual device state.
