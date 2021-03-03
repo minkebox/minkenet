@@ -42,10 +42,8 @@ class DeviceInstanceManager extends EventEmitter {
     }
   }
 
-  onDeviceUpdate(reason) {
-    if (reason !== 'statistics') {
-      this.emit('update');
-    }
+  onDeviceUpdate(evt) {
+    this.emit('update', evt);
     let commit = false;
     for (let id in this.devices) {
       if (this.devices[id].needCommit()) {

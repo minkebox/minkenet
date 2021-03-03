@@ -131,6 +131,12 @@ class VLANManager extends EventEmitter {
     this.deviceUpdate = Debounce(() => {
       this.updateVLANs();
     });
+    const debounceUpdateVLANs = Debounce(() => this.updateVLANs());
+    this.deviceUpdate = evt => {
+      if (!evt.key || evt.key.startsWith('network.vlans.vlan.')) {
+        debounceUpdateVLANs();
+      }
+    };
     DeviceInstanceManager.on('update', this.deviceUpdate);
     this.updateVLANs();
   }
@@ -208,7 +214,6 @@ class VLANManager extends EventEmitter {
         delete ovlans[vid];
         const vlan = dvlan.getVLAN(vid, true);
         const vdata = dev.readKV(`network.vlans.vlan.${vid}`);
-        console.log(vdata);
         vlan.setName(vdata.name || '');
         for (let portnr = 0; portnr < dvlan.nrports; portnr++) {
           if (portnr in vdata.port) {

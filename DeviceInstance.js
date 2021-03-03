@@ -11,7 +11,7 @@ class DeviceInstance extends EventEmitter {
     this._id = config._id;
     this.state = state;
     this.state.on('update', async evt => {
-      this.emit('update');
+      this.emit('update', evt);
       if (evt.op === 'write' || evt.op === 'merge') {
         MonitorManager.logData(this, evt.key, evt.value);
       }
@@ -63,14 +63,8 @@ class DeviceInstance extends EventEmitter {
     await DB.updateDeviceState(this._id, this.state.toDB());
   }
 
-  mergeIntoState(src, trim, reason) {
+  mergeIntoState(src, trim) {
     this.state.mergeIntoState(src, trim);
-    if (reason) {
-      this.emit('update', reason);
-    }
-    else {
-      this.emit('update');
-    }
   }
 
   get monitor() {
