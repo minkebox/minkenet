@@ -23,9 +23,12 @@ class ClientManager extends EventEmitter {
       this.updateEntry(data._id, { name: data.name, firstSeen: data.firstSeen, lastSeen: data.lastSeen });
     });
 
-    DeviceInstanceManager.on('update', Debounce(() => {
-      this.updateDeviceClients();
-    }));
+    const debounced = Debounce(() => this.updateDeviceClients());
+    DeviceInstanceManager.on('update', evt => {
+      if (!evt.key || evt.key.startsWith('network.clients.') || (evt.key.startsWith('network.physical.port.') && evt.key.indexOf('.statistics.') === -1)) {
+        debounced();
+      }
+    });
 
     TopologyManager.on('update', () => {
       // Topology has changed, so we need to recalculate all the connection points.

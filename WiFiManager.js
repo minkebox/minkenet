@@ -10,9 +10,14 @@ class WiFiManager extends EventEmitter {
   }
 
   start() {
-    this.deviceUpdate = Debounce(() => {
+    const debounced = Debounce(() => {
       this.updateWiFi();
     });
+    this.deviceUpdate = evt => {
+      if (!evt.key || evt.key.startsWith('network.wireless.radio.') || evt.key.startsWith('network.wireless.station.')) {
+        debounced();
+      }
+    }
     DeviceInstanceManager.on('update', this.deviceUpdate);
     this.updateWiFi();
   }

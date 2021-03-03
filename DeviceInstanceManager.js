@@ -33,7 +33,7 @@ class DeviceInstanceManager extends EventEmitter {
         }
       }
     }));
-    this.onDeviceUpdate();
+    this.onDeviceUpdate({});
   }
 
   stop() {

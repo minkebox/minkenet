@@ -16,11 +16,12 @@ class TopologyManager extends EventEmitter {
     this.valid = false;
     this.running = false;
 
-    DeviceInstanceManager.on('update', Debounce(() => {
-      if (!this.running) {
-        this._buildLinkLags();
+    const debounced = Debounce(() => this._buildLinkLags());
+    DeviceInstanceManager.on('update', evt => {
+      if (!evt.key || evt.key.startsWith('network.lags.')) {
+        debounced();
       }
-    }));
+    });
   }
 
   getTopology() {

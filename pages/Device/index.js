@@ -65,7 +65,7 @@ class Devices extends Page {
     this.html('device-update-spinner', Template.DeviceSpinner({ delay: 2000 }));
   }
 
-  onListUpdate(reason) {
+  onListUpdate() {
     if (this.authenticating) {
       return;
     }

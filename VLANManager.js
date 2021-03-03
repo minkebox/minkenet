@@ -128,13 +128,10 @@ class VLANManager extends EventEmitter {
   }
 
   start() {
-    this.deviceUpdate = Debounce(() => {
-      this.updateVLANs();
-    });
-    const debounceUpdateVLANs = Debounce(() => this.updateVLANs());
+    const debounced = Debounce(() => this.updateVLANs());
     this.deviceUpdate = evt => {
       if (!evt.key || evt.key.startsWith('network.vlans.vlan.')) {
-        debounceUpdateVLANs();
+        debounced();
       }
     };
     DeviceInstanceManager.on('update', this.deviceUpdate);
