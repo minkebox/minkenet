@@ -2,7 +2,6 @@ const EventEmitter = require('events');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
 const TypeConversion = require('./utils/TypeConversion');
 const Debounce = require('./utils/Debounce');
-const { devices } = require('./DeviceManager');
 const Log = require('debug')('vlan');
 
 const DEFAULT_VLAN = 1;
@@ -200,6 +199,7 @@ class VLANManager extends EventEmitter {
   updateVLANs() {
     Log('updatevlans:');
     DeviceInstanceManager.getAuthenticatedDevices().forEach(dev => {
+      Log('device:', dev.name);
       const vids = dev.readKV('network.vlans.vlan', { depth: 1 }) || {};
       const dvlan = this.getVLANDevice(dev, true);
       const ovlans = Object.assign({}, dvlan.vlans);
@@ -208,6 +208,7 @@ class VLANManager extends EventEmitter {
         delete ovlans[vid];
         const vlan = dvlan.getVLAN(vid, true);
         const vdata = dev.readKV(`network.vlans.vlan.${vid}`);
+        console.log(vdata);
         vlan.setName(vdata.name || '');
         for (let portnr = 0; portnr < dvlan.nrports; portnr++) {
           if (portnr in vdata.port) {
