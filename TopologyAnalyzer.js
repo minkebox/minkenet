@@ -64,8 +64,8 @@ class TopologyAnalyzer extends EventEmitter {
               this.emit('status', { op: 'probe', device: selected, attempt: attempt });
               Log('probe: denoise');
               snap = await this._probeAndSnap(null);
-              const noise = this._calculateTrafficChange(snap, lastsnap, 1000000);
-              snapdiff = this._calculateTrafficChange(snapdiff, noise, 1);
+              const noise = this._calculateTrafficChange(snap, lastsnap, v => (v >>> 0) / 1000000);
+              snapdiff = this._calculateTrafficChange(snapdiff, noise, v => v);
             }
             else {
               // If we don't have a previous snap, we need to establish a baseline.
@@ -80,7 +80,9 @@ class TopologyAnalyzer extends EventEmitter {
               Log(`probe: ${attempt}:`, identity(selected));
               this.emit('status', { op: 'probe', device: selected, attempt: attempt });
               snap = await this._probeAndSnap(selected);
-              snapdiff = this._calculateTrafficChange(snap, lastsnap, 1000000);
+              // Calculate the difference between the two traffic records. We adjust the value to allow
+              // for rollover counters (>>> 0) and scale it down to something more human comprehensive.
+              snapdiff = this._calculateTrafficChange(snap, lastsnap, v => (v >>> 0) / 1000000);
             }
           }
           catch (e) {
@@ -566,9 +568,9 @@ class TopologyAnalyzer extends EventEmitter {
   }
 
   //
-  // Calculate the change in traffic between the two snaps, managing rollover counters.
+  // Calculate the change in traffic between the two snaps and apply an adjustment function.
   //
-  _calculateTrafficChange(current, previous, div) {
+  _calculateTrafficChange(current, previous, adjust) {
     const traffic = [];
     const ctraffic = current.traffic;
     const ptraffic = previous.traffic;
@@ -578,8 +580,8 @@ class TopologyAnalyzer extends EventEmitter {
       const ports = [];
       for (let pidx = 0; pidx < cports.length; pidx++) {
         ports[pidx] = {
-          rx: Math.floor(((cports[pidx].rx - pports[pidx].rx) >>> 0) / div),
-          tx: Math.floor(((cports[pidx].tx - pports[pidx].tx) >>> 0) / div)
+          rx: Math.round(adjust(cports[pidx].rx - pports[pidx].rx)),
+          tx: Math.round(adjust(cports[pidx].tx - pports[pidx].tx))
         };
       }
       traffic[idx] = { device: ctraffic[idx].device, ports: ports };
