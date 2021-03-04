@@ -415,6 +415,9 @@ body.pending-changes .pending-changes-disabled {
   font-weight: bold;
   padding: 5px 0 5px 15px;
 }
+.networks-container .row:not(.title) .col {
+  height: 27px;
+}
 
 .list-container .row .col .default,
 .networks-container .row .col .default,
