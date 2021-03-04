@@ -168,8 +168,17 @@ class Networks extends Page {
     }
 
     if (TopologyManager.valid) {
+      // If we're setting a port which is part of a lag, we set all the ports on the lag
       const link = TopologyManager.findLink(this.state.device, this.state.portnr);
-      link[0].ports.forEach(portnr => vlan.setPort(portnr, tag));
+      if (link) {
+        Log(link[0].device.name, link[0].lag);
+        link[0].lag.ports.forEach(portnr => vlan.setPort(portnr, tag));
+      }
+      // Otherwise, just the port itself
+      else {
+        Log(this.state.device.name, this.state.portnr, tag);
+        vlan.setPort(this.state.portnr, tag);
+      }
 
       const autoroute = Config.read('network.vlan.autoroute');
       if (autoroute && tag !== 'X') {
