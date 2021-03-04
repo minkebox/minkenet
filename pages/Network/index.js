@@ -27,8 +27,7 @@ class Networks extends Page {
       lvid: null,
       ldevice: null,
       lportnr: null,
-      topologyValid: false,
-      managementid: -1
+      topologyValid: false
     };
 
     this.onNetworkUpdate = Debounce(this.onNetworkUpdate, this);
@@ -100,12 +99,6 @@ class Networks extends Page {
     }
     else {
       this.state.topologyValid = true; // hide
-    }
-    if (Config.read('network.vlan.management')) {
-      this.state.managementid = Config.read('network.vlan.managementid');
-    }
-    else {
-      this.state.managementid = null;
     }
   }
 

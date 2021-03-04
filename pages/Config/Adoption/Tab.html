@@ -35,14 +35,6 @@
       <div class="block {{network.vlan.autoroute}}">
         <div><label>Enable IVL mode</label>{{> ConfigTribox key='network.vlan.ivl' value=network.vlan.ivl }}</div>
         <div><label>Generate connections between switches which share VLANs</label>{{> ConfigCheckbox key='network.vlan.autoroute' checked=network.vlan.autoroute }}</div>
-        <div class="block false">
-        <div class="block {{network.vlan.management}}">
-          <div><label>Generate a management VLAN between all devices</label>{{> ConfigCheckbox key='network.vlan.management' checked=network.vlan.management }}</div>
-          <div class="subblock">
-            <div><label>&nbsp;&nbsp;VLAN ID</label>{{> ConfigInput key="network.vlan.managementid" value=network.vlan.managementid }}</div>
-          </div>
-        </div>
-        </div>
       </div>
     </div>
   </div>
