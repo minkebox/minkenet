@@ -44,11 +44,6 @@ const Device = {
     valid: 'div[myid=logout]'
   },
 
-  statistics: {
-    prefer: 'bytes',
-    scale: 3
-  },
-
   constants: {
     system: {
       hardware: {
