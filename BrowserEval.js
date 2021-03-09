@@ -292,8 +292,8 @@ class Eval {
         const frame = await this.getEvalFrame(context, value);
         LogNav('waitfornav:');
         const result = await Promise.all([
-          frame.click(value.arg),
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' })
+          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' }),
+          frame.click(value.arg)
         ]);
         LogNav('waitedfornav:');
         return result;
@@ -313,11 +313,11 @@ class Eval {
         }
         LogNav('waitfornav:');
         const r = await Promise.all([
-          frame.select(value.arg, option),
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' })
+          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' }),
+          frame.select(value.arg, option)
         ]);
         LogNav('waitedfornav:');
-        return TypeConversion.toNatural(r[0]);
+        return TypeConversion.toNatural(r[1]);
       }
       case 'kv':
       {

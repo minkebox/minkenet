@@ -205,9 +205,12 @@ class BrowserDeviceInstance extends DeviceInstance {
         await this.eval('literal', typeof login.password === 'string' ? { $: 'type', value: password, arg: login.password } : Object.assign({ value: password }, login.password), frame);
 
         // Activate the login. This probably involves clocking a button but other actions are possible.
-        Log('activate', login.activate);
-        const actionPromise = this.eval('click', login.activate, frame);
-        Log('activated', login.activate);
+        Log('activate & wait', login.activate);
+        const responses = await Promise.all([
+          frame.waitForNavigation({ timeout: TIMEOUT.validateNavigation, waitUntil: 'networkidle2' }),
+          this.eval('click', login.activate, frame)
+        ]);
+        Log('activated & waited', login.activate);
 
         //
         // Validate that login was successful.
@@ -215,11 +218,6 @@ class BrowserDeviceInstance extends DeviceInstance {
         let success = false;
         if (!login.valid) {
           // Default validation is to wait for page navigation to occur. If it does, we assume login was successful.
-          Log('wait for page navigation');
-          const responses = await Promise.all([
-            frame.waitForNavigation({ timeout: TIMEOUT.validateNavigation, waitUntil: 'networkidle2' }),
-            actionPromise
-          ]);
           Log('waited for page navigation');
           if (!responses[0] || responses[0].status() !== 200) {
             success = false;
@@ -229,13 +227,7 @@ class BrowserDeviceInstance extends DeviceInstance {
           }
         }
         else {
-          // Alternatively we can wait for an explict selector to appear on the page
-          Log('wait for page navigation');
-          const responses = await Promise.all([
-            frame.waitForNavigation({ timeout: TIMEOUT.validateNavigation, waitUntil: 'networkidle2' }),
-            actionPromise
-          ]);
-          Log('waited for page navigation');
+          // Alternatively we can look for an explict selector to appear on the page
           Log('wait for selector');
           const response = await this.eval('wait', login.valid, frame);
           Log('waited for selector');
