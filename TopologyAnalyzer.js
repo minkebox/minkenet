@@ -51,6 +51,7 @@ class TopologyAnalyzer extends EventEmitter {
         let attempt = 0;
         let retry = true;
         let denoise = false;
+        let initial = true;
 
         for (; retry && attempt < MAX_ATTEMPTS && this.running; attempt++) {
 
@@ -82,11 +83,12 @@ class TopologyAnalyzer extends EventEmitter {
               }
               // Run a probe test then calculate the traffic it generated (approximately).
               Log(`probe ${attempt}:`, identity(selected));
-              this.emit('status', { op: 'probe', device: selected, attempt: attempt });
+              this.emit('status', { op: 'probe', device: selected, attempt: initial ? 0 : attempt });
               snap = await this._probeAndSnap(selected);
               // Calculate the difference between the two traffic records. We adjust the value to allow
               // for rollover counters (>>> 0) and scale it down to something more human comprehensive.
               snapdiff = this._calculateTrafficChange(snap, lastsnap, v => (v >>> 0) / 1000000);
+              initial = false;
             }
           }
           catch (e) {

@@ -10,7 +10,7 @@ const Pages = {
   '/js/script.js':      { path: `${__dirname}/script.js`, type: 'text/javascript' },
   '/js/jquery.js':      { path: `${__dirname}/../node_modules/jquery/dist/jquery.js`, type: 'text/javascript' },
   '/js/bootstrap.js':   { path: `${__dirname}/../node_modules/bootstrap/dist/js/bootstrap.bundle.js`, type: 'text/javascript' },
-  '/js/sortable.js':    { path: `${__dirname}/../node_modules/sortablejs/dist/sortable.umd.js`, type: 'text/javascript' },
+  '/js/sortable.js':    { path: `${__dirname}/../node_modules/sortablejs/modular/sortable.esm.js`, type: 'text/javascript' },
   '/js/dx.all.js':      { path: `${__dirname}/../node_modules/devextreme/dist/js/dx.all.js`, type: 'text/javascript' },
   '/css/main.css':      { path: `${__dirname}/main.css`, type: 'text/css' },
   '/css/bootstrap.css': { path: `${__dirname}/../node_modules/bootstrap/dist/css/bootstrap.css`, type: 'text/css' },
