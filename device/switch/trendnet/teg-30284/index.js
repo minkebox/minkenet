@@ -45,6 +45,14 @@ const Device = {
     community: 'private'
   },
 
+  pup: {
+    abortTypes: {
+      image: true,
+      font: true,
+      stylesheet: false // Login page fails if we dont load these
+    }
+  },
+
   constants: {
     system: {
       hardware: {

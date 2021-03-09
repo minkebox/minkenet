@@ -36,20 +36,19 @@ class Pup {
     return await (await this._browser.createIncognitoBrowserContext()).newPage();
   }
 
-  async connect() {
+  async connect(config) {
     const page = await this.newPage();
+    config = Object.assign({
+      abortTypes: { image: true, stylesheet: true, font: true }
+    }, config);
     await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_5) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/83.0.4103.61 Safari/537.36 Edg/83.0.478.37');
     await page.setViewport({ width: 1920, height: 1080 });
     await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-us' });
-    if (Log.enabled || true) {
-      /*
-      * NOTE: Enabling this code makes page loads significantly slower
-      * Mar 9, 2021 - re-enabling with verison 8.0.0 to see if things have improved.
-      */
+    if (config.abortTypes) {
       await page.setRequestInterception(true);
       page.on('request', req => {
         const type = req.resourceType();
-        if (type === 'image' || type === 'stylesheet' || type === 'font') {
+        if (config.abortTypes[type]) {
           Log('request aborted:', req.url(), type);
           req.abort();
         }
@@ -66,7 +65,7 @@ class Pup {
       page.on('requestfailed', req => Log('requestfailed:', req.url()));
       page.on('domcontentloaded', () => Log('domcontentloaded'));
       page.on('load', () => Log('load'));
-      page.on('response', async res => {
+      page.on('Xresponse', async res => {
         try {
           const data = await res.buffer();
           Log('response:', res.url());

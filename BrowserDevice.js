@@ -42,7 +42,7 @@ class BrowserDeviceInstance extends DeviceInstance {
   async attach() {
     if (!this._page) {
       Log('attaching:');
-      this._page = await Pup.connect();
+      this._page = await Pup.connect(this.description.pup);
     }
   }
 
