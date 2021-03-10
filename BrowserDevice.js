@@ -189,7 +189,7 @@ class BrowserDeviceInstance extends DeviceInstance {
 
         // Start the login process by navigating to the root page of the device.
         Log('goto', url);
-        await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: 'networkidle0' });
+        await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'domcontentloaded', 'networkidle0' ] });
         Log('goneto', url);
 
         const frame = await Eval.getFrame(page, login.frame);
@@ -241,8 +241,8 @@ class BrowserDeviceInstance extends DeviceInstance {
         return success;
       }
       catch (e) {
-        console.error(e);
-        Log('login failed:');
+        Log(e);
+        Log('login failed:', this.name);
         // Dont await on this because it seems we can hang here until the request finally completes.
         page.content().then(html => LogContent(html));
         this._validated = false;
@@ -300,7 +300,7 @@ class BrowserDeviceInstance extends DeviceInstance {
 
         // Start the login process by navigating to the root page of the device.
         Log('goto', url);
-        const response = await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: 'networkidle0' });
+        const response = await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'domcontentloaded', 'networkidle0' ] });
         Log('goneto', url);
         Log('status:', response.status());
         const success = (response.status() === HTTPCODE_OK);
