@@ -9,7 +9,8 @@ const LogContent = require('debug')('browser:content');
 
 const TIMEOUT = {
   frameNavigation: 30000,
-  validateNavigation: 5000
+  frameNavigationTries: 2,
+  validateNavigation: 5000,
 };
 
 class Eval {
@@ -475,27 +476,30 @@ class Eval {
           url = `${url}?${params.join('&')}`;
         }
         const timeout = value.timeout || TIMEOUT.frameNavigation;
+        const retries = value.tries || TIMEOUT.frameNavigationTries;
 
         let response;
-        try {
-          LogNav('goto:', url);
-          response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
-          LogNav('goneto:', url, response.ok());
-          if (LogContent.enabled) {
-            LogContent(await frame.content());
+        for (let attempt = 0; attempt < retries; attempt++) {
+          try {
+            LogNav('goto:', url);
+            response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
+            LogNav('goneto:', url, response.ok());
+            if (LogContent.enabled) {
+              LogContent(await frame.content());
+            }
+            if (!response.ok()) {
+              throw new Error(`navigation failed: ${url} - ${response.statusText()}`);
+            }
+            if (value.values) {
+              return await this.eval(value.type || 'selector', value.values, frame, path, device);
+            }
+            return true;
+          }
+          catch (e) {
+            Log(e);
           }
         }
-        catch (e) {
-          Log(e);
-          throw new Error(`navigation failed: ${url} - ${e}`);
-        }
-        if (!response.ok()) {
-          throw new Error(`navigation failed: ${url} - ${response.statusText()}`);
-        }
-        if (value.values) {
-          return await this.eval(value.type || 'selector', value.values, frame, path, device);
-        }
-        return true;
+        throw new Error(`navigation failed after ${retries} tries - ${url}`);
       }
       case 'fetch':
       {
