@@ -189,7 +189,7 @@ class BrowserDeviceInstance extends DeviceInstance {
 
         // Start the login process by navigating to the root page of the device.
         Log('goto', url);
-        await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'domcontentloaded', 'networkidle0' ] });
+        await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'load', 'networkidle2' ] });
         Log('goneto', url);
 
         const frame = await Eval.getFrame(page, login.frame);
@@ -207,7 +207,7 @@ class BrowserDeviceInstance extends DeviceInstance {
         // Activate the login. This probably involves clocking a button but other actions are possible.
         Log('activate & wait', login.activate);
         const responses = await Promise.all([
-          frame.waitForNavigation({ timeout: TIMEOUT.validateNavigation, waitUntil: 'networkidle2' }),
+          frame.waitForNavigation({ timeout: TIMEOUT.validateNavigation, waitUntil: [ 'load', 'networkidle2' ] }),
           this.eval('click', login.activate, frame)
         ]);
         Log('activated & waited', login.activate);
@@ -267,7 +267,7 @@ class BrowserDeviceInstance extends DeviceInstance {
         throw new Error(`Cannot ping ${url}`);
       }
       Log('goto', url);
-      await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: 'networkidle2' });
+      await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'load', 'networkidle2' ] });
       Log('eval', this.description.identify.http.loggedIn);
       try {
         return TypeConversion.toBoolean(await this.eval('literal', this.description.identify.http.loggedIn, page.mainFrame()));
@@ -300,7 +300,7 @@ class BrowserDeviceInstance extends DeviceInstance {
 
         // Start the login process by navigating to the root page of the device.
         Log('goto', url);
-        const response = await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'domcontentloaded', 'networkidle0' ] });
+        const response = await page.goto(url, { timeout: TIMEOUT.loginNavigation, waitUntil: [ 'load', 'networkidle2' ] });
         Log('goneto', url);
         Log('status:', response.status());
         const success = (response.status() === HTTPCODE_OK);

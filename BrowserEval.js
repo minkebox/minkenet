@@ -293,7 +293,7 @@ class Eval {
         const frame = await this.getEvalFrame(context, value);
         LogNav('waitfornav:');
         const result = await Promise.all([
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' }),
+          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] }),
           frame.click(value.arg)
         ]);
         LogNav('waitedfornav:');
@@ -314,7 +314,7 @@ class Eval {
         }
         LogNav('waitfornav:');
         const r = await Promise.all([
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: 'networkidle2' }),
+          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] }),
           frame.select(value.arg, option)
         ]);
         LogNav('waitedfornav:');
@@ -482,7 +482,7 @@ class Eval {
         for (let attempt = 0; attempt < retries; attempt++) {
           try {
             LogNav('goto:', url);
-            response = await frame.goto(url, { timeout: timeout, waitUntil: 'networkidle2' });
+            response = await frame.goto(url, { timeout: timeout, waitUntil: [ 'load', 'networkidle2' ] });
             LogNav('goneto:', url, response.ok());
             if (LogContent.enabled) {
               LogContent(await frame.content());
@@ -622,7 +622,7 @@ class Eval {
             await ncontext.evaluate(nvalue);
             break;
           case 'selector':
-            await ncontext.setContent(nvalue, { timeout: TIMEOUT.frameNavigation, waitUntil: 'networkidle2' });
+            await ncontext.setContent(nvalue, { timeout: TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] });
             break;
           case 'literal':
             ncontext = nvalue;

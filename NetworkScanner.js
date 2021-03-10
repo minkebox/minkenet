@@ -54,7 +54,7 @@ class Scanner extends EventEmitter {
     const page = await Pup.connect();
     try {
       Log('goto', target.ip);
-      await page.goto(`http://${target.ip}:${target.port}`, { timeout: this.config.pageTimeout || DEFAULT_PAGE_TIMEOUT, waitUntil: 'networkidle2' });
+      await page.goto(`http://${target.ip}:${target.port}`, { timeout: this.config.pageTimeout || DEFAULT_PAGE_TIMEOUT, waitUntil: [ 'load', 'networkidle2' ] });
       //Log('goneto', await page.content());
       for (let i = 0; i < devices.length; i++) {
         const device = devices[i];
