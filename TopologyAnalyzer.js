@@ -100,25 +100,16 @@ class TopologyAnalyzer extends EventEmitter {
             continue;
           }
 
-          // Calculate the max, mean and standard deviation of the traffic for each snap.
+          // Calculate the mean and standard deviation of the traffic for each snap.
           // We use this information for filtering out the signal from the noise.
 
           const traffic = snapdiff.traffic;
           let total = 0;
-          let max = 0;
           let count = 0;
           for (let idx = 0; idx < traffic.length; idx++) {
             const trafficInstance = traffic[idx];
-            trafficInstance.ports.forEach(port => {
-              total += port.rx + port.tx;
-              if (port.rx > max) {
-                max = port.rx;
-              }
-              if (port.tx > max) {
-                max = port.tx;
-              }
-            });
-            count += trafficInstance.ports.length * 2;
+            trafficInstance.ports.forEach(port => total += port.rx + port.rx);
+            count += 2 * trafficInstance.ports.length;
           }
           const mean = Math.round(total / count);
           let variance = 0;
@@ -127,7 +118,6 @@ class TopologyAnalyzer extends EventEmitter {
             trafficInstance.ports.forEach(port => variance += Math.pow(port.rx - mean, 2) + Math.pow(port.tx - mean, 2));
           }
           stddev = {
-            max: max,
             mean: mean,
             deviation: Math.round(Math.sqrt(variance / (count - 1)))
           };
@@ -351,7 +341,7 @@ class TopologyAnalyzer extends EventEmitter {
       Log('');
       Log('filtered snaps:');
       snaps.forEach(snap => {
-        Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
+        Log(` target: ${identity(snap.target)}: mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
         snap.active.forEach(active => Log(`  ${identity(active.device)} rx: ${portid(active.rx)} tx: ${portid(active.tx)}`));
       });
     }
@@ -359,7 +349,7 @@ class TopologyAnalyzer extends EventEmitter {
 
   logSnap(snap) {
     if (Log.enabled) {
-      Log(` target: ${identity(snap.target)}: max ${snap.stddev.max.toLocaleString()} mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
+      Log(` target: ${identity(snap.target)}: mean ${snap.stddev.mean.toLocaleString()} deviation ${snap.stddev.deviation.toLocaleString()}`);
       snap.snap.traffic.forEach(trafficInstance => {
         const foundRx = { port: -1, rx: 0 };
         const foundTx = { port: -1, tx: 0 };
