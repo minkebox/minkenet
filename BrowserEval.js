@@ -326,6 +326,12 @@ class Eval {
         Log('v=', v);
         return v;
       }
+      case 'local':
+      {
+        const k = value.arg || path;
+        device.state.localKV(k, true);
+        return device.readKV(k, value.options) || ('default' in value ? value.default : '');
+      }
       case 'tojson':
       {
         const obj = await this.eval('literal', value.arg, context, path, device);

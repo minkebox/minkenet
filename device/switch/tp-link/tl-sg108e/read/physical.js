@@ -13,6 +13,9 @@ module.exports = {
               arg: `form[name=port_statistics] tr:nth-child(${itr.index + 2}) td:nth-child(1)`,
               map: name => name.split(' ')[1]
             },
+            name: {
+              $: 'local'
+            },
             framesize: {
               $: 'literal',
               arg: 16384
