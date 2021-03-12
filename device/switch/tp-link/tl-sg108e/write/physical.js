@@ -5,9 +5,11 @@ module.exports = {
         $: 'foreach',
         arg: itr => [{
           $: `guard`,
+          key : `${itr.path}.enable,${itr.path}.speed,${itr.path}.flowcontrol`,
           arg: {
             $: `fetch`,
             arg: `/port_setting.cgi`,
+            wait: 1, // Sometimes hangs, so best we only wait for a little while before moving on
             params: {
               portid: itr.index + 1,
               state: {
