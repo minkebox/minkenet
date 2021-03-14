@@ -11,6 +11,7 @@ const DB_CONFIG = `${DB_PATH}/config.db`;
 const DB_MACS = `${DB_PATH}/macs.db`;
 const DB_MONITOR_LIST = `${DB_PATH}/monitors.db`;
 const DB_MONITOR_PATH = `${DB_PATH}/monitor`;
+const ONEDAY = 24 * 60 * 60 * 1000;
 
 const DB_COMPACT_SEC = 24 * 60 * 60; // Every day
 const DB_FAST_COMPACT_SEC = 5 * 60; // Every 5 minutes
@@ -154,17 +155,16 @@ class Database {
     if (!db) {
       throw new Error(`unknown monitor: ${name}`);
     }
-    await this.asyncInsert(db.db, record);
+    await this.asyncInsert(db.db, Object.assign({ expiresAt: new Date(Date.now() + ONEDAY) }, record));
   }
 
-  async readMonitor(name) {
+  async readMonitor(name, keys, window) {
     const db = this._monitors[name];
     if (!db) {
       throw new Error(`unknown monitor: ${name}`);
     }
-    //return this.asyncFind(db.db, {});
     return new Promise((resolve, reject) => {
-      db.db.find({}).sort({ expiresAt: 1 }).exec((err, docs) => {
+      db.db.find({ key: { $in: keys }, expiresAt: { $gt: new Date(Date.now() + ONEDAY - window * 1000) } }).sort({ expiresAt: 1 }).exec((err, docs) => {
         if (err) {
           return reject(err);
         }

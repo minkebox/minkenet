@@ -132,19 +132,22 @@ class Viz extends Page {
       mon: mon
     };
     let scale = 1;
+    let window = 5 * 60;
 
     switch (mon.type) {
       case '1day':
         graph.type = '1Day';
         scale = 60 * 60 * 1000;
+        window = 60 * 60 * 24;
         break;
       case '1hour':
       default:
         graph.type = '1Hour';
         scale = 60 * 1000;
+        window = 60 * 60;
         break;
     }
-    const data = await DB.readMonitor(mon.name);
+    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), window);
     if (data.length) {
       const tracedata = [];
       mon.keys.forEach((k, ki) => {
@@ -189,16 +192,28 @@ class Viz extends Page {
       return null;
     }
 
+    let title = mon.title;
+    if (title.indexOf('##device##') === 0) {
+      title = device.name;
+      const portnr = parseInt(mon.title.substring(10) || -1);
+      if (portnr !== -1) {
+        const port = device.readKV(`network.physical.port.${portnr}`);
+        if (port && port.name) {
+          title = port.name;
+        }
+      }
+    }
+
     const graph = {
       type: 'Gauge',
       id: `mon-${mon.id}`,
-      title: mon.title,
+      title: title,
       max: 0,
       series: [],
       mon: mon
     };
 
-    const data = await DB.readMonitor(mon.name);
+    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), 5 * 60);
     mon.keys.forEach(k => {
       const trace = {
         unit: 'Mbps',

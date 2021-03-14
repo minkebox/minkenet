@@ -3,8 +3,6 @@ const DB = require('./Database');
 const Log = require('debug')('monitor');
 
 const MONITOR_EXPIRES = {
-  FIVEMINUTES: 5 * 60 * 1000,
-  ONEHOUR: 60 * 60 * 1000,
   ONEDAY: 24 * 60 * 60 * 1000
 };
 
@@ -15,7 +13,6 @@ class MonitorManager extends EventEmitter {
     super();
     this.enabled = [];
     this.monitors = [];
-    this._devkey2mons = {};
   }
 
   async start() {
@@ -23,19 +20,15 @@ class MonitorManager extends EventEmitter {
     if (data) {
       this.enabled = JSON.parse(data.enabled);
       this.monitors = JSON.parse(data.monitors);
-      for (let i = 0; i < this.monitors.length; i++) {
-        if (this.monitors[i].name) {
-          await DB.createMonitor(this.monitors[i].name);
-        }
-      }
       const DeviceInstanceManager = require('./DeviceInstanceManager');
-      this.enabled.forEach(id => {
+      for (let i = 0; i < this.enabled.length; i++) {
+        const id = this.enabled[i];
         const device = DeviceInstanceManager.getDeviceById(id);
         if (device) {
+          await DB.createMonitor(`device-${id}`);
           device.watch();
         }
-      });
-      this._buildMap();
+      }
     }
   }
 
@@ -50,18 +43,16 @@ class MonitorManager extends EventEmitter {
     }
     if (enable) {
       this.enabled.push(device._id);
+      await DB.createMonitor(`device-${device._id}`);
       device.watch();
     }
-    this._buildMap();
     await DB.updateMonitorList(this.toDB());
   }
 
   async monitorDeviceKeysType(device, id, title, keys, monitorType) {
     const idx = this.monitors.findIndex(mon => mon.id === id);
     if (idx !== -1) {
-      const old = this.monitors.splice(idx, 1);
-      this._buildMap();
-      await DB.removeMonitor(old[0].name);
+      this.monitors.splice(idx, 1);
     }
     if (keys[0].key !== 'none' && monitorType !== 'none') {
       const mon = {
@@ -74,8 +65,6 @@ class MonitorManager extends EventEmitter {
         order: -1
       };
       this.monitors.push(mon);
-      await DB.createMonitor(mon.name);
-      this._buildMap();
     }
     await DB.updateMonitorList(this.toDB());
   }
@@ -116,29 +105,10 @@ class MonitorManager extends EventEmitter {
   }
 
   logData(device, key, value) {
-    const dev = this._devkey2mons[device._id];
-    if (dev) {
-      const prop = dev.key[key];
-      if (prop) {
-        prop.monitors.forEach(mon => {
-          let expires = 0;
-          switch (mon.type) {
-            case 'now':
-              expires = MONITOR_EXPIRES.FIVEMINUTES;
-              break;
-            case '1day':
-              expires = MONITOR_EXPIRES.ONEDAY;
-              break;
-            case '1hour':
-            default:
-              expires = MONITOR_EXPIRES.ONEHOUR;
-              break;
-          }
-          DB.updateMonitor(mon.name, { key: key, value: value, expiresAt: new Date(Date.now() + expires) }).catch(err => {
-            Log(err);
-          });
-        });
-      }
+    if (this.enabled.indexOf(device._id) !== -1 && key.match(/^network\.physical\.port\.[0-9]+\.statistics\./)) {
+      DB.updateMonitor(`device-${device._id}`, { key: key, value: value }).catch(err => {
+        Log(err);
+      });
     }
   }
 
@@ -148,19 +118,6 @@ class MonitorManager extends EventEmitter {
 
   newMonitorId() {
     return DB.newMonitorId();
-  }
-
-  _buildMap() {
-    this._devkey2mons = {};
-    this.monitors.forEach(mon => {
-      if (this.enabled.indexOf(mon.deviceid) !== -1) {
-        const dev = this._devkey2mons[mon.deviceid] || (this._devkey2mons[mon.deviceid] = { key: {} });
-        mon.keys.forEach(k => {
-          const prop = dev.key[k.key] || (dev.key[k.key] = { monitors: [] });
-          prop.monitors.push(mon);
-        });
-      }
-    });
   }
 
   toDB() {
