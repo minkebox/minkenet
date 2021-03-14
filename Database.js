@@ -158,13 +158,13 @@ class Database {
     await this.asyncInsert(db.db, Object.assign({ expiresAt: new Date(Date.now() + ONEDAY) }, record));
   }
 
-  async readMonitor(name, keys, window) {
+  async readMonitor(name, keys, when) {
     const db = this._monitors[name];
     if (!db) {
       throw new Error(`unknown monitor: ${name}`);
     }
     return new Promise((resolve, reject) => {
-      db.db.find({ key: { $in: keys }, expiresAt: { $gt: new Date(Date.now() + ONEDAY - window * 1000) } }).sort({ expiresAt: 1 }).exec((err, docs) => {
+      db.db.find({ key: { $in: keys }, expiresAt: { $gt: new Date(when) } }).sort({ expiresAt: 1 }).exec((err, docs) => {
         if (err) {
           return reject(err);
         }

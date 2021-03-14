@@ -7,6 +7,7 @@ const ClientManager = require('../../ClientManager');
 const SpeedTest = require('../../monitors/SpeedTest');
 
 const REFRESH_TIMER = 60 * 1000; // 1 minute
+const ONEDAY = 24 * 60 * 60 * 1000;
 
 
 class Viz extends Page {
@@ -104,8 +105,6 @@ class Viz extends Page {
   }
 
   async _makeGraph(mon) {
-    const now = Date.now();
-
     const device = DeviceInstanceManager.getDeviceById(mon.deviceid);
     if (!device) {
       return null;
@@ -132,22 +131,22 @@ class Viz extends Page {
       mon: mon
     };
     let scale = 1;
-    let window = 5 * 60;
+    let when = Date.now() + ONEDAY;
 
     switch (mon.type) {
       case '1day':
         graph.type = '1Day';
         scale = 60 * 60 * 1000;
-        window = 60 * 60 * 24;
+        when -= 60 * 60 * 24 * 1000;
         break;
       case '1hour':
       default:
         graph.type = '1Hour';
         scale = 60 * 1000;
-        window = 60 * 60;
+        when -= 60 * 60 * 1000;
         break;
     }
-    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), window);
+    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), when);
     if (data.length) {
       const tracedata = [];
       mon.keys.forEach((k, ki) => {
@@ -156,13 +155,13 @@ class Viz extends Page {
         });
         const previous = {
           value: 0,
-          time: now
+          time: when
         };
         let first = true;
         for (let d = 0; d < data.length; d++) {
           const item = data[d];
           if (item.key === k.key && item.expiresAt > previous.time) {
-            const t = (item.expiresAt - now) / scale;
+            const t = (item.expiresAt - when) / scale;
             if (first) {
               first = false;
               if (t > 2) {
@@ -213,7 +212,7 @@ class Viz extends Page {
       mon: mon
     };
 
-    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), 5 * 60);
+    const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), Date.now() + ONEDAY - 5 * 60 * 1000);
     mon.keys.forEach(k => {
       const trace = {
         unit: 'Mbps',
