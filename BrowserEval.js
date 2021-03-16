@@ -561,14 +561,17 @@ class Eval {
         }
 
         const wait = ('wait' in value) ? value.wait : true;
+        const timeout = ('timeout' in value) ? value.timeout : 10;
 
         let nvalue;
         try {
           LogNav('fetch:', url, method, body, contentType);
-          nvalue = await frame.evaluate(async (url, method, contentType, body, wait) => {
+          nvalue = await frame.evaluate(async (url, method, contentType, body, wait, timeout) => {
+            const ac = new AbortController();
             const options = {
               method: method,
-              headers: {}
+              headers: {},
+              signal: ac.signal
             };
             if (contentType) {
               options.headers['Content-Type'] = contentType;
@@ -578,7 +581,9 @@ class Eval {
             }
             let response = fetch(url, options);
             if (wait === true) {
+              const id = setTimeout(() => ac.abort(), timeout * 1000);
               response = await response;
+              clearTimeout(id);
               if (response.ok) {
                 return await response.text();
               }
@@ -586,9 +591,10 @@ class Eval {
             }
             else {
               await new Promise(resolve => setTimeout(resolve, wait * 1000));
+              ac.abort();
               return true;
             }
-          }, url, method, contentType, body, wait);
+          }, url, method, contentType, body, wait, timeout);
           LogNav('fetched:', nvalue);
         }
         catch (e) {
