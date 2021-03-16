@@ -420,6 +420,7 @@ class DeviceStateInstance extends EventEmitter {
     if (typeof val === 'string' || typeof val === 'number' || typeof val === 'boolean') {
       if (!target[key]) {
         target[key] = { $: val };
+        this.emit('update', { op: 'merge', type: 'add', key: `${parent.substring(7)}.${key}`, value: val });
       }
       else {
         if (target[key].$l) {
@@ -437,7 +438,7 @@ class DeviceStateInstance extends EventEmitter {
         }
         else if (target[key].$ !== val) {
           target[key].$ = val;
-          this.emit('update', { op: 'merge', key: `${parent.substring(7)}.${key}`, value: val });
+          this.emit('update', { op: 'merge', type: 'update', key: `${parent.substring(7)}.${key}`, value: val });
         }
       }
       // If value has a selection, bring the selection along too
@@ -468,6 +469,7 @@ class DeviceStateInstance extends EventEmitter {
       }
       for (let k in okeys) {
         delete target[key][k];
+        this.emit('update', { op: 'merge', type: 'delete', key: `${parent.substring(7)}.${key}.${k}` });
       }
     }
   }
