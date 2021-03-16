@@ -11,6 +11,7 @@ const Barrier = require('./utils/Barrier');
 const Log = require('debug')('browser');
 const LogContent = Log.extend('content');
 const LogState = Log.extend('state');
+const LogQ = Log.extend('q');
 const LogSNMP = require('debug')('snmp');
 const LogDontWrite = require('debug')('nowrite');
 
@@ -123,12 +124,16 @@ class BrowserDeviceInstance extends DeviceInstance {
   // trying to use the browser page at the same time.
   //
   async q(fn) {
+    const here = new Error();
     return new Promise(async (resolve, reject) => {
       this._q.push(async () => {
         try {
           resolve(await fn(this._page));
         }
         catch (e) {
+          LogQ(e);
+          LogQ('from:');
+          LogQ(here);
           reject(e);
         }
       });

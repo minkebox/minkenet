@@ -5,6 +5,7 @@ const DeviceManager = require('./DeviceManager');
 const DeviceState = require('./DeviceState');
 let TopologyManager;
 const Log = require('debug')('device');
+const LogCommit = Log.extend('commit');
 
 const RETRY_COMMIT = 3;
 
@@ -129,10 +130,12 @@ class DeviceInstanceManager extends EventEmitter {
 
   async commit(config) {
     if (this.activeCommit) {
+      LogCommit('already active');
       throw new Error('Commit already active');
     }
     this.activeCommit = true;
     this.emit('commit');
+    LogCommit('starting');
     try {
       config = Object.assign({ direction: 'near-to-far', preconnect: true, retry: 3, callback: null }, config);
       if (!TopologyManager) {
@@ -142,8 +145,10 @@ class DeviceInstanceManager extends EventEmitter {
       const devices = TopologyManager.order(Object.values(this.devices).filter(device => device.needCommit()), config.direction);
       // Most commits will pre-connect to all devices before making any changes to limit potential partial-commit problems if
       // a device as failed. Not full proof as a device could fail later.
+      LogCommit('found commit order');
       let slen = 0;
       if (config.preconnect) {
+        LogCommit('doing pre-commit');
         const connect = [].concat(devices);
         for (let retry = config.retry; connect.length && retry > 0; retry = (slen === connect.length ? retry - 1 : config.retry)) {
           slen = connect.length;
@@ -152,40 +157,52 @@ class DeviceInstanceManager extends EventEmitter {
             if (config.callback) {
               config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
             }
+            LogCommit(`verifying ${device.name}`);
             if (await device.verify()) {
+              LogCommit('success');
               connect.splice(i, 1);
             }
             else {
+              LogCommit('failed');
               i++;
             }
           }
         }
         if (connect.length) {
+          LogCommit(`failed to connect to ${connect.length} devices`);
           throw new Error('Failed to connect');
         }
       }
+      LogCommit('doing commit');
       for (let retry = config.retry; devices.length && retry > 0; retry = (slen === devices.length ? retry - 1 : config.retry)) {
         slen = devices.length;
         for (let i = 0; i < devices.length; ) {
           const device = devices[i];
           try {
+            LogCommit(`commit ${device.name}`);
             if (!config.preconnect) {
               if (config.callback) {
                 config.callback({ op: 'connect', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
               }
+              LogCommit('verify');
               if (!await device.verify()) {
+                LogCommit('failed');
                 break;
               }
             }
             if (config.callback) {
               config.callback({ op: 'commit', ip: device.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS) });
             }
+            LogCommit('write');
             await device.write();
+            LogCommit('commit');
             await device.commit();
+            LogCommit('success');
             devices.splice(i, 1);
           }
           catch (e) {
-            Log(e);
+            LogCommit('commit failed');
+            LogCommit(e);
             if (!config.preconnect) {
               break;
             }
@@ -194,12 +211,17 @@ class DeviceInstanceManager extends EventEmitter {
         }
       }
       if (devices.length) {
+        LogCommit(`failed with ${devices.length} devices pending`);
         throw new Error('Failed to commit');
       }
+    }
+    catch (e) {
+      LogCommit('unexpected error', e);
     }
     finally {
       this.activeCommit = false;
       this.emit('commit');
+      LogCommit('commit complete');
     }
   }
 
