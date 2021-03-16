@@ -11,11 +11,10 @@ class DeviceInstance extends EventEmitter {
     this._id = config._id;
     this.state = state;
     this.state.on('update', async evt => {
-      evt.device = this;
-      this.emit('update', evt);
-      if (evt.op === 'write' || evt.op === 'merge') {
-        MonitorManager.logData(this, evt.key, evt.value);
-      }
+      this.emit('update', Object.assign(evt, { device: this }));
+    });
+    this.state.on('merge', async evt => {
+      this.emit('update', Object.assign(evt, { type: 'merge', device: this }));
     });
   }
 

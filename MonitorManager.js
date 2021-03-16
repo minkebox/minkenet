@@ -16,11 +16,11 @@ class MonitorManager extends EventEmitter {
   }
 
   async start() {
+    const DeviceInstanceManager = require('./DeviceInstanceManager');
     const data = await DB.getMonitorList();
     if (data) {
       this.enabled = JSON.parse(data.enabled);
       this.monitors = JSON.parse(data.monitors);
-      const DeviceInstanceManager = require('./DeviceInstanceManager');
       for (let i = 0; i < this.enabled.length; i++) {
         const id = this.enabled[i];
         const device = DeviceInstanceManager.getDeviceById(id);
@@ -30,6 +30,11 @@ class MonitorManager extends EventEmitter {
         }
       }
     }
+    DeviceInstanceManager.on('update', evt => {
+      if (evt.type === 'merge' && evt.op === 'update') {
+        this.logData(evt.device, evt.key, evt.value);
+      }
+    });
   }
 
   stop() {
