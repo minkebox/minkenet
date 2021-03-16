@@ -1,0 +1,9 @@
+{{> Modal1
+  id='vlan-delete-modal'
+  title=(concat 'Delete VLAN ' selected)
+  body=(concat 'Are you sure you want to delete VLAN ' selected ' ?')
+  primary='Yes'
+  secondary='Cancel'
+  event='network.vlan.delete'
+  primary_event=selected
+}}

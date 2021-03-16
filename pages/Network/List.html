@@ -18,4 +18,6 @@
   </script>
 </div>
 <button type="button" class="networks-new btn btn-secondary btn-sm" onclick="$('#vlan-new-modal').modal()">Create VLAN</button>
+<button type="button" {{#if (eq @root.vid 1)}}disabled{{/if}} class="networks-new btn btn-secondary btn-sm" onclick="$('#vlan-delete-modal').modal()">Delete VLAN</button>
 {{> NetworkNewVLAN}}
+{{> NetworkDeleteVLAN selected=@root.vid }}

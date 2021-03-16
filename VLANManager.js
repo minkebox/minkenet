@@ -24,7 +24,6 @@ class VLAN extends EventEmitter {
     if (this.ports[portnr] === tag) {
       return;
     }
-    const options = { create: true };
     this.ports[portnr] = tag;
     if (tag === 'X') {
       if (!this.ports.find(p => p !== 'X')) {
@@ -33,11 +32,12 @@ class VLAN extends EventEmitter {
       else {
         this.device.deleteKV(`network.vlans.vlan.${this.vid}.port.${portnr}`);
       }
-      if (this.device.readKV(`network.vlans.pvid.${portnr}.pvid`) === this.vid) {
+      if (this.device.readKV(`network.vlans.pvid.${portnr}.pvid`) == this.vid) {
         this.device.writeKV(`network.vlans.pvid.${portnr}.pvid`, DEFAULT_VLAN);
       }
     }
     else {
+      const options = { create: true };
       if (!this.device.readKV(`network.vlans.vlan.${this.vid}`)) {
         this.device.writeKV(`network.vlans.vlan.${this.vid}`, {}, options);
         this.device.writeKV(`network.vlans.vlan.${this.vid}.port`, {}, options);
@@ -224,6 +224,17 @@ class VLANManager extends EventEmitter {
       for (let vid in ovlans) {
         dvlan.deleteVLAN(vid);
       }
+    });
+  }
+
+  deleteVLAN(vid) {
+    this.getVLANDevices(vid).forEach(device => {
+      const vdev = this.getVLANDevice(device);
+      const vlan = vdev.getVLAN(vid);
+      for (let portnr = 0; portnr < vlan.ports.length; portnr++) {
+        vlan.setPort(portnr, 'X');
+      }
+      vdev.deleteVLAN(vid);
     });
   }
 

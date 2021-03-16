@@ -173,7 +173,6 @@ class Monitor extends Page {
               title: 'none',
               scale: 1
             };
-            break;
         }
       }),
       mon.type

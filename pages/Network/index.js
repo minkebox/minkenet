@@ -134,8 +134,9 @@ class Networks extends Page {
   }
 
   'select.vlan' (msg) {
-    this.updateState({ vid: msg.value });
+    this.updateState({ vid: parseInt(msg.value) });
     this.html('network-selected', Template.NetworkSelected(this.state));
+    this.html('networks-column', Template.NetworkList(this.state));
   }
 
   'device.port.select' (msg) {
@@ -237,6 +238,25 @@ class Networks extends Page {
       default:
         break;
     }
+  }
+
+  async 'network.vlan.delete' (msg) {
+    const vid = parseInt(msg.value);
+    // Cannot delete default/management vlan
+    if (vid === 1) {
+      return;
+    }
+    // Sanity check
+    if (vid !== this.state.vid) {
+      return;
+    }
+
+    VLANManager.deleteVLAN(this.state.vid);
+
+    this.updateState({ vid: 1 });
+    this.html('networks-column', Template.NetworkList(this.state));
+    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-overview', Template.NetworkNetwork(this.state));
   }
 
 }
