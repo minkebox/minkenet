@@ -16,6 +16,10 @@ class VLAN extends EventEmitter {
     this.ports = Array(nrports).fill('X');
   }
 
+  isActive() {
+    return !!this.ports.find(p => p !== 'X');
+  }
+
   getPort(portnr) {
     return this.ports[portnr];
   }
@@ -26,7 +30,7 @@ class VLAN extends EventEmitter {
     }
     this.ports[portnr] = tag;
     if (tag === 'X') {
-      if (!this.ports.find(p => p !== 'X')) {
+      if (!this.isActive()) {
         this.device.deleteKV(`network.vlans.vlan.${this.vid}`);
       }
       else {
@@ -204,6 +208,7 @@ class VLANManager extends EventEmitter {
     DeviceInstanceManager.getAuthenticatedDevices().forEach(dev => {
       Log('device:', dev.name);
       const vids = dev.readKV('network.vlans.vlan', { depth: 1 }) || {};
+      Log('vids:', Object.keys(vids));
       const dvlan = this.getVLANDevice(dev, true);
       const ovlans = Object.assign({}, dvlan.vlans);
       for (let v in vids) {
@@ -212,6 +217,7 @@ class VLANManager extends EventEmitter {
         const vlan = dvlan.getVLAN(vid, true);
         const vdata = dev.readKV(`network.vlans.vlan.${vid}`);
         vlan.setName(vdata.name || '');
+        Log(vid, 'ports:', Object.keys(vdata.port));
         for (let portnr = 0; portnr < dvlan.nrports; portnr++) {
           if (portnr in vdata.port) {
             vlan.setPort(portnr, TypeConversion.toBoolean(vdata.port[portnr].tagged) ? 'T' : 'U');
