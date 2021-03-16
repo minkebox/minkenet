@@ -14,7 +14,7 @@ module.exports = {
             const vlans = ctx.readKV(`network.vlans.vlan`);
             for (let vid in vlans) {
               const igmp = vlans[vid].igmp.snoop ? 1 : 0;
-              if (vlan[vid].management) {
+              if (vlans[vid].management) {
                 management = vid;
               }
               let members = 0;
