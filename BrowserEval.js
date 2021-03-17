@@ -11,6 +11,7 @@ const TIMEOUT = {
   frameNavigation: 30000,
   frameNavigationTries: 2,
   validateNavigation: 5000,
+  fetch: 30000
 };
 
 class Eval {
@@ -560,8 +561,8 @@ class Eval {
           }
         }
 
-        const wait = ('wait' in value) ? value.wait : true;
-        const timeout = ('timeout' in value) ? value.timeout : 10;
+        const wait = ('wait' in value) ? value.wait * 1000 : true;
+        const timeout = ('timeout' in value) ? value.timeout * 1000 : TIMEOUT.fetch;
 
         let nvalue;
         try {
@@ -581,7 +582,7 @@ class Eval {
             }
             let response = fetch(url, options);
             if (wait === true) {
-              const id = setTimeout(() => ac.abort(), timeout * 1000);
+              const id = setTimeout(() => ac.abort(), timeout);
               response = await response;
               clearTimeout(id);
               if (response.ok) {
@@ -590,7 +591,7 @@ class Eval {
               throw Error(`Fail ${response.status}`);
             }
             else {
-              await new Promise(resolve => setTimeout(resolve, wait * 1000));
+              await new Promise(resolve => setTimeout(resolve, wait));
               ac.abort();
               return true;
             }
