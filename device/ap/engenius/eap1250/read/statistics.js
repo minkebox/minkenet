@@ -3,24 +3,35 @@ module.exports = {
     physical: {
       port: {
         0: {
-          $: 'oid',
-          arg: '1.3.6.1.2.1.2.2.1',
-          values: {
-            statistics: {
-              rx: {
-                bytes: `1.3.6.1.2.1.2.2.1.10.13`,
-                unicast: `1.3.6.1.2.1.2.2.1.11.13`,
-                multicast: `1.3.6.1.2.1.2.2.1.12.13`,
-                discarded: `1.3.6.1.2.1.2.2.1.13.13`,
-                errors: `1.3.6.1.2.1.2.2.1.14.13`,
-                unknownprotos: `1.3.6.1.2.1.2.2.1.15.13`
-              },
-              tx: {
-                bytes: `1.3.6.1.2.1.2.2.1.16.13`,
-                unicast: `1.3.6.1.2.1.2.2.1.17.13`,
-                multicast: `1.3.6.1.2.1.2.2.1.18.13`,
-                discarded: `1.3.6.1.2.1.2.2.1.19.13`,
-                errors: `1.3.6.1.2.1.2.2.1.20.13`
+          statistics: {
+            $: 'oid',
+            arg: '1.3.6.1.2.1.2.2.1',
+            values: {
+              $: 'fn',
+              arg: ctx => {
+                const base = ctx.context[1][3][6][1][2][1][2][2][1];
+                const names = OID.getKeyValues('', base[2]);
+                const idx = Object.keys(names)[Object.values(names).findIndex(v => v === 'eth1')];
+                if (idx) {
+                  return {
+                    rx: {
+                      bytes: base[10][idx],
+                      unicast: base[11][idx],
+                      multicast: base[12][idx],
+                      discareded: base[13][idx],
+                      errors: base[14][idx],
+                      unknownprotos: base[15][idx]
+                    },
+                    tx: {
+                      bytes: base[16][idx],
+                      unicast: base[17][idx],
+                      multicast: base[18][idx],
+                      discareded: base[19][idx],
+                      errors: base[20][idx],
+                    }
+                  };
+                }
+                return null;
               }
             }
           }
