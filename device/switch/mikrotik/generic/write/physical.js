@@ -7,7 +7,7 @@ module.exports = {
           $: 'fetch',
           arg: '/link.b',
           method: 'post',
-          wait: false,
+          wait: 0.1,
           params: {
             $: 'fn',
             arg: async function() {

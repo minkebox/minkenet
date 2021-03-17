@@ -7,7 +7,7 @@ module.exports = {
           $: 'fetch',
           arg: '/sys.b',
           method: 'post',
-          wait: false,
+          wait: 0.1,
           params: {
             $: 'kv',
             arg: 'network.igmp.snoop',

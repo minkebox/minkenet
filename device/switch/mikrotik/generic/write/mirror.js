@@ -7,7 +7,7 @@ module.exports = {
           $: 'fetch',
           arg: '/fwd.b',
           method: 'post',
-          wait: false,
+          wait: 0.1,
           params: {
             $: 'fn',
             arg: ctx => {

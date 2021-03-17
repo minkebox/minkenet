@@ -8,10 +8,10 @@ const LogNav = require('debug')('browser:nav');
 const LogContent = require('debug')('browser:content');
 
 const TIMEOUT = {
-  frameNavigation: 30000,
+  frameNavigation: 30,
   frameNavigationTries: 2,
-  validateNavigation: 5000,
-  fetch: 30000
+  validateNavigation: 5,
+  fetch: 30
 };
 
 class Eval {
@@ -287,14 +287,14 @@ class Eval {
       }
       case 'wait':
       {
-        return await (await this.getEvalFrame(context, value)).waitForSelector(value.arg, { timeout: value.timeout || TIMEOUT.validateNavigation });
+        return await (await this.getEvalFrame(context, value)).waitForSelector(value.arg, { timeout: 1000 * (value.timeout || TIMEOUT.validateNavigation) });
       }
       case 'click+nav':
       {
         const frame = await this.getEvalFrame(context, value);
         LogNav('waitfornav:');
         const result = await Promise.all([
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] }),
+          frame.waitForNavigation({ timeout: 1000 * (value.timeout || TIMEOUT.frameNavigation), waitUntil: [ 'load', 'networkidle2' ] }),
           frame.click(value.arg)
         ]);
         LogNav('waitedfornav:');
@@ -315,7 +315,7 @@ class Eval {
         }
         LogNav('waitfornav:');
         const r = await Promise.all([
-          frame.waitForNavigation({ timeout: value.timeout || TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] }),
+          frame.waitForNavigation({ timeout: 1000 * (value.timeout || TIMEOUT.frameNavigation), waitUntil: [ 'load', 'networkidle2' ] }),
           frame.select(value.arg, option)
         ]);
         LogNav('waitedfornav:');
@@ -482,7 +482,7 @@ class Eval {
           }
           url = `${url}?${params.join('&')}`;
         }
-        const timeout = value.timeout || TIMEOUT.frameNavigation;
+        const timeout = 1000 * (value.timeout || TIMEOUT.frameNavigation);
         const retries = value.tries || TIMEOUT.frameNavigationTries;
 
         let response;
@@ -561,8 +561,8 @@ class Eval {
           }
         }
 
-        const wait = ('wait' in value) ? value.wait * 1000 : true;
-        const timeout = ('timeout' in value) ? value.timeout * 1000 : TIMEOUT.fetch;
+        const wait = (typeof value.wait === 'number') ? value.wait * 1000 : true;
+        const timeout = 1000 * (value.timeout || TIMEOUT.fetch);
 
         let nvalue;
         try {
@@ -635,7 +635,7 @@ class Eval {
             await ncontext.evaluate(nvalue);
             break;
           case 'selector':
-            await ncontext.setContent(nvalue, { timeout: TIMEOUT.frameNavigation, waitUntil: [ 'load', 'networkidle2' ] });
+            await ncontext.setContent(nvalue, { timeout: 1000 * (value.timeout || TIMEOUT.frameNavigation), waitUntil: [ 'load', 'networkidle2' ] });
             break;
           case 'literal':
             ncontext = nvalue;
@@ -684,7 +684,7 @@ class Eval {
     if (!name) {
       return context;
     }
-    for (let retry = Math.ceil(TIMEOUT.frameNavigation / 1000); retry > 0; retry--) {
+    for (let retry = TIMEOUT.frameNavigation; retry > 0; retry--) {
       //console.log(name, context.childFrames().map(f => f.name()));
       const frame = context.childFrames().find(frame => frame.name() === name);
       if (frame) {

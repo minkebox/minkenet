@@ -6,7 +6,7 @@ module.exports = {
         $: 'fetch',
         arg: '/sys.b',
         method: 'post',
-        wait: false,
+        wait: 0.1,
         params: {
           $: 'fn',
           arg: async function() {
