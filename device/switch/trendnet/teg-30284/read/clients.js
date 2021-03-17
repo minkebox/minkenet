@@ -28,7 +28,7 @@ module.exports = {
           const values = {};
           for (let k in macs) {
             values[k] = {
-              mac: Buffer.from(macs[k], 'latin1').toString('hex').replace(/(..)(?!$)/g,'$1:'),
+              mac: OID.toMacAddress(macs[k]),
               vlan: vlans[k],
               portnr: ports[k][0] === 'p' ? `lag${ports[k].substring(2)}` : (parseInt(ports[k]) - 1)
             };
