@@ -33,6 +33,11 @@ const Device = {
     }
   },
 
+  snmp: {
+    version: '2c',
+    community: 'private'
+  },
+
   login: {
     path: '/',
     username: '#account',
@@ -98,8 +103,9 @@ const Device = {
     $6: require('./read/wifi')
   },
   write: {
-    $1: require('./write/name'),
-    $2: require('./write/keychain')
+    $1: require('./write/snmp'),
+    $2: require('./write/name'),
+    $3: require('./write/keychain')
   },
   commit: require('./write/commit')
 

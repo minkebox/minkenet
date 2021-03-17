@@ -1,23 +1,26 @@
 module.exports = {
-  $: 'fetch',
-  arg: {
-    $: 'eval',
-    arg: `window.location.pathname.replace(/(tok=.*admin).*/,'$1')+'/network/iface_status2/eth1'`
-  },
-  type: 'jsonp',
-  values: {
-    network: {
-      physical: {
-        port: {
-          '0': {
+  network: {
+    physical: {
+      port: {
+        0: {
+          $: 'oid',
+          arg: '1.3.6.1.2.1.2.2.1',
+          values: {
             statistics: {
               rx: {
-                bytes: '$[0].rx_bytes',
-                packets: '$[0].rx_packets'
+                bytes: `1.3.6.1.2.1.2.2.1.10.13`,
+                unicast: `1.3.6.1.2.1.2.2.1.11.13`,
+                multicast: `1.3.6.1.2.1.2.2.1.12.13`,
+                discarded: `1.3.6.1.2.1.2.2.1.13.13`,
+                errors: `1.3.6.1.2.1.2.2.1.14.13`,
+                unknownprotos: `1.3.6.1.2.1.2.2.1.15.13`
               },
               tx: {
-                bytes: '$[0].tx_bytes',
-                packets: '$[0].tx_packets'
+                bytes: `1.3.6.1.2.1.2.2.1.16.13`,
+                unicast: `1.3.6.1.2.1.2.2.1.17.13`,
+                multicast: `1.3.6.1.2.1.2.2.1.18.13`,
+                discarded: `1.3.6.1.2.1.2.2.1.19.13`,
+                errors: `1.3.6.1.2.1.2.2.1.20.13`
               }
             }
           }
