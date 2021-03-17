@@ -27,20 +27,27 @@ module.exports = {
             arg: '#vlanIdOption',
             index: itr.index + 1
           }, {
-            $: 'fn',
-            arg: async ctx => {
-              const port = {};
-              for (let p = 0; p < 10; p++) {
-                if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .tagImg`) !== null) {
-                  port[p] = { tagged: true };
+            $1: {
+              $: 'fn',
+              arg: async ctx => {
+                const port = {};
+                for (let p = 0; p < 10; p++) {
+                  if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .tagImg`) !== null) {
+                    port[p] = { tagged: true };
+                  }
+                  else if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .untImg`) !== null) {
+                    port[p] = { tagged: false };
+                  }
                 }
-                else if (await ctx.eval('selector', `.portMember:nth-child(${p + 2}) .untImg`) !== null) {
-                  port[p] = { tagged: false };
+                return {
+                  port: port
+                };
+              },
+              $2: {
+                name: {
+                  $: 'local'
                 }
               }
-              return {
-                port: port
-              };
             }
           }]
         }
