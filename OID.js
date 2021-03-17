@@ -68,7 +68,7 @@ module.exports = {
     function _f(k, v) {
       if (typeof v === 'object') {
         for (let c in v) {
-          _f(`${k}.${c}`, v[c]);
+          _f(k ? `${k}.${c}` : c, v[c]);
         }
       }
       else {
