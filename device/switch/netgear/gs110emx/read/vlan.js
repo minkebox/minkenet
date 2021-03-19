@@ -52,7 +52,7 @@ module.exports = {
           }]
         }
       },
-      pvids: {
+      pvid: {
         $: 'navigate',
         arg: {
           $: 'eval',
