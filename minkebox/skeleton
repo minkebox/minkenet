@@ -4,6 +4,7 @@
   uuid: `6BD1A75A-8DC2-4F11-AFDC-6E537E83E32B`,
   image: `registry.minkebox.net/minkebox/minkenet`,
   tags: [
+    `Monitoring`,
     `Networking`
   ],
   actions: [
