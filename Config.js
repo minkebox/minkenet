@@ -48,6 +48,11 @@ const DEFAULT_CONFIG = {
         id: null
       }
     }
+  },
+  clients: {
+    inactive: {
+      age: 7
+    }
   }
 };
 

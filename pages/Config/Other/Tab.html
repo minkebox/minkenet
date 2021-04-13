@@ -1,6 +1,12 @@
 
 <div class="config other">
   Configure various settings.
+  <div class="section">Clients
+    <hr>
+    <div class="block">
+      <div><label>Days to keep inactive clients (0 to keep forever)</label>{{> ConfigInput key="clients.inactive.age" value=clients.inactive.age }}</div>
+    </div>
+  </div>
   <div class="section">Capture
     <hr>
     <div class="block">

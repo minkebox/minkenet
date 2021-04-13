@@ -1,5 +1,6 @@
 const EventEmitter = require('events');
 const OUI = require('oui');
+const Config = require('./Config');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
 const DeviceState = require('./DeviceState');
 const TopologyManager = require('./TopologyManager');
@@ -199,10 +200,22 @@ class ClientManager extends EventEmitter {
   scrubEntries() {
     let anychange = false;
     const before = Date.now() - 60 * 60 * 1000;
+    let ageout = parseFloat(Config.read('clients.inactive.age'));
+    if (ageout === 0) {
+      ageout = Number.MAX_SAFE_INTEGER;
+    }
+    else {
+      ageout = Date.now() - ageout * 24 * 60 * 60 * 1000;
+    }
     for (let addr in this.mac) {
       let change = false;
       const entry = this.mac[addr];
-      if (entry.lastSeen < before) {
+      if (entry.lastSeen < ageout) {
+        DB.removeMac(this.toDB(addr));
+        delete this.mac[addr];
+        anychange = true;
+      }
+      else if (entry.lastSeen < before) {
         // Old entry. Clear transient info.
         if (entry.ip) {
           entry.ip = null;
@@ -212,10 +225,10 @@ class ClientManager extends EventEmitter {
           entry.connected = null;
           change = true;
         }
-      }
-      if (change) {
-        DB.updateMac(this.toDB(addr));
-        anychange = true;
+        if (change) {
+          DB.updateMac(this.toDB(addr));
+          anychange = true;
+        }
       }
     }
     if (anychange) {
