@@ -210,7 +210,7 @@ class ClientManager extends EventEmitter {
     for (let addr in this.mac) {
       let change = false;
       const entry = this.mac[addr];
-      if (entry.lastSeen < ageout) {
+      if (entry.lastSeen < ageout && !entry.name) {
         DB.removeMac(this.toDB(addr));
         delete this.mac[addr];
         anychange = true;
