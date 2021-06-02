@@ -120,7 +120,7 @@ class Networks extends Page {
     // List of networks names and vlan ids
     this.html('networks-column', Template.NetworkList(this.state));
     // Pictures of devices with vlans highlighted
-    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-devices', Template.DeviceListAll(this.state));
     // Selected vlan name and id
     this.html('network-overview', Template.NetworkNetwork(this.state));
     // Vlan information for device port
@@ -141,7 +141,7 @@ class Networks extends Page {
 
   'device.port.select' (msg) {
     this.updateState({ portnr: msg.value.port, device: DeviceInstanceManager.getDeviceById(msg.value.id) });
-    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-devices', Template.DeviceListAll(this.state));
     this.html('network-port', Template.NetworkPort(this.state));
   }
 
@@ -196,7 +196,7 @@ class Networks extends Page {
     }
 
     this.updateState();
-    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-devices', Template.DeviceListAll(this.state));
   }
 
   async 'network.vlan.create' (msg) {
@@ -219,7 +219,7 @@ class Networks extends Page {
     this.state.phantoms.push({ id: id, name: name });
     this.updateState({ vid: id });
     this.html('networks-column', Template.NetworkList(this.state));
-    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-devices', Template.DeviceListAll(this.state));
     this.html('network-overview', Template.NetworkNetwork(this.state));
   }
 
@@ -255,7 +255,7 @@ class Networks extends Page {
 
     this.updateState({ vid: 1 });
     this.html('networks-column', Template.NetworkList(this.state));
-    this.html('network-devices', Template.PortsDevices(this.state));
+    this.html('network-devices', Template.DeviceListAll(this.state));
     this.html('network-overview', Template.NetworkNetwork(this.state));
   }
 

@@ -273,7 +273,7 @@ class Capture extends Page {
     const device = DeviceInstanceManager.getDeviceById(msg.value.id);
     const portnr = parseInt(msg.value.port);
     this.togglePort(device, portnr);
-    this.html('capture-devices', Template.PortsDevices(this.state));
+    this.html('capture-devices', Template.DeviceListAll(this.state));
     this.html('capture-port', Template.CapturePort(this.state));
   }
 

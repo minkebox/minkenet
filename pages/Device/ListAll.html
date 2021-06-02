@@ -1,0 +1,20 @@
+<div class="card-body">
+  <div class="network-devices-stack">
+    {{#each devices}}
+    <div class="entry active-{{lookup (lookup @root.ports @index) 'active'}}" {{#if ../selectdevicecmd}}onclick="send('{{../selectdevicecmd}}','{{@index}}')"{{/if}}>
+      <div class="info">
+        {{#with properties}}
+        {{#if system.name}}
+        <span>{{system.name.$}}</span>
+        {{else if system.fixedname}}
+        <span>{{system.fixedname.$}}</span>
+        {{/if}}
+        {{/with}}
+      </div>
+      <div class="device">
+      {{> DevicePortLayout properties=properties selected=(lookup @root.ports @index)}}
+      </div>
+    </div>
+    {{/each}}
+  </div>
+</div>

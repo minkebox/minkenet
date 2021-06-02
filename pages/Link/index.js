@@ -182,7 +182,7 @@ class Links extends Page {
           TopologyManager.cancel();
         }
         this.state.topologyValid = TopologyManager.valid;
-        this.html('bond-devices', Template.PortsDevices(this.state));
+        this.html('bond-devices', Template.DeviceListAll(this.state));
         setTimeout(() => {
           this.html('topology-analyze-container', Template.LinkTopology());
         }, 1000);
