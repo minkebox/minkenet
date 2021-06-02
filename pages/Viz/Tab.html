@@ -1,4 +1,5 @@
 <div class="viz">
+  {{> VizOverview }}
   {{#each monitor}}
   {{#if (eq type '1Hour')}}
   {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}

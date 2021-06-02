@@ -171,6 +171,16 @@ body.pending-changes .pending-changes-disabled {
   border-radius: 10px;
 }
 
+.overview-card {
+  position: relative;
+  background-color: var(--info-background-color);
+  width: calc(100% - 15px);
+  height: 200px;
+  margin: 5px;
+  border-radius: 10px;
+  xbackground-color: transparent;
+}
+
 .device-card {
   position: relative;
   background-color: var(--info-background-color);
