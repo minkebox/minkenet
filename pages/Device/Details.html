@@ -2,7 +2,7 @@
 <div id="device-details" class="accordion">
   <div class="card">
     <div data-toggle="collapse" data-target="#device-details-overview" class="card-header">
-      <div>System
+      <div>Device
         <span id="device-update-spinner" class="device-update-spinner">
           {{#if @root.updating}}
           {{> DeviceSpinner}}
@@ -29,97 +29,39 @@
       </div>
     </div>
   </div>
-  <div class="card">
-    <div data-toggle="collapse" data-target="#device-details-address" class="card-header">
-      <div>Address</div>
-    </div>
-    <div id="device-details-address" class="collapse show">
-      <div class="card-body">
-        <div class="list-group">
-          <form>
-            {{>RWSelect name="Mode" value=system.ipv4.mode kv="system.ipv4.mode"}}
-            {{#if (eq system.ipv4.mode.$ 'static')}}
-            {{>RW name="IP Address" value=system.ipv4.address kv="system.ipv4.address" default="0.0.0.0"}}
-            {{>RW name="Subnet Mask" value=system.ipv4.netmask kv="system.ipv4.netmask"}}
-            {{>RW name="Default Gateway" value=system.ipv4.gateway kv="system.ipv4.gateway"}}
-            {{>RW name="DNS" value=system.ipv4.dns kv="system.ipv4.dns"}}
-            {{else}}
-            {{>RO name="IP Address" value=system.ipv4.address default="0.0.0.0"}}
-            {{>RO name="Subnet Mask" value=system.ipv4.netmask}}
-            {{>RO name="Default Gateway" value=system.ipv4.gateway}}
-            {{>RO name="DNS" value=system.ipv4.dns}}
-            {{/if}}
-          </form>
-        </div>
-      </div>
-    </div>
+  <div id="device-address" class="card">
+    {{> DeviceAddress }}
   </div>
-  <div class="card">
-    <div data-toggle="collapse" data-target="#device-details-hardware" class="card-header">
-      <div>Ports</div>
-    </div>
-    <div id="device-details-hardware" class="collapse show">
-      <div class="card-body">
-        <div class="list-group">
-          <form>
-            {{>RO name="Total ports" value=network.physical.ports.nr.total}}
-            {{>RO name="100M ports" value=network.physical.ports.nr.100M}}
-            {{>RO name="1G ports" value=network.physical.ports.nr.1G}}
-            {{>RO name="2.5G ports" value=network.physical.ports.nr.2_5G}}
-            {{>RO name="10G ports" value=network.physical.ports.nr.10G}}
-            {{>RO name="SFP ports" value=network.physical.ports.nr.sfp}}
-            {{>RO name="SFP+ ports" value=network.physical.ports.nr.sfpp}}
-          </form>
-        </div>
-      </div>
-    </div>
-  </div>
-  {{#if network.wireless}}
-  <div class="card">
-    <div data-toggle="collapse" data-target="#device-details-wireless" class="card-header">
-      <div>Wireless</div>
-    </div>
-    <div id="device-details-wireless" class="collapse show">
-      <div class="card-body">
-        <div class="list-group">
-          <form>
-            {{>RO name="Total radios" value=network.wireless.radios.nr.total}}
-            {{>RO name="2.4GHz radios" value=network.wireless.radios.nr.2_4ghz}}
-            {{>RO name="5GHz radios" value=network.wireless.radios.nr.5ghz}}
-          </form>
-        </div>
-      </div>
-    </div>
+  {{#if (or network.igmp (isdefined network.vlans.ivl))}}
+  <div id="device-settings" class="card">
+  {{> DeviceSettings }}
   </div>
   {{/if}}
-  <div class="card">
-    <div data-toggle="collapse" data-target="#device-details-network" class="card-header">
-      <div>Network</div>
-    </div>
-    <div id="device-details-network" class="collapse show">
-      <div class="card-body">
-        <div class="list-group">
-          <form>
-            {{#if network.igmp}}
-            {{>RWCheckbox name="IGMP Snooping" kv='network.igmp.snoop' value=network.igmp.snoop}}
-            {{/if}}
-            {{#if (isdefined network.vlans.ivl)}}
-            {{>RWCheckbox name="Independent VLAN lookup" kv='network.vlans.ivl' value=network.vlans.ivl}}
-            {{/if}}
-          </form>
-        </div>
-        <button type="button" class="device-forget-button btn btn-sm btn-outline-secondary" onclick="$('#forget-device').modal()">Forget</button>
-        {{> Modal1
-          id='forget-device'
-          title='Forget this device'
-          body='Forget this device so we\'re no longer managing it'
-          primary='Forget'
-          secondary='Close'
-          event='device.forget'
-          primary_event='forget'
-        }}
-      </div>
-    </div>
+  {{#if @root.selectedDevice.description.properties.switch}}
+  <div id="port-info" class="card">
+  {{> DevicePortInfo selectedDevice=@root.selectedDevice selectedPort=@root.selectedPort porthighlights=@root.porthighlights}}
   </div>
+  <div id="port-settings" class="card">
+  {{> DevicePortSettings selectedPort=@root.selectedPort }}
+  </div>
+  <div id="port-limits" class="card">
+  {{> DevicePortLimits selectedPort=@root.selectedPort }}
+  </div>
+  {{/if}}
+  {{#if network.wireless}}
+  <div id="device-radios" class="card">
+  {{> DeviceRadios selectedDevice=@root.selectedDevice }}
+  </div>
+  {{/if}}
+  <button type="button" class="device-forget-button btn btn-sm btn-outline-secondary" onclick="$('#forget-device').modal()">Forget</button>
+  {{> Modal1
+    id='forget-device'
+    title='Forget this device'
+    body='Forget this device so we\'re no longer managing it'
+    primary='Forget'
+    secondary='Close'
+    event='device.forget'
+    primary_event='forget'
+  }}
 </div>
 {{/with}}

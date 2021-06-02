@@ -1,0 +1,32 @@
+{{#with selectedDevice.properties}}
+<div data-toggle="collapse" data-target="#radio-radios" class="card-header">
+  <div>Radios</div>
+</div>
+<div id="radio-radios" class="collapse show">
+  <div class="card-body">
+    {{#each network.wireless.radio}}
+    <div class="list-group">
+      <form>
+        {{#if (eq band.$ '2_4ghz')}}
+        {{> RO name="Band" value='2.4 GHz' }}
+        {{else if (eq band.$ '5ghz')}}
+        {{> RO name="Band" value='5 GHz' }}
+        {{else}}
+        {{> RO name="Band" value=band.$ }}
+        {{/if}}
+        {{#if (eq opmode.$ 'ap')}}
+        {{> RO name='Type' value='Access Point'}}
+        {{else if (eq opmode.$ 'ext')}}
+        {{> RO name='Type' value='Extender'}}
+        {{else}}
+        {{> RO name="Type" value=opmode.$ }}
+        {{/if}}
+        {{> RWSelect name="Mode" value=mode kv=(concat "network.wireless.radio." @index ".mode") }}
+        {{> RWSelect name="Bandwidth (MHz)" value=width kv=(concat "network.wireless.radio." @index ".width") }}
+        {{> RWSelect name="Transmit Power (dBm)" value=txpower kv=(concat "network.wireless.radio." @index ".txpower") }}
+      </form>
+    </div>
+    {{/each}}
+  </div>
+</div>
+{{/with}}

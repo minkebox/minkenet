@@ -1,0 +1,19 @@
+<div data-toggle="collapse" data-target="#device-ports-settings" class="card-header">
+  <div>Port Settings</div>
+</div>
+<div id="device-ports-settings" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <form>
+        {{#with selectedPort}}
+        {{#with port}}
+        {{>RWCheckbox name="Enable" kv=(concat 'network.physical.port.' ../portnr '.enable') value=enable}}
+        {{>RWCheckbox name="Flow Control" kv=(concat 'network.physical.port.' ../portnr '.flowcontrol') value=flowcontrol}}
+        {{>RWCheckbox name="Jumbo Frames" kv=(concat 'network.physical.port.' ../portnr '.jumbo') value=jumbo}}
+        {{>RO name="Speed" value=speed}}
+        {{/with}}
+        {{/with}}
+      </form>
+    </div>
+  </div>
+</div>

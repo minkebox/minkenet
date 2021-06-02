@@ -2,10 +2,13 @@ const Template = require('../Template');
 const DB = require('../../Database');
 const DeviceManager = require('../../DeviceManager');
 const DeviceInstanceManager = require('../../DeviceInstanceManager');
+const ClientManager = require('../../ClientManager');
+const TopologyManager = require('../../TopologyManager');
 const MonitorManager = require('../../MonitorManager');
 const NetworkScanner = require('../../NetworkScanner');
 const Discovery = require('../../discovery');
 const Debounce = require('../../utils/Debounce');
+const TypeConversion = require('../../utils/TypeConversion');
 const Adopt = require('../../Adopt');
 const Page = require('../Page');
 
@@ -17,6 +20,8 @@ class Devices extends Page {
     this.state = {
       devices: null,
       selectedDevice: null,
+      selectedPort: null,
+      selectedPortnr: 0,
       updating: false
     };
     this.forceRefresh = 1;
@@ -32,18 +37,6 @@ class Devices extends Page {
     super.select();
     DeviceInstanceManager.on('add', this.onListUpdate);
     DeviceInstanceManager.on('remove', this.onListUpdate);
-    this.state.devices = DeviceInstanceManager.getAllDevices();
-    this.state.selectedDevice = this.root.common.device;
-    if (!this.state.selectedDevice && this.state.devices.length) {
-      this.state.selectedDevice = this.state.devices[0];
-    }
-    if (this.state.selectedDevice) {
-      this.state.selectedDevice.on('update', this.onDeviceUpdate);
-      this.state.selectedDevice.on('updating', this.onDeviceUpdating);
-      this.state.selectedDevice.watch();
-    }
-    this.authenticating = false;
-    this.html('main-container', Template.DeviceTab(this.state));
   }
 
   deselect() {
@@ -55,6 +48,41 @@ class Devices extends Page {
     DeviceInstanceManager.off('add', this.onListUpdate);
     DeviceInstanceManager.off('remove', this.onListUpdate);
     this.root.common.device = this.state.selectedDevice;
+    this.root.common.portnr = this.state.selectedPortnr;
+  }
+
+  tabSelect(tab, arg) {
+    switch (tab) {
+      case 'switches':
+      default:
+        this.state.type = 'switches';
+        this.state.devices = DeviceInstanceManager.getSwitchDevices();
+        break;
+      case 'aps':
+        this.state.type = 'aps';
+        this.state.devices = DeviceInstanceManager.getWiFiDevices();
+        break;
+      case 'discovery':
+        this.state.type = 'discovery';
+        this.state.devices = DeviceInstanceManager.getAllDevices();
+        break;
+    }
+    this.state.selectedDevice = this.root.common.device;
+    if (this.state.selectedDevice && this.state.devices.indexOf(this.state.selectedDevice) === -1) {
+      this.state.selectedDevice = null;
+    }
+    if (!this.state.selectedDevice && this.state.devices.length) {
+      this.state.selectedDevice = this.state.devices[0];
+    }
+    if (this.state.selectedDevice) {
+      this.state.selectedDevice.on('update', this.onDeviceUpdate);
+      this.state.selectedDevice.on('updating', this.onDeviceUpdating);
+      this.state.selectedDevice.watch();
+    }
+    this.selectPort();
+
+    this.authenticating = false;
+    this.html('main-container', Template.DeviceTab(this.state));
   }
 
   onDeviceUpdate() {
@@ -75,6 +103,38 @@ class Devices extends Page {
     this.html('devices-column', Template.DeviceList(this.state));
   }
 
+  selectPort() {
+    this.state.selectedPort = null;
+    if (this.state.selectedDevice) {
+      let port = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}`);
+      if (!port) {
+        this.state.selectedPortnr = 0;
+        port = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}`);
+      }
+      const macs = ClientManager.getClientsForDeviceAndPort(this.state.selectedDevice, this.state.selectedPortnr);
+      this.state.selectedPort = {
+        port: port,
+        portnr: this.state.selectedPortnr,
+        clients: {
+          total: macs.length,
+          macs: macs
+        }
+      }
+      const peer = TopologyManager.findLink(this.state.selectedDevice, this.state.selectedPortnr);
+      if (peer) {
+        this.state.selectedPort.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
+      }
+      this.state.porthighlights = [];
+      this.state.porthighlights[this.state.selectedPortnr] = 'A';
+    }
+    else {
+      this.state.selectedPortnr = null;
+    }
+    this.html('port-info', Template.DevicePortInfo(this.state));
+    this.html('port-settings', Template.DevicePortSettings(this.state));
+    this.html('port-limits', Template.DevicePortLimits(this.state));
+  }
+
   async 'device.select' (msg) {
     const device = DeviceInstanceManager.getDeviceById(msg.value);
     if (!device || device === this.state.selectedDevice) {
@@ -90,6 +150,7 @@ class Devices extends Page {
       }));
     }
     this.state.selectedDevice = device;
+    this.selectPort();
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.on('updating', this.onDeviceUpdating);
@@ -100,6 +161,11 @@ class Devices extends Page {
         selectedDevice: this.state.selectedDevice
       }));
     }
+  }
+
+  async 'device.port.select' (msg) {
+    this.state.selectedPortnr = TypeConversion.toNumber(msg.value.port);
+    this.selectPort();
   }
 
   async 'kv.update' (msg) {

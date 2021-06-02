@@ -1,0 +1,41 @@
+<div data-toggle="collapse" data-target="#device-ports-hardware" class="card-header">
+  <div>Ports</div>
+</div>
+<div id="device-ports-hardware" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <div class="device-ports-layout">
+        {{#with selectedDevice}}
+        {{> DevicePortLayout properties=properties selected=../porthighlights}}
+        {{/with}}
+      </div>
+      <form>
+        {{#with selectedPort}}
+        {{#with port}}
+        {{>RO name="Port id" value=id}}
+        {{>RW name="Name" kv=(concat 'network.physical.port.' ../portnr '.name') value=name}}
+        {{#if (eq status 'up')}}
+        {{>RO name="Type" value=type}}
+        {{else}}
+        {{>RO name="Type" value='-'}}
+        {{/if}}
+        {{>RO name="Status" value=status}}
+        {{/with}}
+        {{#if peer}}
+        {{>RO name="Peer" value=peer}}
+        {{else if clients}}
+        {{#if (eq clients.total 1)}}
+        {{#if (lookup (lookup clients.macs 0) 'name')}}
+        {{>RO name="Client" value=(lookup (lookup clients.macs 0) 'name')}}
+        {{else if (lookup (lookup clients.macs 0) 'hostname')}}
+        {{>RO name="Client" value=(lookup (lookup clients.macs 0) 'hostname')}}
+        {{/if}}
+        {{else if (ne clients.total 0)}}
+        {{>RO name="Clients" value=clients.total}}
+        {{/if}}
+        {{/if}}
+        {{/with}}
+      </form>
+    </div>
+  </div>
+</div>

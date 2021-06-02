@@ -25,7 +25,7 @@
           <div class="list-group">
             <div class="device-ports-layout">
               {{#with selected.connected.device}}
-              {{> PortsLayout properties=properties selected=@root.porthighlights}}
+              {{> DevicePortLayout properties=properties selected=@root.porthighlights}}
               {{/with}}
             </div>
             <form>

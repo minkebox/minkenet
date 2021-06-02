@@ -1,0 +1,17 @@
+<div data-toggle="collapse" data-target="#device-details-network" class="card-header">
+  <div>Device Settings</div>
+</div>
+<div id="device-details-network" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <form>
+        {{#if network.igmp}}
+        {{>RWCheckbox name="IGMP Snooping" kv='network.igmp.snoop' value=network.igmp.snoop}}
+        {{/if}}
+        {{#if (isdefined network.vlans.ivl)}}
+        {{>RWCheckbox name="Independent VLAN lookup" kv='network.vlans.ivl' value=network.vlans.ivl}}
+        {{/if}}
+      </form>
+    </div>
+  </div>
+</div>

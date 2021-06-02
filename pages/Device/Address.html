@@ -1,0 +1,23 @@
+<div data-toggle="collapse" data-target="#device-details-address" class="card-header">
+  <div>Address</div>
+</div>
+<div id="device-details-address" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <form>
+        {{>RWSelect name="Mode" value=system.ipv4.mode kv="system.ipv4.mode"}}
+        {{#if (eq system.ipv4.mode.$ 'static')}}
+        {{>RW name="IP Address" value=system.ipv4.address kv="system.ipv4.address" default="0.0.0.0"}}
+        {{>RW name="Subnet Mask" value=system.ipv4.netmask kv="system.ipv4.netmask"}}
+        {{>RW name="Default Gateway" value=system.ipv4.gateway kv="system.ipv4.gateway"}}
+        {{>RW name="DNS" value=system.ipv4.dns kv="system.ipv4.dns"}}
+        {{else}}
+        {{>RO name="IP Address" value=system.ipv4.address default="0.0.0.0"}}
+        {{>RO name="Subnet Mask" value=system.ipv4.netmask}}
+        {{>RO name="Default Gateway" value=system.ipv4.gateway}}
+        {{>RO name="DNS" value=system.ipv4.dns}}
+        {{/if}}
+      </form>
+    </div>
+  </div>
+</div>

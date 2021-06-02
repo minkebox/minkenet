@@ -1,0 +1,19 @@
+{{#if selectedPort.port.limit}}
+<div data-toggle="collapse" data-target="#device-ports-limits" class="card-header">
+  <div>Port Limits</div>
+</div>
+<div id="device-ports-limits" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <form>
+        {{#with selectedPort}}
+        {{#with port}}
+        {{>RW name="Ingress (KB/s)" cmd="update.ingress" kv=(concat 'network.physical.port.' ../portnr '.limit.ingress') value=limit.ingress scale=1024}}
+        {{>RW name="Egress (KB/s)" cmd="update.egress" kv=(concat 'network.physical.port.' ../portnr '.limit.egress') value=limit.egress scale=1024}}
+        {{/with}}
+        {{/with}}
+      </form>
+    </div>
+  </div>
+</div>
+{{/if}}

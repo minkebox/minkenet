@@ -12,7 +12,7 @@
         {{/with}}
       </div>
       <div class="device">
-      {{> PortsLayout properties=properties selected=(lookup @root.ports @index)}}
+      {{> DevicePortLayout properties=properties selected=(lookup @root.ports @index)}}
       </div>
     </div>
     {{/each}}
