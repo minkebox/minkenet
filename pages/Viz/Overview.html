@@ -1,8 +1,12 @@
 <div class="overview-card d-inline-block">
-  <div class="title">Overview</div>
   <div class="entity">? Internet</div>
   <div class="entity">? Gateway</div>
   <div class="entity"><a href="#devices.switches">{{switches}} Switches</a></div>
   <div class="entity"><a href="#devices.aps">{{aps}} APs</a></div>
-  <div class="entity"><a href="#clients.all">{{clients}} Clients</a></div>
+  <div class="entity">
+    <a href="#clients.all">{{clients.all}} Clients</a>
+    {{#if clients.new}}
+    <br><a href="#clients.new">{{clients.new}} New</a>
+    {{/if}}
+  </div>
 </div>

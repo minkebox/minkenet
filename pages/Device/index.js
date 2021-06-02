@@ -54,7 +54,6 @@ class Devices extends Page {
   tabSelect(tab, arg) {
     switch (tab) {
       case 'switches':
-      default:
         this.state.type = 'switches';
         this.state.devices = DeviceInstanceManager.getSwitchDevices();
         break;
@@ -62,8 +61,9 @@ class Devices extends Page {
         this.state.type = 'aps';
         this.state.devices = DeviceInstanceManager.getWiFiDevices();
         break;
-      case 'discovery':
-        this.state.type = 'discovery';
+      case 'all':
+      default:
+        this.state.type = 'all';
         this.state.devices = DeviceInstanceManager.getAllDevices();
         break;
     }

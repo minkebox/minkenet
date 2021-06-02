@@ -15,7 +15,10 @@ class Viz extends Page {
   constructor(root) {
     super(root);
     this.state = {
-      clients: 0,
+      clients: {
+        all: 0,
+        new: 0
+      },
       aps: 0,
       switches: 0,
       monitor: []
@@ -49,7 +52,8 @@ class Viz extends Page {
   }
 
   async updateGeneral() {
-    this.state.clients = Object.keys(ClientManager.getAllClients()).length;
+    this.state.clients.all = Object.keys(ClientManager.getAllClients()).length;
+    this.state.clients.new = Object.keys(ClientManager.getFilteredClients({ onlyNew: true, hostname: '' })).length;
     this.state.aps = DeviceInstanceManager.getWiFiDevices().length;
     this.state.switches = DeviceInstanceManager.getSwitchDevices().length;
   }

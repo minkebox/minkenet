@@ -178,26 +178,12 @@ body.pending-changes .pending-changes-disabled {
   height: 200px;
   margin: 5px;
   border-radius: 10px;
+  text-align: center;
   xbackground-color: transparent;
 }
-.overview-card .title {
-  position: absolute;
-  min-width: 24px;
-  min-height: 24px;
-  padding: 2px 8px;
-  color: var(--minor-text-color);
-  background-color: var(--highlight-background-color);
-  z-index: 2;
-  border-radius: 0 10px 0 10px;
-  top: 0;
-  right: 0;
-  text-align: center;
-}
 .overview-card .entity {
-  display: inline-block;
-  width: 19%;
-  height: 100%;
-  text-align: center;
+  float: left;
+  width: 20%;
   padding-top: 80px;
 }
 
@@ -644,6 +630,7 @@ body.pending-changes .pending-changes-disabled {
 
 .viz {
   overflow-y: scroll;
+  width: 100%;
 }
 
 #radio-radios .list-group + .list-group {
