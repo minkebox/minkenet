@@ -28,7 +28,8 @@ class Radio extends Page {
       this.state.selectedDevice = this.state.devices[0];
     }
 
-    DeviceInstanceManager.on('update', this.onListUpdate);
+    DeviceInstanceManager.on('add', this.onListUpdate);
+    DeviceInstanceManager.on('remove', this.onListUpdate);
     if (this.state.selectedDevice) {
       this.state.selectedDevice.on('update', this.onDeviceUpdate);
       this.state.selectedDevice.watch();
@@ -42,7 +43,8 @@ class Radio extends Page {
       this.state.selectedDevice.unwatch();
       this.state.selectedDevice.off('update', this.onDeviceUpdate);
     }
-    DeviceInstanceManager.off('update', this.onListUpdate);
+    DeviceInstanceManager.off('add', this.onListUpdate);
+    DeviceInstanceManager.off('remove', this.onListUpdate);
     this.root.common.device = this.state.selectedDevice;
   }
 

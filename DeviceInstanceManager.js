@@ -91,7 +91,6 @@ class DeviceInstanceManager extends EventEmitter {
       this.devices[device._id] = device;
       device.on('update', this.onDeviceUpdate);
       this.emit('add');
-      this.emit('update');
     }
   }
 
@@ -100,7 +99,6 @@ class DeviceInstanceManager extends EventEmitter {
       delete this.devices[device._id];
       device.off('update', this.onDeviceUpdate);
       this.emit('remove');
-      this.emit('update');
     }
   }
 

@@ -30,7 +30,8 @@ class Devices extends Page {
 
   select() {
     super.select();
-    DeviceInstanceManager.on('update', this.onListUpdate);
+    DeviceInstanceManager.on('add', this.onListUpdate);
+    DeviceInstanceManager.on('remove', this.onListUpdate);
     this.state.devices = DeviceInstanceManager.getAllDevices();
     this.state.selectedDevice = this.root.common.device;
     if (!this.state.selectedDevice && this.state.devices.length) {
@@ -51,7 +52,8 @@ class Devices extends Page {
       this.state.selectedDevice.off('update', this.onDeviceUpdate);
       this.state.selectedDevice.off('updating', this.onDeviceUpdating);
     }
-    DeviceInstanceManager.off('update', this.onListUpdate);
+    DeviceInstanceManager.off('add', this.onListUpdate);
+    DeviceInstanceManager.off('remove', this.onListUpdate);
     this.root.common.device = this.state.selectedDevice;
   }
 
