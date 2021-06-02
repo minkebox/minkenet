@@ -15,6 +15,9 @@ class Viz extends Page {
   constructor(root) {
     super(root);
     this.state = {
+      clients: 0,
+      aps: 0,
+      switches: 0,
       monitor: []
     };
 
@@ -23,6 +26,7 @@ class Viz extends Page {
 
   async select() {
     await super.select();
+    await this.updateGeneral();
     await this.updateMonitors();
     this.html('main-container', Template.VizTab(Object.assign({ first: true }, this.state)));
 
@@ -39,8 +43,15 @@ class Viz extends Page {
   }
 
   async refresh() {
+    await this.updateGeneral();
     await this.updateMonitors();
     this.html('main-container', Template.VizTab(this.state));
+  }
+
+  async updateGeneral() {
+    this.state.clients = Object.keys(ClientManager.getAllClients()).length;
+    this.state.aps = DeviceInstanceManager.getWiFiDevices().length;
+    this.state.switches = DeviceInstanceManager.getSwitchDevices().length;
   }
 
   async updateMonitors() {

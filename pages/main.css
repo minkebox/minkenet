@@ -180,6 +180,26 @@ body.pending-changes .pending-changes-disabled {
   border-radius: 10px;
   xbackground-color: transparent;
 }
+.overview-card .title {
+  position: absolute;
+  min-width: 24px;
+  min-height: 24px;
+  padding: 2px 8px;
+  color: var(--minor-text-color);
+  background-color: var(--highlight-background-color);
+  z-index: 2;
+  border-radius: 0 10px 0 10px;
+  top: 0;
+  right: 0;
+  text-align: center;
+}
+.overview-card .entity {
+  display: inline-block;
+  width: 19%;
+  height: 100%;
+  text-align: center;
+  padding-top: 80px;
+}
 
 .device-card {
   position: relative;
