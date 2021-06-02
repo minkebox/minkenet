@@ -153,10 +153,7 @@ async function WS(ctx) {
 
   State.onMessage['changes.commit'] = async msg => {
     if (msg.value === 'start') {
-      DeviceInstanceManager.commit({ callback: arg => html('commit-changes-update', arg.op === 'connect' ? `Connecting to ${arg.ip}` : `Updating ${arg.ip}`) }).then(() => {
-        html('commit-changes-update', 'Done');
-        html('commit-changes-primary', '');
-      });
+      DeviceInstanceManager.commit();
     }
     else if (msg.value === 'stop') {
       setTimeout(() => {
