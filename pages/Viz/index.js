@@ -27,6 +27,7 @@ class Viz extends Page {
         all: 0,
         new: 0
       },
+      internet: null,
       monitor: []
     };
 
@@ -43,6 +44,7 @@ class Viz extends Page {
     DeviceInstanceManager.on('add', this.updateOverview);
     DeviceInstanceManager.on('remote', this.updateOverview);
     ClientManager.on('update', this.updateOverview);
+    SpeedTest.on('update', this.updateOverview);
 
     this.html('main-container', Template.VizTab(Object.assign({ first: true }, this.state)));
 
@@ -55,6 +57,7 @@ class Viz extends Page {
     DeviceInstanceManager.off('add', this.updateOverview);
     DeviceInstanceManager.off('remote', this.updateOverview);
     ClientManager.off('update', this.updateOverview);
+    SpeedTest.off('update', this.updateOverview);
 
     clearInterval(this._refreshClock);
   }
@@ -81,6 +84,18 @@ class Viz extends Page {
     this.state.switches.all = DeviceInstanceManager.getSwitchDevices().length;
     this.state.switches.new = newdevices.filter(device => device.description.properties.switch).length;
 
+    const speed = SpeedTest.getWanSpeed();
+    if (!speed) {
+      this.state.internet = null;
+    }
+    else {
+      this.state.internet = {
+        latency: speed.latency.toFixed(2),
+        upload: (8 * speed.upload / 1000000).toFixed(2),
+        download: (8 * speed.download / 1000000).toFixed(2)
+      };
+    }
+
     this.html('viz-overview', Template.VizOverview(this.state));
   }
 
@@ -100,9 +115,6 @@ class Viz extends Page {
           break;
         case 'clients':
           graph = this._makeClientGraph(mon);
-          break;
-        case 'wanspeedtest':
-          graph = this._makeSpeedtestGraph(mon);
           break;
         default:
           break;
@@ -307,22 +319,6 @@ class Viz extends Page {
         { title: `Total ${all}`, value: all },
         { title: `Active ${active}`, value: active },
         { title: `New ${recent}`, value: recent }
-      ],
-      mon: mon
-    };
-  }
-
-  _makeSpeedtestGraph(mon) {
-    const speed = SpeedTest.getWanSpeed();
-    return {
-      type: 'Gauge',
-      id: `mon-${mon.id}`,
-      title: mon.title,
-      max: Math.max(speed.upload, speed.download) * 8 / (1024 * 1024) * 1.1,
-      series: [
-        { unit: 'Mbps', tipunit: 'Download (Mbps)', value: speed.download * 8 / (1024 * 1024) },
-        { unit: 'Mbps', tipunit: 'Upload (Mbps)', value: speed.upload * 8 / (1024 * 1024) },
-        { unit: 'ms', tipunit: 'Latency (ms)', value: speed.latency }
       ],
       mon: mon
     };

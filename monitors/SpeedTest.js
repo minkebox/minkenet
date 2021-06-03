@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const SpeedTestNet = require('@lh2020/speedtest-net');
 const ConfigDB = require('../Config');
+const { timeStamp } = require('console');
 const Log = require('debug')('speedtest');
 
 const SPEEDTEST_TIMER = 60 * 60 * 1000; // 1 hour
@@ -8,11 +9,7 @@ const SPEEDTEST_TIMER = 60 * 60 * 1000; // 1 hour
 class SpeedTest extends EventEmitter {
 
   start() {
-    this.last = {
-      ping: { latency: 0 },
-      download: { bandwidth: 0 },
-      upload: { bandwidth: 0 }
-    };
+    this.last = null;
     ConfigDB.on('update', evt => {
       if (evt.key === 'monitor.wan.speedtest.enabled') {
         this.enable(evt.value);
@@ -24,6 +21,7 @@ class SpeedTest extends EventEmitter {
   enable(yes) {
     if (yes) {
       if (!this._speedtest) {
+        this.last = null;
         this._speedtest = setInterval(() => this._run(), SPEEDTEST_TIMER);
         this._run();
       }
@@ -31,12 +29,16 @@ class SpeedTest extends EventEmitter {
     else {
       if (this._speedtest) {
         clearInterval(this._speedtest);
+        this.last = null;
         this._speedtest = null;
       }
     }
   }
 
   getWanSpeed() {
+    if (!this.last) {
+      return null;
+    }
     return {
       latency: this.last.ping.latency,
       upload: this.last.upload.bandwidth,

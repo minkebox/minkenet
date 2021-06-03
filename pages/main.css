@@ -644,6 +644,10 @@ body.pending-changes .pending-changes-disabled {
   border-bottom: 4px solid var(--emphasis-text-color);
   z-index: 1;
 }
+.viz-internet {
+  font-size: 8px;
+  color: var(--disabled-text-color);
+}
 
 #radio-radios .list-group + .list-group {
   margin-top: 24px;

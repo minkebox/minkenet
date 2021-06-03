@@ -2,6 +2,12 @@
 <div class="entity">
   {{> VizImgInternet }}
   <br><a href="#">Internet</a>
+  {{#if internet}}
+  <div class="viz-internet">
+    <div>Up: {{internet.upload}} Mbps | Down: {{internet.download}} Mbps</div>
+    <div>Latency: {{internet.latency}} ms</div>
+  </div>
+  {{/if}}
 </div>
 <div class="entity">
   {{> VizImgFirewall }}
