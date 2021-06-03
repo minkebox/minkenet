@@ -333,6 +333,7 @@ class ClientManager extends EventEmitter {
         include = false;
       }
       if (include && (
+        filter.all ||
         ('mac' in filter && client.mac.includes(filter.mac)) ||
         ('ip' in filter && client.ip && client.ip.includes(filter.ip)) ||
         ('hostname' in filter && client.hostname && client.hostname.toLowerCase().includes(filter.hostname)) ||

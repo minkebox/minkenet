@@ -74,7 +74,7 @@ class Viz extends Page {
 
   updateOverview() {
     this.state.clients.all = Object.keys(ClientManager.getAllClients()).length;
-    this.state.clients.new = Object.keys(ClientManager.getFilteredClients({ onlyNew: true, hostname: '' })).length;
+    this.state.clients.new = Object.keys(ClientManager.getFilteredClients({ onlyNew: true, all: true })).length;
 
     const newdevices = Object.values(DeviceInstanceManager.getUnauthenticatedDevices());
 
