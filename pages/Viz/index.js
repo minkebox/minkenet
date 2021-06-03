@@ -17,6 +17,7 @@ class Viz extends Page {
     this.state = {
       clients: {
         all: 0,
+        active: 0,
         new: 0
       },
       aps: {
@@ -73,8 +74,19 @@ class Viz extends Page {
   }
 
   updateOverview() {
-    this.state.clients.all = Object.keys(ClientManager.getAllClients()).length;
-    this.state.clients.new = Object.keys(ClientManager.getFilteredClients({ onlyNew: true, all: true })).length;
+    const inlast24hours = Date.now() - (24 * 60 * 60 * 1000);
+    const clients = ClientManager.getAllClients();
+    this.state.clients.all = Object.keys(clients).length;
+    this.state.clients.active = 0;
+    this.state.clients.new = 0;
+    for (let key in clients) {
+      if (clients[key].lastSeen > inlast24hours) {
+        this.state.clients.active++;
+      }
+      if (clients[key].firstSeen > inlast24hours) {
+        this.state.clients.net++;
+      }
+    }
 
     const newdevices = Object.values(DeviceInstanceManager.getUnauthenticatedDevices());
 

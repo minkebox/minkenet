@@ -15,21 +15,40 @@
 </div>
 <div class="entity">
   {{> VizImgSwitches }}
-  <br><a href="#devices.switches">{{switches.all}} Switches</a>
+  <br><a href="#devices.switches">
+    {{#if (eq switches.all 1)}}
+    {{switches.all}} Switch
+    {{else}}
+    {{switches.all}} Switches
+    {{/if}}
+  </a>
   {{#if switches.new}}
   <br><a href="#devices.new">{{switches.new}} New</a>
   {{/if}}
 </div>
 <div class="entity">
   {{> VizImgAPs }}
-  <br><a href="#devices.aps">{{aps.all}} APs</a>
+  <br><a href="#devices.aps">
+    {{#if (eq aps.all 1)}}
+    {{aps.all}} AP
+    {{else}}
+    {{aps.all}} APs
+    {{/if}}
+  </a>
   {{#if aps.new}}
   <br><a href="#devices.new">{{aps.new}} New</a>
   {{/if}}
 </div>
 <div class="entity">
   {{> VizImgClients }}
-  <br><a href="#clients.all">{{clients.all}} Clients</a>
+  <br><a href="#clients.all">
+    {{#if (eq clients.all 1)}}
+    {{clients.all}} Client
+    {{else}}
+    {{clients.all}} Clients
+    {{/if}}
+  </a>
+  <br><a href="#clients.all">{{clients.active}} Active</a>
   {{#if clients.new}}
   <br><a href="#clients.new">{{clients.new}} New</a>
   {{/if}}
