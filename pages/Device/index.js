@@ -238,14 +238,12 @@ class Devices extends Page {
     }
   }
 
-  async 'device.authenticate.cancel' (msg) {
-    this.authenticating = false;
-    this.html(`login-modal-status-${msg.value}`, '&nbsp;');
-  }
-
-  async 'device.authenticate' (msg) {
-    Log('device.authenticate:');
-    if (this.state.selectedDevice && this.state.selectedDevice._id !== msg.value.id) {
+  async 'device.authenticate.open' (msg) {
+    const device = DeviceInstanceManager.getDeviceById(msg.value.id);
+    if (!device) {
+      return;
+    }
+    if (this.state.selectedDevice && this.state.selectedDevice !== device) {
       Log('closing watched device:');
       this.state.selectedDevice.unwatch();
       this.state.selectedDevice.off('update', this.onDeviceUpdate);
@@ -255,33 +253,35 @@ class Devices extends Page {
         selectedDevice: null
       }));
     }
-    this.state.selectedDevice = null;
+    this.state.selectedDevice = device;
+    this.state.selectedDevice.watch();
+    this.html('device-auth-modal-container', Template.DeviceAuthModal(this.state.selectedDevice));
+  }
 
-    Log('finding device:');
+  async 'device.authenticate.cancel' (msg) {
+    this.authenticating = false;
+    this.html(`login-modal-status`, '&nbsp;');
+  }
+
+  async 'device.authenticate.credentials' (msg) {
+    Log('device.authenticate.credentials:');
     this.authenticating = true;
-    let device = DeviceInstanceManager.getDeviceById(msg.value.id);
-    if (!device) {
-      Log('no device:');
-      this.authenticating = false;
-      this.html(`login-modal-status-${device._id}`, 'Login failed.');
-      return;
-    }
 
     Log('authenticating:');
-    this.html(`login-modal-status-${device._id}`, 'Authenticating ...');
+    this.html(`login-modal-status`, 'Authenticating ...');
 
-    await device.attach();
+    await this.state.selectedDevice.attach();
     Log('attached:');
-    const success = await device.login(msg.value.username, msg.value.password);
+    const success = await this.state.selectedDevice.login(msg.value.username, msg.value.password);
     Log('login: success=', success);
     if (!success) {
       this.authenticating = false;
-      device.detach();
-      this.html(`login-modal-status-${device._id}`, 'Login failed.');
+      this.state.selectedDevice.detach();
+      this.html(`login-modal-status`, 'Login failed.');
       return;
     }
 
-    if (device.description.generic) {
+    if (this.state.selectedDevice.description.generic) {
       Log('switch from generic:');
       // If we're a generic device, we needed to first authenticate and then work out
       // what is is. Now try to identify from the logged-in state.
@@ -289,31 +289,31 @@ class Devices extends Page {
       let ndevice = null;
       for (let i = 0; i < devices.length; i++) {
         const dev = devices[i];
-        if (await dev.identify(device._page, true)) {
-          DeviceInstanceManager.removeDevice(device);
-          ndevice = dev.newInstanceFromGeneric(device);
+        if (await dev.identify(this.state.selectedDevice._page, true)) {
+          DeviceInstanceManager.removeDevice(this.state.selectedDevice);
+          ndevice = dev.newInstanceFromGeneric(this.state.selectedDevice);
           DeviceInstanceManager.addDevice(ndevice);
           break;
         }
       }
       if (!ndevice) {
         this.authenticating = false;
-        device.logout(true);
-        this.html(`login-modal-status-${device._id}`, 'Login failed.');
+        this.state.selectedDevice.logout(true);
+        this.html(`login-modal-status`, 'Login failed.');
         return;
       }
-      device = ndevice;
+      this.state.selectedDevice = ndevice;
       // Update the constants
-      device.state.mergeIntoState(device.description.constants);
+      this.state.selectedDevice.state.mergeIntoState(this.state.selectedDevice.description.constants);
     }
 
     Log('adopting:');
-    this.html(`login-modal-status-${device._id}`, 'Login success. Adopting ...');
+    this.html(`login-modal-status`, 'Login success. Adopting ...');
 
     // Adopt the newly authenticated device.
     let status = null;
     try {
-      const adoption = new Adopt(device);
+      const adoption = new Adopt(this.state.selectedDevice);
       status = await adoption.configure({
         username: msg.value.username,
         password: msg.value.password
@@ -321,18 +321,18 @@ class Devices extends Page {
     }
     catch (_) {
       this.authenticating = false;
-      device.logout(true);
-      this.html(`login-modal-status-${device._id}`, 'Adoption failed.');
+      this.state.selectedDevice.logout(true);
+      this.html(`login-modal-status`, 'Adoption failed.');
       return;
     }
 
-    this.html(`login-modal-status-${device._id}`, 'Configuring device ...');
+    this.html(`login-modal-status`, 'Configuring device ...');
 
     // Write the changes to the device. We let this take at least a couple of seconds so we can see this happening.
     await Promise.all([
       new Promise(resolve => setTimeout(resolve, 2000)),
       (async () => {
-        await device.write();
+        await this.state.selectedDevice.write();
 
         // If we change the address or password we need logout and reauthenticate before we commit
         if (status.newaddress || status.newpassword) {
@@ -343,22 +343,22 @@ class Devices extends Page {
             // ....
           }
 
-          device.logout();
-          await device.connect();
+          this.state.selectedDevice.logout();
+          await this.state.selectedDevice.connect();
         }
 
-        await device.commit();
+        await this.state.selectedDevice.commit();
       })()
     ]);
 
-    DeviceInstanceManager.authenticated(device);
+    DeviceInstanceManager.authenticated(this.state.selectedDevice);
 
     // Monitor by default
-    MonitorManager.monitorDevice(device, true);
+    MonitorManager.monitorDevice(this.state.selectedDevice, true);
 
     this.send('modal.hide.all');
-    this.html(`device-card-${device._id}`, Template.DeviceCard({
-      device: device,
+    this.html(`device-card`, Template.DeviceCard({
+      device: this.state.selectedDevice,
       selectedDevice: null
     }));
 

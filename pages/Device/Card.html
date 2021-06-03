@@ -10,12 +10,9 @@
     <a class="card-text" href="http://{{properties.system.ipv4.address.$}}" target="_blank">{{properties.system.ipv4.address.$}}</a>
     {{#unless _authenticated}}
     <div class="d-flex buttons" style="justify-content: flex-end">
-      <button type="button" class="btn btn-outline-primary btn-sm" onclick="$('#login-modal-{{_id}}').modal()">Authenticate</button>
+      <button type="button" class="btn btn-outline-primary btn-sm" onclick="send('device.authenticate.open', { id: '{{_id}}' })">Authenticate</button>
     </div>
     {{/unless}}
   </div>
-  {{#unless _authenticated}}
-  {{> DeviceAuthModal}}
-  {{/unless}}
 </div>
 {{/with}}

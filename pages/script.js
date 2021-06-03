@@ -82,18 +82,6 @@ onMessage['html.update'] = msg => {
   }
 }
 
-function deviceLogin(id) {
-  const modal = document.getElementById(`login-modal-${id}`);
-  const username = modal.querySelector('.device-username');
-  const password = modal.querySelector('.device-password');
-  const auth = {
-    id: id,
-    username: username ? username.value : undefined,
-    password: password ? password.value : undefined
-  };
-  send('device.authenticate', auth);
-}
-
 let pendingModals = 0;
 let pendingHide = false;
 $(document).on('show.bs.modal', () => {

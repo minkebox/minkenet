@@ -1,4 +1,4 @@
-<div class="modal fade" id="login-modal-{{_id}}" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="login-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -17,12 +17,24 @@
             <input type="text" class="form-control device-password" value="{{properties.system.keychain.password.$}}">
           </div>
         </form>
-        <div id="login-modal-status-{{_id}}">&nbsp;</div>
+        <div id="login-modal-status">&nbsp;</div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="deviceLogin('{{_id}}')">Login</button>
-        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="send('device.authenticate.cancel','{{_id}}')">Cancel</button>
+        <button type="button" class="btn btn-primary" onclick="window._deviceLogin()">Login</button>
+        <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="send('device.authenticate.cancel')">Cancel</button>
       </div>
     </div>
   </div>
 </div>
+<script>
+  window._deviceLogin = () => {
+    const modal = document.getElementById('login-modal');
+    const username = modal.querySelector('.device-username');
+    const password = modal.querySelector('.device-password');
+    send('device.authenticate.credentials', {
+      username: username ? username.value : undefined,
+      password: password ? password.value : undefined
+    });
+  }
+  $("#login-modal").modal();
+</script>
