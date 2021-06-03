@@ -183,11 +183,13 @@ body.pending-changes .pending-changes-disabled {
 .overview-card .entity {
   float: left;
   width: 20%;
+  font-size: 14px;
   padding-top: 25px;
   text-align: center;
 }
 .overview-card .entity img {
   position: relative;
+  padding-bottom: 10px;
   z-index: 2;
 }
 
@@ -638,7 +640,7 @@ body.pending-changes .pending-changes-disabled {
 }
 .viz-line {
   position: absolute;
-  top: 80px;
+  top: 75px;
   left: 10%;
   width: 80%;
   border-bottom: 2px solid var(--emphasis-text-color);
