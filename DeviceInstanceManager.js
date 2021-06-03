@@ -77,6 +77,10 @@ class DeviceInstanceManager extends EventEmitter {
     return this.getAllDevices().filter(device => device._authenticated);
   }
 
+  getUnauthenticatedDevices() {
+    return this.getAllDevices().filter(device => !device._authenticated);
+  }
+
   getDeviceById(id) {
     return this.devices[id];
   }

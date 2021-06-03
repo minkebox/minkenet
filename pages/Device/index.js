@@ -52,21 +52,8 @@ class Devices extends Page {
   }
 
   tabSelect(tab, arg) {
-    switch (tab) {
-      case 'switches':
-        this.state.type = 'switches';
-        this.state.devices = DeviceInstanceManager.getSwitchDevices();
-        break;
-      case 'aps':
-        this.state.type = 'aps';
-        this.state.devices = DeviceInstanceManager.getWiFiDevices();
-        break;
-      case 'all':
-      default:
-        this.state.type = 'all';
-        this.state.devices = DeviceInstanceManager.getAllDevices();
-        break;
-    }
+    this.state.type = tab;
+    this.state.devices = this.getDevices();
     this.state.selectedDevice = this.root.common.device;
     if (this.state.selectedDevice && this.state.devices.indexOf(this.state.selectedDevice) === -1) {
       this.state.selectedDevice = null;
@@ -99,8 +86,22 @@ class Devices extends Page {
     if (this.authenticating) {
       return;
     }
-    this.state.devices = DeviceInstanceManager.getAllDevices();
+    this.state.devices = this.getDevices();
     this.html('devices-column', Template.DeviceList(this.state));
+  }
+
+  getDevices() {
+    switch (this.state.type) {
+      case 'switches':
+        return DeviceInstanceManager.getSwitchDevices();
+      case 'aps':
+        return DeviceInstanceManager.getWiFiDevices();
+      case 'new':
+        return DeviceInstanceManager.getUnauthenticatedDevices();
+      case 'all':
+      default:
+        return DeviceInstanceManager.getAuthenticatedDevices();
+    }
   }
 
   selectPort() {
@@ -132,7 +133,6 @@ class Devices extends Page {
     }
     this.html('port-info', Template.DevicePortInfo(this.state));
     this.html('port-settings', Template.DevicePortSettings(this.state));
-    this.html('port-limits', Template.DevicePortLimits(this.state));
   }
 
   async 'device.select' (msg) {
