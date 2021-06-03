@@ -7,7 +7,6 @@
     "url": "https://gitlab.com/minkebox/minkenet.git"
   },
   "dependencies": {
-    "@lh2020/speedtest-net": "^2.1.1",
     "bootstrap": "^4.5.3",
     "debug": "^4.3.1",
     "devextreme": "^20.2.4",
@@ -29,6 +28,7 @@
     "pcap": "git+https://github.com/aanon4/node_pcap.git",
     "popper.js": "^1.16.1",
     "puppeteer": "^8.0.0",
-    "sortablejs": "^1.13.0"
+    "sortablejs": "^1.13.0",
+    "speedtest-net": "^2.2.0"
   }
 }
