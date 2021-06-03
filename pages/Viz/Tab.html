@@ -1,5 +1,7 @@
 <div class="viz">
+  <div id="viz-overview" class="overview-card d-inline-block">
   {{> VizOverview }}
+  </div>
   {{#each monitor}}
   {{#if (eq type '1Hour')}}
   {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}

@@ -19,18 +19,31 @@ class Viz extends Page {
         all: 0,
         new: 0
       },
-      aps: 0,
-      switches: 0,
+      aps: {
+        all: 0,
+        new: 0
+      },
+      switches: {
+        all: 0,
+        new: 0
+      },
       monitor: []
     };
 
+    this.updateOverview = this.updateOverview.bind(this);
     this.refresh = this.refresh.bind(this);
   }
 
   async select() {
     await super.select();
-    await this.updateGeneral();
+
+    await this.updateOverview();
     await this.updateMonitors();
+
+    DeviceInstanceManager.on('add', this.updateOverview);
+    DeviceInstanceManager.on('remote', this.updateOverview);
+    ClientManager.on('update', this.updateOverview);
+
     this.html('main-container', Template.VizTab(Object.assign({ first: true }, this.state)));
 
     this._refreshClock = setInterval(this.refresh, REFRESH_TIMER);
@@ -38,6 +51,11 @@ class Viz extends Page {
 
   async deselect() {
     await super.deselect();
+
+    DeviceInstanceManager.off('add', this.updateOverview);
+    DeviceInstanceManager.off('remote', this.updateOverview);
+    ClientManager.off('update', this.updateOverview);
+
     clearInterval(this._refreshClock);
   }
 
@@ -46,16 +64,24 @@ class Viz extends Page {
   }
 
   async refresh() {
-    await this.updateGeneral();
+    await this.updateOverview();
     await this.updateMonitors();
     this.html('main-container', Template.VizTab(this.state));
   }
 
-  async updateGeneral() {
+  updateOverview() {
     this.state.clients.all = Object.keys(ClientManager.getAllClients()).length;
     this.state.clients.new = Object.keys(ClientManager.getFilteredClients({ onlyNew: true, hostname: '' })).length;
-    this.state.aps = DeviceInstanceManager.getWiFiDevices().length;
-    this.state.switches = DeviceInstanceManager.getSwitchDevices().length;
+
+    const newdevices = Object.values(DeviceInstanceManager.getUnauthenticatedDevices());
+
+    this.state.aps.all = DeviceInstanceManager.getWiFiDevices().length;
+    this.state.aps.new = newdevices.filter(device => device.description.properties.ap).length;
+
+    this.state.switches.all = DeviceInstanceManager.getSwitchDevices().length;
+    this.state.switches.new = newdevices.filter(device => device.description.properties.switch).length;
+
+    this.html('viz-overview', Template.VizOverview(this.state));
   }
 
   async updateMonitors() {
