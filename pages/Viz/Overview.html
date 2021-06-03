@@ -1,19 +1,29 @@
-<div class="entity">? Internet</div>
-<div class="entity">? Gateway</div>
+<div class="viz-line"></div>
 <div class="entity">
-  <a href="#devices.switches">{{switches.all}} Switches</a>
+  {{> VizImgInternet }}
+  <br><a href="#">Internet</a>
+</div>
+<div class="entity">
+  {{> VizImgFirewall }}
+  <br><a href="#">Firewall</a>
+</div>
+<div class="entity">
+  {{> VizImgSwitches }}
+  <br><a href="#devices.switches">{{switches.all}} Switches</a>
   {{#if switches.new}}
   <br><a href="#devices.new">{{switches.new}} New</a>
   {{/if}}
 </div>
 <div class="entity">
-  <a href="#devices.aps">{{aps.all}} APs</a>
+  {{> VizImgAPs }}
+  <br><a href="#devices.aps">{{aps.all}} APs</a>
   {{#if aps.new}}
   <br><a href="#devices.new">{{aps.new}} New</a>
   {{/if}}
 </div>
 <div class="entity">
-  <a href="#clients.all">{{clients.all}} Clients</a>
+  {{> VizImgClients }}
+  <br><a href="#clients.all">{{clients.all}} Clients</a>
   {{#if clients.new}}
   <br><a href="#clients.new">{{clients.new}} New</a>
   {{/if}}

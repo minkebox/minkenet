@@ -179,12 +179,16 @@ body.pending-changes .pending-changes-disabled {
   margin: 5px;
   border-radius: 10px;
   text-align: center;
-  xbackground-color: transparent;
 }
 .overview-card .entity {
   float: left;
   width: 20%;
-  padding-top: 80px;
+  padding-top: 25px;
+  text-align: center;
+}
+.overview-card .entity img {
+  position: relative;
+  z-index: 2;
 }
 
 .device-card {
@@ -631,6 +635,14 @@ body.pending-changes .pending-changes-disabled {
 .viz {
   overflow-y: scroll;
   width: 100%;
+}
+.viz-line {
+  position: absolute;
+  top: 80px;
+  left: 100px;
+  width: calc(100% - 200px);
+  border-bottom: 4px solid var(--emphasis-text-color);
+  z-index: 1;
 }
 
 #radio-radios .list-group + .list-group {
