@@ -15,6 +15,7 @@ const Discovery = require('./discovery');
 const MonitorManager = require('./MonitorManager');
 const WiFiManager = require('./WiFiManager');
 const SpeedTest = require('./monitors/SpeedTest');
+const NetworkScanner = require('./NetworkScanner');
 
 // Extend path so we can find 'ping' and 'arp'
 process.env.PATH = `${process.env.PATH}:/usr/sbin:/sbin`;
@@ -58,6 +59,7 @@ App.ws.use(async (ctx, next) => {
   await MonitorManager.start();
   await WiFiManager.start();
   SpeedTest.start();
+  NetworkScanner.start();
 
   App.listen({
     port: WEBPORT
@@ -73,6 +75,7 @@ App.ws.use(async (ctx, next) => {
   });
 
   process.on('SIGTERM', async () => {
+    NetworkScanner.stop();
     WiFiManager.stop();
     MonitorManager.stop();
     Discovery.stop();

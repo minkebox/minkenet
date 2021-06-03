@@ -3,6 +3,7 @@ const Pup = require('./Pup');
 const DeviceManager = require('./DeviceManager');
 const DeviceInstanceManager = require('./DeviceInstanceManager');
 const DeviceState = require('./DeviceState');
+const Discovery = require('./discovery');
 const DB = require('./Database');
 const Log = require('debug')('scan');
 
@@ -83,7 +84,40 @@ class Scanner extends EventEmitter {
 };
 
 module.exports = {
-  createScanner: function(config) {
-    return new Scanner(config);
+  start: function() {
+    let scanner = null;
+    let pending = false;
+    const backgroundScan = () => {
+      if (scanner) {
+        pending = true;
+        return;
+      }
+      Log('starting background scan');
+      pending = false;
+      scanner = new Scanner({
+        addresses: Discovery.getAddresses(),
+        pageTimeout: 20000
+      });
+      scanner.on('status', evt => {
+        switch (evt.op) {
+          case 'running':
+            break;
+          case 'done':
+            Log('finished background scan');
+            scanner = null;
+            if (pending) {
+              setTimeout(backgroundScan, 0);
+            }
+            break;
+          default:
+            break;
+        }
+      });
+      scanner.start();
+    }
+    Discovery.on('update', backgroundScan);
+  },
+
+  stop: function() {
   }
 }
