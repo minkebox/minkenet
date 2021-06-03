@@ -39,7 +39,7 @@
   {{/if}}
   {{#if @root.selectedDevice.description.properties.switch}}
   <div id="port-info" class="card">
-  {{> DevicePortInfo selectedDevice=@root.selectedDevice selectedPort=@root.selectedPort porthighlights=@root.porthighlights}}
+  {{> DevicePortInfo selectedDevice=@root.selectedDevice selectedPort=@root.selectedPort porthighlights=@root.porthighlights }}
   </div>
   <div id="port-settings" class="card">
   {{> DevicePortSettings selectedPort=@root.selectedPort }}
@@ -48,6 +48,11 @@
   {{#if network.wireless.radio}}
   <div id="device-radios" class="card">
   {{> DeviceRadios selectedDevice=@root.selectedDevice }}
+  </div>
+  {{/if}}
+  {{#if @root.selectedDevice.description.properties.switch}}
+  <div id="port-monitors" class="card">
+  {{> DevicePortMonitors selectedPort=@root.selectedPort }}
   </div>
   {{/if}}
   <button type="button" class="device-forget-button btn btn-sm btn-outline-secondary" onclick="$('#forget-device').modal()">Forget</button>

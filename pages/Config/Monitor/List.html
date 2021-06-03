@@ -2,22 +2,13 @@
   <div class="row title">
     <div class="col">Device Name</div>
     <div class="col">Monitor</div>
-    <div class="col">Ports</div>
   </div>
   {{#each devices}}
-  <a class="row {{#if (eq ../selected this)}}active{{/if}}" href="#" onclick="selectmonitor(event,'{{_id}}')">
+  <div class="row">
     <div class="col">{{name}}</div>
     <div class="col">
       <input type="checkbox" {{#if monitor}}checked{{/if}} onclick="send('monitor.change',{id:'{{_id}}',checked:this.checked})">
     </div>
-    <div class="col">{{lookup ../deviceportsmonitored @index}}</div>
-  </a>
+  </div>
   {{/each}}
-  <script>
-    window.selectmonitor = function(evt,id) {
-      $('.monitor-container .row').removeClass('active');
-      send('monitor.select', id);
-      $(evt.target).parents('.monitor-container .row').addClass('active');
-    }
-  </script>
 </div>

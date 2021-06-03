@@ -39,7 +39,7 @@ class Viz extends Page {
   async select() {
     await super.select();
 
-    await this.updateOverview();
+    this.updateOverview();
     await this.updateMonitors();
 
     DeviceInstanceManager.on('add', this.updateOverview);
@@ -68,7 +68,7 @@ class Viz extends Page {
   }
 
   async refresh() {
-    await this.updateOverview();
+    this.updateOverview();
     await this.updateMonitors();
     this.html('main-container', Template.VizTab(this.state));
   }
@@ -135,8 +135,6 @@ class Viz extends Page {
         this.state.monitor.push(graph);
       }
     }
-
-    await this._sortAndSaveMonitors();
   }
 
   async 'mon.move' (msg) {
@@ -159,14 +157,8 @@ class Viz extends Page {
         });
       }
       move.mon.order = Math.min(to, this.state.monitor.length);
-      await this._sortAndSaveMonitors();
+      await MonitorManager.updateMonitors()
     }
-  }
-
-  async _sortAndSaveMonitors() {
-    this.state.monitor.sort((a, b) => a.mon.order - b.mon.order);
-    this.state.monitor.forEach((m, idx) => m.mon.order = idx);
-    await MonitorManager.updateMonitors();
   }
 
   async _makeGraph(mon) {

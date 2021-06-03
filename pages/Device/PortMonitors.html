@@ -1,0 +1,17 @@
+{{#with selectedPort}}
+{{#with monitors}}
+<div data-toggle="collapse" data-target="#device-ports-monitors" class="card-header">
+  <div>Port Traffic Monitors</div>
+</div>
+<div id="device-ports-monitors" class="collapse show">
+  <div class="card-body">
+    <div class="list-group">
+      <form>
+        {{>RWCheckbox name="Hourly" cmd='monitor.update' key='1hour' value=hourly}}
+        {{>RWCheckbox name="Daily" cmd='monitor.update' key='1day' value=daily}}
+      </form>
+    </div>
+  </div>
+</div>
+{{/with}}
+{{/with}}

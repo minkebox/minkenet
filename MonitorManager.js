@@ -2,10 +2,6 @@ const EventEmitter = require('events');
 const DB = require('./Database');
 const Log = require('debug')('monitor');
 
-const MONITOR_EXPIRES = {
-  ONEDAY: 24 * 60 * 60 * 1000
-};
-
 
 class MonitorManager extends EventEmitter {
 
@@ -20,7 +16,6 @@ class MonitorManager extends EventEmitter {
     const data = await DB.getMonitorList();
     if (data) {
       this.enabled = JSON.parse(data.enabled);
-      this.monitors = JSON.parse(data.monitors);
       for (let i = 0; i < this.enabled.length; i++) {
         const id = this.enabled[i];
         const device = DeviceInstanceManager.getDeviceById(id);
@@ -29,15 +24,26 @@ class MonitorManager extends EventEmitter {
           device.watch();
         }
       }
+      this.monitors = JSON.parse(data.monitors);
     }
-    DeviceInstanceManager.on('update', evt => {
-      if (evt.type === 'merge' && evt.op === 'update') {
-        this.logData(evt.device, evt.key, evt.value);
+
+    this._monitorUpdates = evt => {
+      if (evt.type === 'merge' && evt.op === 'update' && this.enabled.indexOf(evt.device._id) !== -1 && evt.key.match(/^network\.physical\.port\.[0-9]+\.statistics\./)) {
+        DB.updateMonitor(`device-${evt.device._id}`, { key: evt.key, value: evt.value }).catch(err => Log(err));
       }
-    });
+    }
+
+    DeviceInstanceManager.on('update', this._monitorUpdates);
   }
 
   stop() {
+    DeviceInstanceManager.on('update', this._monitorUpdates);
+    this.enabled.forEach(id => {
+      const device = DeviceInstanceManager.getDeviceById(id);
+      if (device) {
+        device.unwatch();
+      }
+    });
   }
 
   async monitorDevice(device, enable) {
@@ -51,7 +57,7 @@ class MonitorManager extends EventEmitter {
       await DB.createMonitor(`device-${device._id}`);
       device.watch();
     }
-    await DB.updateMonitorList(this.toDB());
+    await this.updateMonitors();
   }
 
   async monitorDeviceKeysType(device, id, title, keys, monitorType) {
@@ -71,7 +77,7 @@ class MonitorManager extends EventEmitter {
       };
       this.monitors.push(mon);
     }
-    await DB.updateMonitorList(this.toDB());
+    await this.updateMonitors();
   }
 
   async monitorCustom(id, enable, title, monitorType) {
@@ -88,33 +94,25 @@ class MonitorManager extends EventEmitter {
       };
       this.monitors.push(mon);
     }
-    await DB.updateMonitorList(this.toDB());
-  }
-
-  async updateMonitors() {
-    await DB.updateMonitorList(this.toDB());
+    await this.updateMonitors();
   }
 
   getAllMonitors() {
     return this.monitors;
   }
 
-  getDeviceMonitors(device) {
+  getDevicePortMonitors(device, portnr) {
+    if (this.enabled.indexOf(device._id) === -1) {
+      return null;
+    }
+    const patt = new RegExp(`^network\.physical\.port\.${portnr}\.statistics.*$`);
     const monitors = [];
     this.monitors.forEach(mon => {
-      if (mon.deviceid === device._id) {
+      if (mon.deviceid === device._id && mon.keys[0].key.match(patt)) {
         monitors.push(mon);
       }
     });
     return monitors;
-  }
-
-  logData(device, key, value) {
-    if (this.enabled.indexOf(device._id) !== -1 && key.match(/^network\.physical\.port\.[0-9]+\.statistics\./)) {
-      DB.updateMonitor(`device-${device._id}`, { key: key, value: value }).catch(err => {
-        Log(err);
-      });
-    }
   }
 
   isMonitored(device) {
@@ -123,6 +121,12 @@ class MonitorManager extends EventEmitter {
 
   newMonitorId() {
     return DB.newMonitorId();
+  }
+
+  async updateMonitors() {
+    this.monitors.sort((a, b) => a.order - b.order);
+    this.monitors.forEach((m, idx) => m.order = idx);
+    await DB.updateMonitorList(this.toDB());
   }
 
   toDB() {

@@ -1,18 +1,20 @@
-<div class="viz">
-  <div id="viz-overview" class="overview-card d-inline-block">
+<div style="width:100%">
+  <div id="viz-overview" class="overview-card">
     {{> VizOverview }}
   </div>
-  {{#each monitor}}
-  {{#if (eq type '1Hour')}}
-  {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
-  {{else if (eq type '1Day')}}
-  {{> VizMonTime xtitle='Last Day' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
-  {{else if (eq type 'Gauge')}}
-  {{> VizMonGauge id=id link=link title=title series=series max=max first=@root.first }}
-  {{else if (eq type 'Bubbles')}}
-  {{> VizMonBubbles id=id link=link title=title series=series first=@root.first }}
-  {{/if}}
-  {{/each}}
+  <div class="viz">
+    {{#each monitor}}
+    {{#if (eq type '1Hour')}}
+    {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
+    {{else if (eq type '1Day')}}
+    {{> VizMonTime xtitle='Last Day' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
+    {{else if (eq type 'Gauge')}}
+    {{> VizMonGauge id=id link=link title=title series=series max=max first=@root.first }}
+    {{else if (eq type 'Bubbles')}}
+    {{> VizMonBubbles id=id link=link title=title series=series first=@root.first }}
+    {{/if}}
+    {{/each}}
+  </div>
 </div>
 <script>
   new Sortable(document.querySelector('.viz'), {

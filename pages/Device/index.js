@@ -11,6 +11,7 @@ const Debounce = require('../../utils/Debounce');
 const TypeConversion = require('../../utils/TypeConversion');
 const Adopt = require('../../Adopt');
 const Page = require('../Page');
+const Log = require('debug')('devices');
 
 class Devices extends Page {
 
@@ -107,11 +108,14 @@ class Devices extends Page {
   selectPort() {
     this.state.selectedPort = null;
     if (this.state.selectedDevice) {
+      // Select the port, and default if it fails
       let port = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}`);
       if (!port) {
         this.state.selectedPortnr = 0;
         port = this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}`);
       }
+
+      // Find the clients on this port
       const macs = ClientManager.getClientsForDeviceAndPort(this.state.selectedDevice, this.state.selectedPortnr);
       this.state.selectedPort = {
         port: port,
@@ -119,20 +123,49 @@ class Devices extends Page {
         clients: {
           total: macs.length,
           macs: macs
-        }
+        },
+        monitors: null
       }
+
+      // Find the peer
       const peer = TopologyManager.findLink(this.state.selectedDevice, this.state.selectedPortnr);
       if (peer) {
         this.state.selectedPort.peer = `${peer[1].device.name}, port ${peer[1].port + 1}`;
       }
+
+      // Highlight the selected port
       this.state.porthighlights = [];
       this.state.porthighlights[this.state.selectedPortnr] = 'A';
+
+      // Find monitors
+      const monitors = MonitorManager.getDevicePortMonitors(this.state.selectedDevice, this.state.selectedPortnr);
+      if (monitors) {
+        this.state.selectedPort.monitors = {
+          hourly: false,
+          daily: false
+        };
+        monitors.forEach(mon => {
+          switch (mon.type) {
+            case '1hour':
+              this.state.selectedPort.monitors.hourly = true;
+              break;
+            case '1day':
+              this.state.selectedPort.monitors.daily = true;
+              break;
+            default:
+              break;
+          }
+        });
+      }
     }
+
     else {
       this.state.selectedPortnr = null;
     }
+
     this.html('port-info', Template.DevicePortInfo(this.state));
     this.html('port-settings', Template.DevicePortSettings(this.state));
+    this.html('port-monitors', Template.DevicePortMonitors(this.state));
   }
 
   async 'device.select' (msg) {
@@ -172,13 +205,48 @@ class Devices extends Page {
     this.state.selectedDevice.writeKV(msg.value.k, msg.value.v);
   }
 
+  async 'monitor.update' (msg) {
+    const type = msg.value.k;
+    const enabled = msg.value.v;
+
+    let keys = [];
+    if (this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}.statistics.rx.bytes`)) {
+      // Bytes
+      keys = [
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.bytes`, title: 'RX (Mbps)', scale: 0.000008 },
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.bytes`, title: 'TX (Mbps)', scale: 0.000008 }
+      ];
+    }
+    else {
+      // Packets
+      keys = [
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.packets`, title: 'RX (Mpps)', scale: 0.000001 },
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.packets`, title: 'TX (Mpps)', scale: 0.000001 }
+      ];
+    }
+
+    const mons = MonitorManager.getDevicePortMonitors(this.state.selectedDevice, this.state.selectedPortnr);
+    if (mons) {
+      const mon = mons.find(mon => mon.type == type);
+      await MonitorManager.monitorDeviceKeysType(
+        this.state.selectedDevice,
+        mon ? mon.id : MonitorManager.newMonitorId(),
+        `##device##${this.state.selectedPortnr}`,
+        keys,
+        enabled ? type : 'none'
+      );
+    }
+  }
+
   async 'device.authenticate.cancel' (msg) {
     this.authenticating = false;
     this.html(`login-modal-status-${msg.value}`, '&nbsp;');
   }
 
   async 'device.authenticate' (msg) {
-    if (this.state.selectedDevice) {
+    Log('device.authenticate:');
+    if (this.state.selectedDevice && this.state.selectedDevice._id !== msg.value.id) {
+      Log('closing watched device:');
       this.state.selectedDevice.unwatch();
       this.state.selectedDevice.off('update', this.onDeviceUpdate);
       this.state.selectedDevice.off('updating', this.onDeviceUpdating);
@@ -189,18 +257,23 @@ class Devices extends Page {
     }
     this.state.selectedDevice = null;
 
+    Log('finding device:');
     this.authenticating = true;
     let device = DeviceInstanceManager.getDeviceById(msg.value.id);
     if (!device) {
+      Log('no device:');
       this.authenticating = false;
       this.html(`login-modal-status-${device._id}`, 'Login failed.');
       return;
     }
 
+    Log('authenticating:');
     this.html(`login-modal-status-${device._id}`, 'Authenticating ...');
 
     await device.attach();
+    Log('attached:');
     const success = await device.login(msg.value.username, msg.value.password);
+    Log('login: success=', success);
     if (!success) {
       this.authenticating = false;
       device.detach();
@@ -209,6 +282,7 @@ class Devices extends Page {
     }
 
     if (device.description.generic) {
+      Log('switch from generic:');
       // If we're a generic device, we needed to first authenticate and then work out
       // what is is. Now try to identify from the logged-in state.
       const devices = DeviceManager.getDevices();
@@ -233,6 +307,7 @@ class Devices extends Page {
       device.state.mergeIntoState(device.description.constants);
     }
 
+    Log('adopting:');
     this.html(`login-modal-status-${device._id}`, 'Login success. Adopting ...');
 
     // Adopt the newly authenticated device.

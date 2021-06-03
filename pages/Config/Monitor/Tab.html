@@ -7,11 +7,6 @@
   <div class="section">Other Monitors
     <hr>
     {{#with config}}
-    <div class="block">
-      <div><label>Active client count</label>
-      {{> ConfigCheckbox key='monitor.clients' checked=monitor.clients }}
-    </div>
-    </div>
     <div class="block {{monitor.wan.speedtest.enabled}}">
       <div><label>WAN speed test</label>
       {{> ConfigCheckbox key='monitor.wan.speedtest.enabled' checked=monitor.wan.speedtest.enabled }}
@@ -19,7 +14,4 @@
     </div>
     {{/with}}
   </div>
-</div>
-<div id="monitor-details-column" class="monitor-details-column">
-  {{> ConfigMonitorSelected }}
 </div>
