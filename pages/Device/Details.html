@@ -44,11 +44,8 @@
   <div id="port-settings" class="card">
   {{> DevicePortSettings selectedPort=@root.selectedPort }}
   </div>
-  <div id="port-limits" class="card">
-  {{> DevicePortLimits selectedPort=@root.selectedPort }}
-  </div>
   {{/if}}
-  {{#if network.wireless}}
+  {{#if network.wireless.radio}}
   <div id="device-radios" class="card">
   {{> DeviceRadios selectedDevice=@root.selectedDevice }}
   </div>
