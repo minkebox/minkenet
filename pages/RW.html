@@ -1,7 +1,7 @@
 {{#if (or (isdefined value) (isdefined default))}}
 <div class="row">
   <label class="col-sm-6 col-form-label col-form-label-sm">{{name}}</label>
-  <div class="col-sm-6 d-flex align-items-center">
+  <div class="col-sm-5 d-flex align-items-center">
     {{#if ro}}
     <div class="device-property-ro small">{{#if (isdefined value)}}{{#if value.$}}{{value.$}}{{else}}{{value}}{{/if}}{{else}}{{default}}{{/if}}</div>
     {{else}}
@@ -18,5 +18,8 @@
     >
     {{/if}}
   </div>
+  {{#if unit}}
+  <label class="col-form-label col-form-label-sm">{{unit}}</label>
+  {{/if}}
 </div>
 {{/if}}
