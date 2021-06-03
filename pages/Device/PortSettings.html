@@ -11,6 +11,8 @@
         {{>RWCheckbox name="Flow Control" kv=(concat 'network.physical.port.' ../portnr '.flowcontrol') value=flowcontrol}}
         {{>RWCheckbox name="Jumbo Frames" kv=(concat 'network.physical.port.' ../portnr '.jumbo') value=jumbo}}
         {{>RO name="Speed" value=speed}}
+        {{>RW name="Max In" cmd="update.ingress" kv=(concat 'network.physical.port.' ../portnr '.limit.ingress') value=limit.ingress scale=1024 unit="KBps"}}
+        {{>RW name="Max Out" cmd="update.egress" kv=(concat 'network.physical.port.' ../portnr '.limit.egress') value=limit.egress scale=1024 unit="KBps"}}
         {{/with}}
         {{/with}}
       </form>
