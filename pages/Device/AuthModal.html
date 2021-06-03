@@ -20,21 +20,12 @@
         <div id="login-modal-status">&nbsp;</div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="window._deviceLogin()">Login</button>
+        <button type="button" class="btn btn-primary" onclick="send('device.authenticate.credentials', { username: (document.querySelector('.login-modal .device-username') || {}).value, password: (document.querySelector('.login-model .device-password') || {}).value })">Login</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="send('device.authenticate.cancel')">Cancel</button>
       </div>
     </div>
   </div>
 </div>
 <script>
-  window._deviceLogin = () => {
-    const modal = document.getElementById('login-modal');
-    const username = modal.querySelector('.device-username');
-    const password = modal.querySelector('.device-password');
-    send('device.authenticate.credentials', {
-      username: username ? username.value : undefined,
-      password: password ? password.value : undefined
-    });
-  }
   $("#login-modal").modal();
 </script>
