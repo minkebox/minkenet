@@ -7,23 +7,24 @@ const TopologyManager = require('../../TopologyManager');
 const MonitorManager = require('../../MonitorManager');
 const NetworkScanner = require('../../NetworkScanner');
 const Discovery = require('../../discovery');
+const DeviceState = require('../../DeviceState');
 const Debounce = require('../../utils/Debounce');
 const TypeConversion = require('../../utils/TypeConversion');
 const Adopt = require('../../Adopt');
 const Page = require('../Page');
-const Log = require('debug')('devices');
+const Log = require('debug')('device');
 
 class Devices extends Page {
 
   constructor(root) {
     super(root);
-    this.authenticating = false;
     this.state = {
       devices: null,
       selectedDevice: null,
       selectedPort: null,
       selectedPortnr: 0,
-      updating: false
+      updating: false,
+      authinfo: {}
     };
     this.forceRefresh = 1;
 
@@ -69,24 +70,20 @@ class Devices extends Page {
     }
     this.selectPort();
 
-    this.authenticating = false;
     this.html('main-container', Template.DeviceTab(this.state));
   }
 
   onDeviceUpdate() {
-    this.state.updating = false;
+    this.state.spinner = false;
     this.html('details-device', Template.DeviceDetails(this.state));
   }
 
   onDeviceUpdating() {
-    this.state.updating = true;
+    this.state.spinner = true;
     this.html('device-update-spinner', Template.DeviceSpinner({ delay: 2000 }));
   }
 
   onListUpdate() {
-    if (this.authenticating) {
-      return;
-    }
     this.state.devices = this.getDevices();
     this.html('devices-column', Template.DeviceList(this.state));
   }
@@ -239,7 +236,7 @@ class Devices extends Page {
   }
 
   async 'device.authenticate.open' (msg) {
-    const device = DeviceInstanceManager.getDeviceById(msg.value.id);
+    const device = DeviceInstanceManager.getDeviceById(msg.value);
     if (!device) {
       return;
     }
@@ -259,37 +256,44 @@ class Devices extends Page {
   }
 
   async 'device.authenticate.cancel' (msg) {
-    this.authenticating = false;
-    this.html(`login-modal-status`, '&nbsp;');
+    this._updateAuthInfo(id, 'Adopt', 'device.authenticate.open');
   }
 
   async 'device.authenticate.credentials' (msg) {
+    // Use the provided credentials to authenticate to the device.
     Log('device.authenticate.credentials:');
-    this.authenticating = true;
 
-    Log('authenticating:');
-    this.html(`login-modal-status`, 'Authenticating ...');
+    const id = this.state.selectedDevice._id;
 
+    this._updateAuthInfo(id, 'Authenticating...', 'device.authenticate.cancel');
+
+    // Attach to the device (create a browser context for device communications)
     await this.state.selectedDevice.attach();
     Log('attached:');
+
+    // Attempt to login to the device using the credentials. The specifics of the login are hidden in the device type.
     const success = await this.state.selectedDevice.login(msg.value.username, msg.value.password);
     Log('login: success=', success);
     if (!success) {
-      this.authenticating = false;
+      // Login failed - probably due to bad credentials. Detach so we can try again.
       this.state.selectedDevice.detach();
-      this.html(`login-modal-status`, 'Login failed.');
+      this._updateAuthInfo(id, 'Failed', 'device.authenticate.open');
       return;
     }
 
+    // At this point login has been successful.
+
     if (this.state.selectedDevice.description.generic) {
+      // Device is generic. This means we cant identify the exact model before logging in. Once we have
+      // we need to convert the device object to one specific for the target hardware.
       Log('switch from generic:');
-      // If we're a generic device, we needed to first authenticate and then work out
-      // what is is. Now try to identify from the logged-in state.
+      // Now we're logged in, try to find an exact device using logged-in information.
       const devices = DeviceManager.getDevices();
       let ndevice = null;
       for (let i = 0; i < devices.length; i++) {
         const dev = devices[i];
         if (await dev.identify(this.state.selectedDevice._page, true)) {
+          // Found a match, so switch to using that for the device.
           DeviceInstanceManager.removeDevice(this.state.selectedDevice);
           ndevice = dev.newInstanceFromGeneric(this.state.selectedDevice);
           DeviceInstanceManager.addDevice(ndevice);
@@ -297,20 +301,25 @@ class Devices extends Page {
         }
       }
       if (!ndevice) {
-        this.authenticating = false;
+        // No match, so login fails.
         this.state.selectedDevice.logout(true);
-        this.html(`login-modal-status`, 'Login failed.');
+        this._updateAuthInfo(id, 'Failed', 'device.authenticate.open');
         return;
       }
+
+      // Fully switch to the new device instance.
       this.state.selectedDevice = ndevice;
-      // Update the constants
+      // Update the constants from this new instance.
       this.state.selectedDevice.state.mergeIntoState(this.state.selectedDevice.description.constants);
     }
 
-    Log('adopting:');
-    this.html(`login-modal-status`, 'Login success. Adopting ...');
+    // Adopting
 
-    // Adopt the newly authenticated device.
+    Log('adopting:');
+    this._updateAuthInfo(id, 'Adopting...', 'device.authenticate.cancel');
+
+    // Adopt the newly authenticated device. Adopting can setup a bunch of defaults, or do very
+    // little depending on the default configuration.
     let status = null;
     try {
       const adoption = new Adopt(this.state.selectedDevice);
@@ -320,13 +329,15 @@ class Devices extends Page {
       });
     }
     catch (_) {
-      this.authenticating = false;
       this.state.selectedDevice.logout(true);
-      this.html(`login-modal-status`, 'Adoption failed.');
+      this._updateAuthInfo(id, 'Failed', 'device.authenticate.open');
       return;
     }
 
-    this.html(`login-modal-status`, 'Configuring device ...');
+    // Time to commit any changes made during adoption to the hardware
+
+    Log('updating:');
+    this._updateAuthInfo(id, 'Updating...', 'device.authenticate.cancel');
 
     // Write the changes to the device. We let this take at least a couple of seconds so we can see this happening.
     await Promise.all([
@@ -351,18 +362,28 @@ class Devices extends Page {
       })()
     ]);
 
+    // Give a moment to see completeness
+    this._updateAuthInfo(id, 'Done', '');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // Mark the device as authetnicated
     DeviceInstanceManager.authenticated(this.state.selectedDevice);
 
-    // Monitor by default
+    // Enable monitoring by default
     MonitorManager.monitorDevice(this.state.selectedDevice, true);
 
-    this.send('modal.hide.all');
-    this.html(`device-card`, Template.DeviceCard({
-      device: this.state.selectedDevice,
-      selectedDevice: null
-    }));
+    // Update remaining cards
+    this.onListUpdate()
 
-    this.authenticating = false;
+    Log('done - success:');
+  }
+
+  _updateAuthInfo(id, msg, event) {
+    this.state.authinfo[id] = {
+      msg: msg,
+      event: event
+    };
+    this.html(`auth-button-${id}`, Template.DeviceAuthButton({ id: id, msg: msg, event: event }));
   }
 
   async 'device.forget' (msg) {

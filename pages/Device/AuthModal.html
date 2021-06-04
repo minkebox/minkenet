@@ -1,4 +1,4 @@
-<div class="modal fade" id="login-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true">
+<div class="modal fade" id="login-modal" data-backdrop="static" tabindex="-1" role="dialog" aria-hidden="true" data-now="{{now}}">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content">
       <div class="modal-header">
@@ -17,10 +17,9 @@
             <input type="text" class="form-control device-password" value="{{properties.system.keychain.password.$}}">
           </div>
         </form>
-        <div id="login-modal-status">&nbsp;</div>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-primary" onclick="send('device.authenticate.credentials', { username: (document.querySelector('.login-modal .device-username') || {}).value, password: (document.querySelector('.login-model .device-password') || {}).value })">Login</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal" onclick="send('device.authenticate.credentials', { username: (document.querySelector('.device-username') || {}).value, password: (document.querySelector('.device-password') || {}).value })">Login</button>
         <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="send('device.authenticate.cancel')">Cancel</button>
       </div>
     </div>

@@ -2,7 +2,7 @@
   <div class="card-deck">
     {{#each devices}}
     <div id="device-card-{{_id}}">
-      {{> DeviceCard device=this selectedDevice=../selectedDevice}}
+      {{> DeviceCard authinfo=../authinfo device=this selectedDevice=../selectedDevice}}
     </div>
     {{/each}}
   </div>

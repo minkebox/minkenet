@@ -9,8 +9,12 @@
     {{/if}}
     <a class="card-text" href="http://{{properties.system.ipv4.address.$}}" target="_blank">{{properties.system.ipv4.address.$}}</a>
     {{#unless _authenticated}}
-    <div class="d-flex buttons" style="justify-content: flex-end">
-      <button type="button" class="btn btn-outline-primary btn-sm" onclick="send('device.authenticate.open', { id: '{{_id}}' })">Authenticate</button>
+    <div id="auth-button-{{_id}}" class="d-flex buttons" style="justify-content: flex-end">
+      {{#with (lookup ../authinfo _id)}}
+        {{> DeviceAuthButton id=../_id msg=msg event=event }}
+      {{else}}
+        {{> DeviceAuthButton id=_id msg="Adopt" event="device.authenticate.open" }}
+      {{/with}}
     </div>
     {{/unless}}
   </div>
