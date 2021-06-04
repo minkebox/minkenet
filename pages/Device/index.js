@@ -377,6 +377,7 @@ class Devices extends Page {
     MonitorManager.monitorDevice(this.state.selectedDevice, false);
     DeviceInstanceManager.removeDevice(this.state.selectedDevice);
     DB.removeDevice(this.state.selectedDevice._id);
+    Discovery.remove(this.state.selectedDevice.readKV(DeviceState.KEY_SYSTEM_IPV4_ADDRESS));
 
     this.state.selectedDevice = null;
 

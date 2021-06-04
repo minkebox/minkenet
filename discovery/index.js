@@ -119,6 +119,10 @@ class Discovery extends EventEmitter {
     }
   }
 
+  remove(ip) {
+    this.clear();
+  }
+
   _doUpdate() {
     let change = false;
     for (let key in this.agents) {
