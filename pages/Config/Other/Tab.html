@@ -7,8 +7,11 @@
       <div><label>Days to keep inactive clients (0 to keep forever)</label>{{> ConfigInput key="clients.inactive.age" value=clients.inactive.age }}</div>
     </div>
   </div>
-  <div class="section">Capture
+  <div class="section">Devices
     <hr>
+    <div class="block">
+      <div><label>Enable device discovery</label>{{> ConfigCheckbox key="discovery.enabled" checked=discovery.enabled }}</div>
+    </div>
     <div class="block">
       <div><label>Select capture device</label>{{> ConfigInput key="network.capture.device" value=network.capture.device }}</div>
     </div>

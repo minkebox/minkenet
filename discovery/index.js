@@ -1,6 +1,7 @@
 const EventEmitter = require('events');
 const OS = require('os');
 const DeviceManager = require('../DeviceManager');
+const ConfigDB = require('../Config');
 const Log = require('debug')('discovery');
 
 const NET = require('./net');
@@ -16,6 +17,7 @@ class Discovery extends EventEmitter {
 
   constructor() {
     super();
+    this.running = false;
     this.agents = {};
     this.addresses = {};
     this.addressRoot = this._getAddressRoot();
@@ -26,14 +28,37 @@ class Discovery extends EventEmitter {
   }
 
   start() {
-    this.build();
-    for (let key in this.agents) {
-      this.agents[key].on('update', this._doUpdate);
-      this.agents[key].start();
+    ConfigDB.on('update', evt => {
+      if (evt.key === 'discovery.enabled') {
+        if (evt.value) {
+          this._start();
+        }
+        else {
+          this._stop();
+        }
+      }
+    });
+    if (ConfigDB.read('discovery.enabled')) {
+      this._start();
     }
   }
 
-  build() {
+  stop() {
+    this._stop();
+  }
+
+  _start() {
+    if (!this.running) {
+      this.running = true;
+      this._build();
+      for (let key in this.agents) {
+        this.agents[key].on('update', this._doUpdate);
+        this.agents[key].start();
+      }
+    }
+  }
+
+  _build() {
     this.agents = {};
     const devices = DeviceManager.getDevices();
     for (let i = 0; i < devices.length; i++) {
@@ -105,10 +130,13 @@ class Discovery extends EventEmitter {
     Log('build:', Object.keys(this.agents));
   }
 
-  stop() {
-    for (let key in this.agents) {
-      this.agents[key].off('update', this._doUpdate);
-      this.agents[key].stop();
+  _stop() {
+    if (this.running) {
+      this.running = false;
+      for (let key in this.agents) {
+        this.agents[key].off('update', this._doUpdate);
+        this.agents[key].stop();
+      }
     }
   }
 

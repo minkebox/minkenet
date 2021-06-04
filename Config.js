@@ -40,6 +40,9 @@ const DEFAULT_CONFIG = {
       device: ''
     }
   },
+  discovery: {
+    enabled: true
+  },
   monitor: {
     clients: false,
     wan: {
