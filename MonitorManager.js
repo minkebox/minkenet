@@ -25,6 +25,9 @@ class MonitorManager extends EventEmitter {
         }
       }
       this.monitors = JSON.parse(data.monitors);
+      // XXX - Remove me June 6th, 2021
+      this.monitors = this.monitors.filter(mon => mon.type !== 'clients');
+      // XXX
     }
 
     this._monitorUpdates = evt => {
