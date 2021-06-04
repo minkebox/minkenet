@@ -199,6 +199,14 @@ class BrowserDeviceInstance extends DeviceInstance {
 
         const frame = await Eval.getFrame(page, login.frame);
 
+        // Wait until the page has what we need.
+        const selectors = [];
+        if (typeof login.username === 'string') {
+          selectors.push(await frame.waitForSelector(login.username), { timeout: TIMEOUT.loginNavigation });
+        }
+        selectors.push(await frame.waitForSelector(login.password), { timeout: TIMEOUT.loginNavigation });
+        await Promise.all(selectors);
+
         // Some devices have a username (other do not). Select the place to enter it.
         if (login.username) {
           Log('login', username);
@@ -249,7 +257,7 @@ class BrowserDeviceInstance extends DeviceInstance {
         Log(e);
         Log('login failed:', this.name);
         // Dont await on this because it seems we can hang here until the request finally completes.
-        page.content().then(html => LogContent(html));
+        page.content().then(html => LogContent(html)).catch(_ => _);
         this._validated = false;
         return false;
       }
