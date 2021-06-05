@@ -84,7 +84,7 @@ class Viz extends Page {
         this.state.clients.active++;
       }
       if (clients[key].firstSeen > inlast24hours) {
-        this.state.clients.net++;
+        this.state.clients.new++;
       }
     }
 
