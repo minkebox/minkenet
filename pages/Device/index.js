@@ -217,8 +217,8 @@ class Devices extends Page {
     else {
       // Packets
       keys = [
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.packets`, title: 'RX (Mpps)', scale: 0.000001 },
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.packets`, title: 'TX (Mpps)', scale: 0.000001 }
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.packets`, title: 'RX (Kpps)', scale: 0.001 },
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.packets`, title: 'TX (Kpps)', scale: 0.001 }
       ];
     }
 
