@@ -122,12 +122,6 @@ class Viz extends Page {
         case '1day':
           graph = await this._makeGraph(mon);
           break;
-        case 'now':
-          graph = await this._makeGauge(mon);
-          break;
-        case 'clients':
-          graph = this._makeClientGraph(mon);
-          break;
         default:
           break;
       }
@@ -183,24 +177,27 @@ class Viz extends Page {
       type: '',
       id: `mon-${mon.id}`,
       title: title,
+      unit: mon.unit || 'b',
       series: [],
       data: '[]',
       mon: mon
     };
-    let scale = 1;
+
+    //let scale = 1;
     let when = Date.now() + ONEDAY;
+    let step = 1;
 
     switch (mon.type) {
       case '1day':
         graph.type = '1Day';
-        scale = 60 * 60 * 1000;
         when -= 60 * 60 * 24 * 1000;
+        step = 60 * 60 * 1000;
         break;
       case '1hour':
       default:
         graph.type = '1Hour';
-        scale = 60 * 1000;
         when -= 60 * 60 * 1000;
+        step = 60 * 1000;
         break;
     }
     const data = await DB.readMonitor(`device-${mon.deviceid}`, mon.keys.map(k => k.key), when);
@@ -210,30 +207,47 @@ class Viz extends Page {
         graph.series.push({
           title: k.title,
         });
-        const previous = {
-          value: 0,
-          time: when
-        };
-        let first = true;
+
+        // Find the start of the usable data
+        let start = -1;
         for (let d = 0; d < data.length; d++) {
           const item = data[d];
-          if (item.key === k.key && item.expiresAt > previous.time) {
-            const t = (item.expiresAt - when) / scale;
-            if (first) {
-              first = false;
-              if (t > 2) {
-                tracedata.push({ t: 0, [`v${ki}`]: 0 }, { t: t, [`v${ki}`]: 0 });
+          if (item.key === k.key && item.expiresAt > when) {
+            start = d;
+            break;
+          }
+        }
+        if (start === -1) {
+          // No usable data
+          return;
+        }
+        const t = (data[start].expiresAt - when) / step;
+        // Anchor the graph if necessary
+        if (t > 2) {
+          tracedata.push({ t: 0, [`v${ki}`]: 0 }, { t: t, [`v${ki}`]: 0 });
+        }
+        // Group data into bars
+        let pvalue = null;
+        let until = when;
+        for (let d = start; d < data.length; ) {
+          until += step;
+          let value = 0;
+          for (; d < data.length; d++) {
+            const item = data[d];
+            if (item.key === k.key) {
+              if (pvalue !== null) {
+                value += (item.value - pvalue) >>> 0;
+              }
+              pvalue = item.value;
+              if (item.expiresAt > until) {
+                break;
               }
             }
-            else {
-              tracedata.push({
-                t: t,
-                [`v${ki}`]: k.scale * 1000 * ((item.value - previous.value) >>> 0) / (item.expiresAt - previous.time)
-              });
-            }
-            previous.value = item.value;
-            previous.time = item.expiresAt;
           }
+          tracedata.push({
+            t: (until - when) / step,
+            [`v${ki}`]: value
+          });
         }
       });
       graph.data = JSON.stringify(tracedata);

@@ -63,7 +63,7 @@ class MonitorManager extends EventEmitter {
     await this.updateMonitors();
   }
 
-  async monitorDeviceKeysType(device, id, title, keys, monitorType) {
+  async monitorDeviceKeysType(device, id, title, keys, monitorType, unit) {
     const idx = this.monitors.findIndex(mon => mon.id === id);
     if (idx !== -1) {
       this.monitors.splice(idx, 1);
@@ -76,6 +76,7 @@ class MonitorManager extends EventEmitter {
         keys: keys,
         type: monitorType,
         name: `${device._id}-${id}`,
+        unit: unit,
         order: -1
       };
       this.monitors.push(mon);

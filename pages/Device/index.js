@@ -155,7 +155,6 @@ class Devices extends Page {
         });
       }
     }
-
     else {
       this.state.selectedPortnr = null;
     }
@@ -207,18 +206,21 @@ class Devices extends Page {
     const enabled = msg.value.v;
 
     let keys = [];
+    let unit = null;
     if (this.state.selectedDevice.readKV(`network.physical.port.${this.state.selectedPortnr}.statistics.rx.bytes`)) {
       // Bytes
+      unit = 'B';
       keys = [
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.bytes`, title: 'RX (Mbps)', scale: 0.000008 },
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.bytes`, title: 'TX (Mbps)', scale: 0.000008 }
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.bytes`, title: 'RX (Bytes)' },
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.bytes`, title: 'TX (Bytes)' }
       ];
     }
     else {
       // Packets
+      unit = 'p';
       keys = [
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.packets`, title: 'RX (Kpps)', scale: 0.001 },
-        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.packets`, title: 'TX (Kpps)', scale: 0.001 }
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.rx.packets`, title: 'RX (Packets)' },
+        { key: `network.physical.port.${this.state.selectedPortnr}.statistics.tx.packets`, title: 'TX (Packets)' }
       ];
     }
 
@@ -230,7 +232,8 @@ class Devices extends Page {
         mon ? mon.id : MonitorManager.newMonitorId(),
         `##device##${this.state.selectedPortnr}`,
         keys,
-        enabled ? type : 'none'
+        enabled ? type : 'none',
+        unit
       );
     }
   }

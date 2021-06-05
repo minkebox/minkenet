@@ -8,9 +8,11 @@
         enabled: false
       },
       {{/unless}}
+      barGroupPadding: 0,
       commonSeriesSettings: {
         argumentField: 't',
-        type: 'spline',
+        type: 'bar',
+        barPadding: 0,
         point: {
           size: 0,
           hoverStyle: {
@@ -33,6 +35,12 @@
         horizontalAlignment: 'left',
         position: 'inside',
         backgroundColor: 'rgba(62,62,62,0.8)',
+        margin: {
+          top: 0,
+          right: 0,
+          bottom: 0,
+          left: 0
+        },
         border: {
           visible: true,
           color: 'transparent',
@@ -43,7 +51,18 @@
       },
       tooltip: {
         enabled: true,
-        format: arg => `${arg.toFixed(2)} {{unit}}`,
+        format: arg => {
+          if (arg < 1000) {
+            return `${Math.round(arg)} {{unit}}`;
+          }
+          if (arg < 1000000) {
+            return `${Math.round(arg / 1000).toLocaleString()} K{{unit}}`;
+          }
+          if (arg < 1000000000) {
+            return `${Math.round(arg / 1000000).toLocaleString()} M{{unit}}`;
+          }
+          return `${(arg / 1000000000).toLocaleString()} G{{unit}}`;
+        },
         color: '#3e3e3e',
         font: {
           color: '#c0c0c0'

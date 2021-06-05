@@ -5,9 +5,9 @@
   <div class="viz">
     {{#each monitor}}
     {{#if (eq type '1Hour')}}
-    {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
+    {{> VizMonTime xtitle='Last Hour' id=id link=link title=title series=series data=data unit=unit first=@root.first}}
     {{else if (eq type '1Day')}}
-    {{> VizMonTime xtitle='Last Day' id=id link=link title=title series=series data=data unit='Mbps' first=@root.first}}
+    {{> VizMonTime xtitle='Last Day' id=id link=link title=title series=series data=data unit=unit first=@root.first}}
     {{else if (eq type 'Gauge')}}
     {{> VizMonGauge id=id link=link title=title series=series max=max first=@root.first }}
     {{else if (eq type 'Bubbles')}}
