@@ -1,5 +1,5 @@
 {{#with device}}
-<div class="device-card d-inline-block {{#if (eq this ../selectedDevice)}}active{{/if}} {{#if (gte _watchFail 5)}}watch-fail{{/if}}" onclick="send('device.select','{{_id}}')">
+<div class="device-card d-inline-block {{#if (eq this ../selectedDevice)}}active{{/if}}" onclick="send('device.select','{{_id}}')">
   <img src="{{description.image}}" class="card-img-top">
   <div class="card-body">
     {{#if properties.system.name}}
@@ -8,7 +8,11 @@
     <h5 class="card-title">{{description.name}}</h5>
     {{/if}}
     <a class="card-text" href="http://{{properties.system.ipv4.address.$}}" target="_blank">{{properties.system.ipv4.address.$}}</a>
-    {{#unless _authenticated}}
+    {{#if _authenticated}}
+      {{#if (gte _watchFail 5)}}
+        {{> DeviceAuthButton msg="Disconnected" }}
+      {{/if}}
+    {{else}}
     <div id="auth-button-{{_id}}" class="d-flex buttons" style="justify-content: flex-end">
       {{#with (lookup ../authinfo _id)}}
         {{> DeviceAuthButton id=../_id msg=msg event=event }}
@@ -16,7 +20,7 @@
         {{> DeviceAuthButton id=_id msg="Adopt" event="device.authenticate.open" }}
       {{/with}}
     </div>
-    {{/unless}}
+    {{/if}}
   </div>
 </div>
 {{/with}}

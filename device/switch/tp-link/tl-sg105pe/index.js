@@ -29,7 +29,7 @@ const Device = {
     }
   },
 
-  login: require('../generic/login'),
+  login: require('../generic1/login'),
 
   constants: {
     system: {
