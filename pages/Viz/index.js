@@ -223,9 +223,9 @@ class Viz extends Page {
         }
         const t = (data[start].expiresAt - when) / step;
         // Anchor the graph if necessary
-        if (t > 2) {
-          tracedata.push({ t: 0, [`v${ki}`]: 0 }, { t: t, [`v${ki}`]: 0 });
-        }
+        //if (t > 2) {
+        //  tracedata.push({ t: 0, [`v${ki}`]: 0 }, { t: t, [`v${ki}`]: 0 });
+        //}
         // Group data into bars
         let pvalue = null;
         let until = when;
