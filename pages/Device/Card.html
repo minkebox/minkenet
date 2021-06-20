@@ -10,7 +10,9 @@
     <a class="card-text" href="http://{{properties.system.ipv4.address.$}}" target="_blank">{{properties.system.ipv4.address.$}}</a>
     {{#if _authenticated}}
       {{#if (gte _watchFail 5)}}
+        <div id="auth-button-{{_id}}" class="d-flex buttons" style="justify-content: flex-end">
         {{> DeviceAuthButton msg="Disconnected" }}
+        </div>
       {{/if}}
     {{else}}
     <div id="auth-button-{{_id}}" class="d-flex buttons" style="justify-content: flex-end">
